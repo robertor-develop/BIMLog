@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "generatedFrom": "tracked source; deterministic",
   "counts": {
-    "frontendRoutes": 65,
+    "frontendRoutes": 137,
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 796,
-    "frontendApiReferences": 318,
-    "routeOwnedTables": 72
+    "apiRoutes": 800,
+    "frontendApiReferences": 407,
+    "routeOwnedTables": 75
   },
   "compatibilityRedirects": [
     {
@@ -83,330 +83,762 @@
     },
     {
       "order": 11,
+      "path": "/auth/login",
+      "guard": "public",
+      "target": "AuthLogin"
+    },
+    {
+      "order": 12,
+      "path": "/auth/openai-key",
+      "guard": "authenticated",
+      "target": "AuthOpenAiKey"
+    },
+    {
+      "order": 13,
+      "path": "/autodesk/hubs",
+      "guard": "authenticated",
+      "target": "AutodeskHubs"
+    },
+    {
+      "order": 14,
+      "path": "/autodesk/login",
+      "guard": "authenticated",
+      "target": "AutodeskLogin"
+    },
+    {
+      "order": 15,
+      "path": "/autodesk/projects/:hubId",
+      "guard": "authenticated",
+      "target": "AutodeskProjects"
+    },
+    {
+      "order": 16,
+      "path": "/autodesk/token",
+      "guard": "authenticated",
+      "target": "AutodeskToken"
+    },
+    {
+      "order": 17,
+      "path": "/commercial/billing-identity",
+      "guard": "authenticated",
+      "target": "CommercialBillingIdentity"
+    },
+    {
+      "order": 18,
+      "path": "/commercial/billing-portal",
+      "guard": "authenticated",
+      "target": "CommercialBillingPortal"
+    },
+    {
+      "order": 19,
+      "path": "/commercial/checkout",
+      "guard": "authenticated",
+      "target": "CommercialCheckout"
+    },
+    {
+      "order": 20,
+      "path": "/commercial/providers",
+      "guard": "authenticated",
+      "target": "CommercialProviders"
+    },
+    {
+      "order": 21,
       "path": "/register",
       "guard": "public",
       "target": "Register"
     },
     {
-      "order": 12,
+      "order": 22,
       "path": "/verify-email",
       "guard": "public",
       "target": "VerifyEmail"
     },
     {
-      "order": 13,
+      "order": 23,
       "path": "/reset-password",
       "guard": "public",
       "target": "ResetPasswordPage"
     },
     {
-      "order": 14,
+      "order": 24,
       "path": "/privacy",
       "guard": "public",
       "target": "Privacy"
     },
     {
-      "order": 15,
+      "order": 25,
       "path": "/terms",
       "guard": "public",
       "target": "Terms"
     },
     {
-      "order": 16,
+      "order": 26,
       "path": "/legal-notice",
       "guard": "public",
       "target": "Disclaimer"
     },
     {
-      "order": 17,
+      "order": 27,
       "path": "/disclaimer",
       "guard": "public",
       "target": "Disclaimer"
     },
     {
-      "order": 18,
+      "order": 28,
       "path": "/data-retention",
       "guard": "public",
       "target": "DataRetention"
     },
     {
-      "order": 19,
+      "order": 29,
       "path": "/dashboard",
       "guard": "authenticated",
       "target": "Dashboard"
     },
     {
-      "order": 20,
+      "order": 30,
       "path": "/pending",
       "guard": "authenticated",
       "target": "PendingItems"
     },
     {
-      "order": 21,
+      "order": 31,
       "path": "/all-tools",
       "guard": "authenticated",
       "target": "AllTools"
     },
     {
-      "order": 22,
+      "order": 32,
+      "path": "/meeting-rfi-sources",
+      "guard": "authenticated",
+      "target": "MeetingRfiSources"
+    },
+    {
+      "order": 33,
+      "path": "/meeting-lens-sources",
+      "guard": "authenticated",
+      "target": "MeetingLensSources"
+    },
+    {
+      "order": 34,
       "path": "/lens-next",
       "guard": "authenticated",
       "target": "LensNextWorkspace"
     },
     {
-      "order": 23,
+      "order": 35,
       "path": "/projects/:id/financial/cost-structure",
       "guard": "project",
       "target": "() => <FinancialBudgetWorkspace mode=\"structure\" />"
     },
     {
-      "order": 24,
+      "order": 36,
       "path": "/projects/:id/financial/budget",
       "guard": "project",
       "target": "() => <FinancialBudgetWorkspace mode=\"budget\" />"
     },
     {
-      "order": 25,
+      "order": 37,
       "path": "/projects/:id/financial/history",
       "guard": "project",
       "target": "() => <FinancialBudgetWorkspace mode=\"history\" />"
     },
     {
-      "order": 26,
+      "order": 38,
       "path": "/projects/:id/financial/snapshots/:snapshotId",
       "guard": "project",
       "target": "() => <FinancialBudgetWorkspace mode=\"snapshot\" />"
     },
     {
-      "order": 27,
+      "order": 39,
       "path": "/projects/:id/financial/contracts",
       "guard": "project",
       "target": "FinancialContractWorkspace"
     },
     {
-      "order": 28,
+      "order": 40,
       "path": "/projects/:id/financial/contracts/:contractId/items",
       "guard": "project",
       "target": "FinancialContractItemsWorkspace"
     },
     {
-      "order": 29,
+      "order": 41,
       "path": "/projects/:id/financial/apu",
       "guard": "project",
       "target": "FinancialApuWorkspace"
     },
     {
-      "order": 30,
+      "order": 42,
       "path": "/projects/:id/commercial/team-performance",
       "guard": "project",
       "target": "TeamPerformanceWorkspace"
     },
     {
-      "order": 31,
+      "order": 43,
       "path": "/projects/:id/intake",
       "guard": "project",
       "target": "JobIntakeWorkspace"
     },
     {
-      "order": 32,
+      "order": 44,
       "path": "/projects/:id/operations",
       "guard": "project",
       "target": "JobOperationsWorkspace"
     },
     {
-      "order": 33,
+      "order": 45,
       "path": "/projects/:id/submittal-tracker",
       "guard": "project",
       "target": "LegacySubmittalTrackerRedirect"
     },
     {
-      "order": 34,
+      "order": 46,
       "path": "/projects/:id/:tab?",
       "guard": "project",
       "target": "ProjectDetail"
     },
     {
-      "order": 35,
+      "order": 47,
       "path": "/help",
       "guard": "authenticated",
       "target": "HelpCenter"
     },
     {
-      "order": 36,
+      "order": 48,
       "path": "/setup-guide",
       "guard": "authenticated",
       "target": "SetupGuideRedirect"
     },
     {
-      "order": 37,
+      "order": 49,
       "path": "/training/project-setup",
       "guard": "authenticated",
       "target": "ProjectSetupTraining"
     },
     {
-      "order": 38,
+      "order": 50,
       "path": "/profile",
       "guard": "authenticated",
       "target": "Profile"
     },
     {
-      "order": 39,
+      "order": 51,
       "path": "/settings/company-profile",
       "guard": "authenticated",
       "target": "CompanyProfile"
     },
     {
-      "order": 40,
+      "order": 52,
       "path": "/settings/notifications",
       "guard": "authenticated",
       "target": "NotificationSettings"
     },
     {
-      "order": 41,
+      "order": 53,
       "path": "/settings/financial-controls",
       "guard": "authenticated",
       "target": "FinancialControlsSettings"
     },
     {
-      "order": 42,
+      "order": 54,
       "path": "/settings/billing-support",
       "guard": "authenticated",
       "target": "CommercialWorkspace"
     },
     {
-      "order": 43,
+      "order": 55,
       "path": "/admin/feedback",
       "guard": "access",
       "target": "AdminPanel"
     },
     {
-      "order": 44,
+      "order": 56,
       "path": "/company-catalogs",
       "guard": "access",
       "target": "CompanyMasterCatalogs"
     },
     {
-      "order": 45,
+      "order": 57,
       "path": "/company-workflows",
       "guard": "access",
       "target": "CompanyDeliveryWorkflows"
     },
     {
-      "order": 46,
+      "order": 58,
       "path": "/company-workflow-governance",
       "guard": "access",
       "target": "CompanyWorkflowGovernance"
     },
     {
-      "order": 47,
+      "order": 59,
       "path": "/company-pricing-templates",
       "guard": "access",
       "target": "CompanyPricingTemplates"
     },
     {
-      "order": 48,
+      "order": 60,
       "path": "/knowledge",
       "guard": "authenticated",
       "target": "CoordinationKnowledgeLibrary"
     },
     {
-      "order": 49,
+      "order": 61,
+      "path": "/knowledge/search",
+      "guard": "authenticated",
+      "target": "KnowledgeSearch"
+    },
+    {
+      "order": 62,
+      "path": "/knowledge/starter-library",
+      "guard": "authenticated",
+      "target": "KnowledgeStarterLibrary"
+    },
+    {
+      "order": 63,
+      "path": "/knowledge/taxonomy",
+      "guard": "authenticated",
+      "target": "KnowledgeTaxonomy"
+    },
+    {
+      "order": 64,
+      "path": "/pending-work",
+      "guard": "authenticated",
+      "target": "PendingWork"
+    },
+    {
+      "order": 65,
+      "path": "/sync-agent/mac",
+      "guard": "authenticated",
+      "target": "MacSyncAvailability"
+    },
+    {
+      "order": 66,
+      "path": "/feature-access",
+      "guard": "authenticated",
+      "target": "FeatureAccessInspector"
+    },
+    {
+      "order": 67,
+      "path": "/feature-catalog",
+      "guard": "authenticated",
+      "target": "FeatureCatalog"
+    },
+    {
+      "order": 68,
+      "path": "/feature-policies",
+      "guard": "authenticated",
+      "target": "FeaturePolicyWorkspace"
+    },
+    {
+      "order": 69,
+      "path": "/feature-preferences",
+      "guard": "authenticated",
+      "target": "FeaturePreferences"
+    },
+    {
+      "order": 70,
+      "path": "/telegram-operations",
+      "guard": "authenticated",
+      "target": "TelegramOperations"
+    },
+    {
+      "order": 71,
+      "path": "/master-catalogs",
+      "guard": "authenticated",
+      "target": "MasterCatalogBrowser"
+    },
+    {
+      "order": 72,
+      "path": "/my-ai-usage",
+      "guard": "authenticated",
+      "target": "MyAiUsage"
+    },
+    {
+      "order": 73,
+      "path": "/my-connected-files",
+      "guard": "authenticated",
+      "target": "MyConnectionFiles"
+    },
+    {
+      "order": 74,
+      "path": "/my-setup",
+      "guard": "authenticated",
+      "target": "MySetup"
+    },
+    {
+      "order": 75,
+      "path": "/project-agent-review",
+      "guard": "authenticated",
+      "target": "ProjectAgentReview"
+    },
+    {
+      "order": 76,
+      "path": "/project-insights-review",
+      "guard": "authenticated",
+      "target": "ProjectInsightsReview"
+    },
+    {
+      "order": 77,
+      "path": "/intake-agent-preview",
+      "guard": "authenticated",
+      "target": "IntakeAgentPreview"
+    },
+    {
+      "order": 78,
+      "path": "/folder-wizard-workspace",
+      "guard": "authenticated",
+      "target": "FolderWizardWorkspace"
+    },
+    {
+      "order": 79,
+      "path": "/project-links",
+      "guard": "authenticated",
+      "target": "ProjectLinksWorkspace"
+    },
+    {
+      "order": 80,
+      "path": "/plugin-project-directory",
+      "guard": "authenticated",
+      "target": "PluginProjectDirectory"
+    },
+    {
+      "order": 81,
+      "path": "/project-user-assignment",
+      "guard": "authenticated",
+      "target": "ProjectUserAssignment"
+    },
+    {
+      "order": 82,
+      "path": "/project-briefing-review",
+      "guard": "authenticated",
+      "target": "ProjectBriefingReview"
+    },
+    {
+      "order": 83,
+      "path": "/lens-import-plan",
+      "guard": "authenticated",
+      "target": "LensImportPlan"
+    },
+    {
+      "order": 84,
+      "path": "/lens-import-context",
+      "guard": "authenticated",
+      "target": "LensImportContext"
+    },
+    {
+      "order": 85,
+      "path": "/lens-sequence-status",
+      "guard": "authenticated",
+      "target": "LensSequenceStatus"
+    },
+    {
+      "order": 86,
+      "path": "/lens-sync-review",
+      "guard": "authenticated",
+      "target": "LensSyncReview"
+    },
+    {
+      "order": 87,
+      "path": "/plugin-pull-review",
+      "guard": "authenticated",
+      "target": "PluginPullReview"
+    },
+    {
+      "order": 88,
+      "path": "/find-original-clash",
+      "guard": "authenticated",
+      "target": "FindOriginalClash"
+    },
+    {
+      "order": 89,
+      "path": "/procore-connection-status",
+      "guard": "authenticated",
+      "target": "ProcoreConnectionStatus"
+    },
+    {
+      "order": 90,
+      "path": "/coordination-operations",
+      "guard": "authenticated",
+      "target": "CoordinationOperations"
+    },
+    {
+      "order": 91,
+      "path": "/meeting-link-actions",
+      "guard": "authenticated",
+      "target": "MeetingLinkActions"
+    },
+    {
+      "order": 92,
+      "path": "/project-document-search",
+      "guard": "authenticated",
+      "target": "ProjectDocumentSearch"
+    },
+    {
+      "order": 93,
+      "path": "/edt-activation",
+      "guard": "authenticated",
+      "target": "EdtActivation"
+    },
+    {
+      "order": 94,
+      "path": "/edt-permissions",
+      "guard": "authenticated",
+      "target": "EdtCapabilities"
+    },
+    {
+      "order": 95,
+      "path": "/edt-changes",
+      "guard": "authenticated",
+      "target": "EdtChanges"
+    },
+    {
+      "order": 96,
+      "path": "/edt-intake-previews",
+      "guard": "authenticated",
+      "target": "EdtIntakePreviews"
+    },
+    {
+      "order": 97,
+      "path": "/edt-qc-review",
+      "guard": "authenticated",
+      "target": "EdtQcReview"
+    },
+    {
+      "order": 98,
+      "path": "/edt-director-authority",
+      "guard": "authenticated",
+      "target": "EdtDirectorAuthority"
+    },
+    {
+      "order": 99,
+      "path": "/edt-time-review",
+      "guard": "authenticated",
+      "target": "EdtTimeReview"
+    },
+    {
+      "order": 100,
+      "path": "/edt-issuances",
+      "guard": "authenticated",
+      "target": "EdtIssuances"
+    },
+    {
+      "order": 101,
+      "path": "/file-custody-review",
+      "guard": "authenticated",
+      "target": "FileCustodyReview"
+    },
+    {
+      "order": 102,
+      "path": "/manual-bonus-review",
+      "guard": "authenticated",
+      "target": "ManualBonusReview"
+    },
+    {
+      "order": 103,
+      "path": "/budget-decision-review",
+      "guard": "authenticated",
+      "target": "BudgetDecisionReview"
+    },
+    {
+      "order": 104,
+      "path": "/apu-budget-review",
+      "guard": "authenticated",
+      "target": "ApuBudgetReview"
+    },
+    {
+      "order": 105,
+      "path": "/plugin-sync-review",
+      "guard": "authenticated",
+      "target": "PluginSyncReview"
+    },
+    {
+      "order": 106,
       "path": "/admin",
       "guard": "access",
       "target": "AdminPanel"
     },
     {
-      "order": 50,
+      "order": 107,
       "path": "/feedback",
       "guard": "authenticated",
       "target": "Dashboard"
     },
     {
-      "order": 51,
+      "order": 108,
       "path": "/total-control",
       "guard": "access",
       "target": "TotalControl"
     },
     {
-      "order": 52,
+      "order": 109,
       "path": "/admin/project-company-bindings",
       "guard": "access",
       "target": "ProjectCompanyBindings"
     },
     {
-      "order": 53,
+      "order": 110,
       "path": "/admin/fix-specific-link",
       "guard": "access",
       "target": "FixSpecificLink"
     },
     {
-      "order": 54,
+      "order": 111,
       "path": "/admin/launch-configuration",
       "guard": "access",
       "target": "LaunchConfiguration"
     },
     {
-      "order": 55,
+      "order": 112,
       "path": "/admin/master-catalogs",
       "guard": "access",
       "target": "AdminMasterCatalogs"
     },
     {
-      "order": 56,
+      "order": 113,
       "path": "/admin/overview",
       "guard": "access",
       "target": "AdminOverview"
     },
     {
-      "order": 57,
+      "order": 114,
       "path": "/admin/platform-capabilities",
       "guard": "access",
       "target": "AdminPlatformCapabilities"
     },
     {
-      "order": 58,
+      "order": 115,
+      "path": "/admin/platform-stats",
+      "guard": "access",
+      "target": "AdminPlatformStats"
+    },
+    {
+      "order": 116,
+      "path": "/admin/projects-list",
+      "guard": "access",
+      "target": "AdminProjectsList"
+    },
+    {
+      "order": 117,
+      "path": "/admin/support-operations",
+      "guard": "access",
+      "target": "AdminSupport"
+    },
+    {
+      "order": 118,
+      "path": "/ai-control/budgets",
+      "guard": "authenticated",
+      "target": "AiControlBudgets"
+    },
+    {
+      "order": 119,
+      "path": "/ai-control/companies",
+      "guard": "access",
+      "target": "AiControlCompanies"
+    },
+    {
+      "order": 120,
+      "path": "/ai-control/company-ai-administrators",
+      "guard": "access",
+      "target": "AiControlCompanyAdministrators"
+    },
+    {
+      "order": 121,
+      "path": "/ai-control/company-users",
+      "guard": "authenticated",
+      "target": "AiControlCompanyUsers"
+    },
+    {
+      "order": 122,
+      "path": "/ai-control/entitlements",
+      "guard": "authenticated",
+      "target": "AiControlEntitlements"
+    },
+    {
+      "order": 123,
+      "path": "/ai-control/estimates",
+      "guard": "authenticated",
+      "target": "AiControlEstimates"
+    },
+    {
+      "order": 124,
+      "path": "/ai-control/prices",
+      "guard": "access",
+      "target": "AiControlPrices"
+    },
+    {
+      "order": 125,
+      "path": "/ai-control/provider-connections",
+      "guard": "authenticated",
+      "target": "AiControlProviderConnections"
+    },
+    {
+      "order": 126,
+      "path": "/ai-control/runs",
+      "guard": "authenticated",
+      "target": "AiControlRuns"
+    },
+    {
+      "order": 127,
+      "path": "/ai-control/status",
+      "guard": "authenticated",
+      "target": "AiControlStatus"
+    },
+    {
+      "order": 128,
+      "path": "/ai-control/usage",
+      "guard": "authenticated",
+      "target": "AiControlUsage"
+    },
+    {
+      "order": 129,
+      "path": "/auth/launch-step-up",
+      "guard": "access",
+      "target": "AuthLaunchStepUp"
+    },
+    {
+      "order": 130,
       "path": "/living-brief",
       "guard": "access",
       "target": "LivingBrief"
     },
     {
-      "order": 59,
+      "order": 131,
       "path": "/pricing",
       "guard": "public",
       "target": "Pricing"
     },
     {
-      "order": 60,
+      "order": 132,
       "path": "/features",
       "guard": "public",
       "target": "Features"
     },
     {
-      "order": 61,
+      "order": 133,
       "path": "/about",
       "guard": "public",
       "target": "About"
     },
     {
-      "order": 62,
+      "order": 134,
       "path": "/contact",
       "guard": "public",
       "target": "Contact"
     },
     {
-      "order": 63,
+      "order": 135,
       "path": "*",
       "guard": "public",
       "target": "NotFound"
     },
     {
-      "order": 64,
+      "order": 136,
       "path": "*",
       "guard": "public",
       "target": "inline"
     },
     {
-      "order": 65,
+      "order": 137,
       "path": "*",
       "guard": "public",
       "target": "inline"
@@ -997,7 +1429,54 @@
       "path": "/projects/:projectId/intake-agent/preview",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
-        "agentInsightsTable"
+        "agentInsightsTable",
+        "clashesTable",
+        "rfisTable",
+        "projectsTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/intake-agent/state",
+      "owner": "artifacts/api-server/src/routes/agents.ts",
+      "tables": [
+        "agentInsightsTable",
+        "clashesTable",
+        "rfisTable",
+        "projectsTable"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/projects/:projectId/intake-agent/state",
+      "owner": "artifacts/api-server/src/routes/agents.ts",
+      "tables": [
+        "agentInsightsTable",
+        "clashesTable",
+        "rfisTable",
+        "projectsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/intake-agent/mcp",
+      "owner": "artifacts/api-server/src/routes/agents.ts",
+      "tables": [
+        "agentInsightsTable",
+        "clashesTable",
+        "rfisTable",
+        "projectsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/intake-agent/turn",
+      "owner": "artifacts/api-server/src/routes/agents.ts",
+      "tables": [
+        "agentInsightsTable",
+        "clashesTable",
+        "rfisTable",
+        "projectsTable"
       ]
     },
     {
@@ -1005,7 +1484,10 @@
       "path": "/assistant/ask",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
-        "agentInsightsTable"
+        "agentInsightsTable",
+        "clashesTable",
+        "rfisTable",
+        "projectsTable"
       ]
     },
     {
@@ -1013,7 +1495,10 @@
       "path": "/projects/:projectId/assistant/ask",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
-        "agentInsightsTable"
+        "agentInsightsTable",
+        "clashesTable",
+        "rfisTable",
+        "projectsTable"
       ]
     },
     {
@@ -1021,7 +1506,10 @@
       "path": "/assistant/conversations/:conversationId",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
-        "agentInsightsTable"
+        "agentInsightsTable",
+        "clashesTable",
+        "rfisTable",
+        "projectsTable"
       ]
     },
     {
@@ -1029,7 +1517,10 @@
       "path": "/assistant/requests/:requestId",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
-        "agentInsightsTable"
+        "agentInsightsTable",
+        "clashesTable",
+        "rfisTable",
+        "projectsTable"
       ]
     },
     {
@@ -1037,7 +1528,10 @@
       "path": "/projects/:projectId/insights",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
-        "agentInsightsTable"
+        "agentInsightsTable",
+        "clashesTable",
+        "rfisTable",
+        "projectsTable"
       ]
     },
     {
@@ -1045,7 +1539,10 @@
       "path": "/projects/:projectId/briefing",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
-        "agentInsightsTable"
+        "agentInsightsTable",
+        "clashesTable",
+        "rfisTable",
+        "projectsTable"
       ]
     },
     {
@@ -1053,7 +1550,10 @@
       "path": "/projects/:projectId/agents/clash/:clashId",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
-        "agentInsightsTable"
+        "agentInsightsTable",
+        "clashesTable",
+        "rfisTable",
+        "projectsTable"
       ]
     },
     {
@@ -1061,7 +1561,10 @@
       "path": "/projects/:projectId/agents/rfi/:rfiId",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
-        "agentInsightsTable"
+        "agentInsightsTable",
+        "clashesTable",
+        "rfisTable",
+        "projectsTable"
       ]
     },
     {
@@ -1613,6 +2116,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1627,6 +2133,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1641,6 +2150,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1655,6 +2167,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1669,6 +2184,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1683,6 +2201,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1697,6 +2218,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1711,6 +2235,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1725,6 +2252,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1739,6 +2269,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1753,6 +2286,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1767,6 +2303,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1781,6 +2320,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1795,6 +2337,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1809,6 +2354,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1823,6 +2371,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1837,6 +2388,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1851,6 +2405,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1865,6 +2422,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1879,6 +2439,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1893,6 +2456,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1907,6 +2473,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1921,6 +2490,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1935,6 +2507,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1949,6 +2524,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1963,6 +2541,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1977,6 +2558,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -1991,6 +2575,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2005,6 +2592,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2019,6 +2609,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2033,6 +2626,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2047,6 +2643,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2061,6 +2660,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2075,6 +2677,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2089,6 +2694,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2103,6 +2711,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2117,6 +2728,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2131,6 +2745,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2145,6 +2762,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2159,6 +2779,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2173,6 +2796,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2187,6 +2813,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2201,6 +2830,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2215,6 +2847,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2229,6 +2864,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2243,6 +2881,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2257,6 +2898,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2271,6 +2915,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2285,6 +2932,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2299,6 +2949,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2313,6 +2966,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2327,6 +2983,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2341,6 +3000,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2355,6 +3017,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -2369,6 +3034,9 @@
         "lensViewpointReportsTable",
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensNextPublishReceiptsTable",
         "filesTable"
       ]
     },
@@ -10131,6 +10799,10 @@
       "apiPath": "/api/v1/company/master-catalogs/"
     },
     {
+      "screen": "artifacts/bimlog/src/components/admin/AdminSupportDataRequestActions.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/support/cases/${item.id}/${path}"
+    },
+    {
       "screen": "artifacts/bimlog/src/components/admin/commercial-launch-dossier-panel.behavior.ts",
       "apiPath": "/api/v1/admin/commercial-launch/dossier"
     },
@@ -10247,6 +10919,10 @@
       "apiPath": "/api/v1/dashboard/responsibilities"
     },
     {
+      "screen": "artifacts/bimlog/src/components/FeedbackCommentForm.tsx",
+      "apiPath": "${base}/api/v1/feedback/${caseId}/comments"
+    },
+    {
       "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
       "apiPath": "${API_BASE}/api/v1/feedback/capture-consents/${id}/revoke"
     },
@@ -10308,11 +10984,7 @@
     },
     {
       "screen": "artifacts/bimlog/src/components/job-operations/TimeApprovalPanel.tsx",
-      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/edt-engine/time-review"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/job-operations/TimeApprovalPanel.tsx",
-      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/edt-engine/time-entries/${encodeURIComponent(selection.entry.id)}/transition"
+      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/edt-engine/${path}"
     },
     {
       "screen": "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
@@ -10423,12 +11095,20 @@
       "apiPath": "/api/v1/projects/${projectId}/reports/current-view/pdf"
     },
     {
+      "screen": "artifacts/bimlog/src/components/ProjectApuReuseDraft.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/apu-library/drafts"
+    },
+    {
       "screen": "artifacts/bimlog/src/components/SubmittalRegisterCoverage.tsx",
       "apiPath": "/api/v1/projects/${projectId}/submittal-register-coverage"
     },
     {
       "screen": "artifacts/bimlog/src/components/SubmittalRegisterCoverage.tsx",
       "apiPath": "/api/v1/projects/${projectId}/submittal-register/${reqId}/packages/${pkgId}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/SyntheticFinancialAuthorization.tsx",
+      "apiPath": "${base}/api/v1/financial-controls/evaluate"
     },
     {
       "screen": "artifacts/bimlog/src/components/team-performance/ResourceSchedulingPanel.tsx",
@@ -10499,6 +11179,14 @@
       "apiPath": "/api/v1/auth/access-profile"
     },
     {
+      "screen": "artifacts/bimlog/src/lib/budget-decision-verification.ts",
+      "apiPath": "/api/v1/projects/${input.projectId}/financial/workspace"
+    },
+    {
+      "screen": "artifacts/bimlog/src/lib/budget-decision-verification.ts",
+      "apiPath": "/api/v1/projects/${input.projectId}/financial/budgets/${encodeURIComponent(input.row.id)}/${approval"
+    },
+    {
       "screen": "artifacts/bimlog/src/lib/commercial-billing-history-client.ts",
       "apiPath": "${import.meta.env.BASE_URL.replace(/\\/$/,\"\")}/api/v1/commercial/billing-history"
     },
@@ -10539,6 +11227,10 @@
       "apiPath": "/api/v1/public/legal-identity"
     },
     {
+      "screen": "artifacts/bimlog/src/lib/resolve-original-clash.ts",
+      "apiPath": "/api/v1/projects/${projectId}/clashes/${clashId}"
+    },
+    {
       "screen": "artifacts/bimlog/src/pages/AdminPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/feedback/admin/${Number(item.id)}/package.zip"
     },
@@ -10553,6 +11245,14 @@
     {
       "screen": "artifacts/bimlog/src/pages/AdminPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/feedback/admin/follow-up.${format}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/AdminPanel.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/admin/export.csv"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/BudgetDecisionReview.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/financial/workspace"
     },
     {
       "screen": "artifacts/bimlog/src/pages/commercial-workspace.behavior.ts",
@@ -10604,6 +11304,10 @@
     },
     {
       "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+      "apiPath": "${API_BASE}/api/v1/coordination-knowledge/rules/${encodeURIComponent(item.rule_id)}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
       "apiPath": "${API_BASE}/api/v1/coordination-knowledge/capabilities"
     },
     {
@@ -10629,6 +11333,10 @@
     {
       "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
       "apiPath": "${API_BASE}/api/v1/coordination-knowledge/lesson-proposals/${encodeURIComponent(item.id)}/${action}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/CoordinationOperations.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/coordination-hub/${path}"
     },
     {
       "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
@@ -10657,6 +11365,66 @@
     {
       "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
       "apiPath": "/api/v1/projects"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/EdtActivation.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/edt-engine/${path}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/EdtCapabilities.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/edt-engine/capabilities"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/EdtChanges.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/edt-engine/${path}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/EdtIntakePreviews.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/edt-engine/${path}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/EdtIssuances.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/edt-engine/${path}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/EdtQcReview.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/edt-engine/${path}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/FeatureAccessInspector.tsx",
+      "apiPath": "${base}/api/v1/features/catalog"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/FeatureAccessInspector.tsx",
+      "apiPath": "${base}/api/v1/features/${encodeURIComponent(feature)}/${path}${query}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/FeatureCatalog.tsx",
+      "apiPath": "${base}/api/v1/features/catalog"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/FeatureCatalog.tsx",
+      "apiPath": "${base}/api/v1/features/catalog/${encodeURIComponent(featureKey)}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/FeaturePolicyWorkspace.tsx",
+      "apiPath": "${base}/api/v1/features/policies/capabilities"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/FeaturePolicyWorkspace.tsx",
+      "apiPath": "${base}/api/v1/features/policies/audit/${scope}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/FeaturePreferences.tsx",
+      "apiPath": "${base}/api/v1/features/preferences"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/FeaturePreferences.tsx",
+      "apiPath": "${base}/api/v1/features/preferences/${encodeURIComponent(item.featureKey)}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/FileCustodyReview.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/files/${path}"
     },
     {
       "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
@@ -10712,7 +11480,7 @@
     },
     {
       "screen": "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
-      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/snapshots/${snapshotId}/export.${format}"
+      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/snapshots/${encodeURIComponent(snapshotId)}/export.${format}${format==="
     },
     {
       "screen": "artifacts/bimlog/src/pages/FinancialContractItemsWorkspace.tsx",
@@ -10720,7 +11488,7 @@
     },
     {
       "screen": "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
-      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/contracts/${contract.id}/export.${format}"
+      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/contracts/${contract.id}/export.${format}${format==="
     },
     {
       "screen": "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
@@ -10731,8 +11499,196 @@
       "apiPath": "/api/v1/help/manual/pdf"
     },
     {
+      "screen": "artifacts/bimlog/src/pages/IntakeAgentPreview.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/intake-agent/preview"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/KnowledgeSearch.tsx",
+      "apiPath": "${base}/api/v1/coordination-knowledge/capabilities"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/KnowledgeSearch.tsx",
+      "apiPath": "${base}/api/v1/coordination-knowledge/search"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/KnowledgeSearch.tsx",
+      "apiPath": "${base}/api/v1/coordination-knowledge/${family}/${encodeURIComponent(row.entity_id)}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/KnowledgeStarterLibrary.tsx",
+      "apiPath": "${base}/api/v1/coordination-knowledge/${path}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/KnowledgeStarterLibrary.tsx",
+      "apiPath": "${base}/api/v1/coordination-knowledge/starter-library/bimtech/import"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/KnowledgeTaxonomy.tsx",
+      "apiPath": "${base}/api/v1/coordination-knowledge/capabilities"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/KnowledgeTaxonomy.tsx",
+      "apiPath": "${base}/api/v1/coordination-knowledge/taxonomy"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/KnowledgeTaxonomy.tsx",
+      "apiPath": "${base}/api/v1/coordination-knowledge/taxonomy${suffix}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/LensImportContext.tsx",
+      "apiPath": "/api/v1/projects/${Number(target)}/clash-reports/lens-import-context"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/LensImportPlan.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/clash-reports/lens-import"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/LensSequenceStatus.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/clash-reports/lens-next-id"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/LensSyncReview.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/clash-reports/lens-sync"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/LessonPromotionControls.tsx",
+      "apiPath": "${(import.meta.env.VITE_API_URL as string|undefined)??\"\"}/api/v1/coordination-knowledge/${family}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/LessonPromotionControls.tsx",
+      "apiPath": "${(import.meta.env.VITE_API_URL as string|undefined)??\"\"}/api/v1/coordination-knowledge/lesson-proposals/${encodeURIComponent(item.id)}/${action}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/MacSyncAvailability.tsx",
+      "apiPath": "${base}/api/v1/downloads/sync-agent-mac"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/MasterCatalogBrowser.tsx",
+      "apiPath": "/api/v1/master-catalogs/${catalog}${projectId"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/MeetingLensSources.tsx",
+      "apiPath": "/api/v1/projects/${request.project}/meetings/lens-viewpoint-candidates"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/MeetingLinkActions.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/${path}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/MeetingRfiSources.tsx",
+      "apiPath": "/api/v1/projects/${request.project}/meetings/rfi-candidates"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/MyAiUsage.tsx",
+      "apiPath": "/api/v1/me/ai-usage"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/MyConnectionFiles.tsx",
+      "apiPath": "/api/v1/me/connections/google-drive/files${search"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/MySetup.tsx",
+      "apiPath": "/api/v1/onboarding/email-verification"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/MySetup.tsx",
+      "apiPath": "/api/v1/onboarding/complete"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/MySetup.tsx",
+      "apiPath": "/api/v1/onboarding"
+    },
+    {
       "screen": "artifacts/bimlog/src/pages/parity/admin-fix-specific-link.tsx",
       "apiPath": "${API_BASE}/api/v1/admin/fix-specific-link"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/admin-platform-stats.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/platform-stats"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/admin-projects-list.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/projects-list"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/ai-control-companies.tsx",
+      "apiPath": "${API_BASE}/api/v1/ai-control/companies"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/ai-control-company-users.tsx",
+      "apiPath": "${API_BASE}/api/v1/ai-control/company-users${suffix}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/ai-control-prices.tsx",
+      "apiPath": "${API_BASE}/api/v1/ai-control/prices"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/ai-control-provider-connections.tsx",
+      "apiPath": "${API_BASE}/api/v1/ai-control/provider-connections${path}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/ai-control-runs.tsx",
+      "apiPath": "${API_BASE}/api/v1/ai-control/runs/${encodeURIComponent(runId)}/${action}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/ai-control-status.tsx",
+      "apiPath": "${API_BASE}/api/v1/ai-control/status"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/ai-control-usage.tsx",
+      "apiPath": "${API_BASE}/api/v1/ai-control/usage"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/auth-launch-step-up.tsx",
+      "apiPath": "${API_BASE}/api/v1/auth/launch-step-up"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/auth-openai-key.tsx",
+      "apiPath": "${API_BASE}/api/v1/auth/openai-key"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/autodesk-hubs.tsx",
+      "apiPath": "${API_BASE}/api/v1/autodesk/hubs"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/autodesk-login.tsx",
+      "apiPath": "/api/v1/autodesk/login"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/autodesk-projects.tsx",
+      "apiPath": "${API_BASE}/api/v1/autodesk/projects/${encodeURIComponent(hubId)}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/autodesk-token.tsx",
+      "apiPath": "${API_BASE}/api/v1/autodesk/token"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/PendingWork.tsx",
+      "apiPath": "${base}/api/v1/dashboard/pending/${type}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/PendingWork.tsx",
+      "apiPath": "${base}/api/v1/dashboard/pending/export-pdf"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/PluginProjectDirectory.tsx",
+      "apiPath": "/api/v1/projects/list-for-plugin"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/PluginPullReview.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/clash-reports/plugin-pull"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/PluginSyncReview.tsx",
+      "apiPath": "/api/v1/projects/${saved.projectId}/clash-reports/${id}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/PluginSyncReview.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/clash-reports/plugin-sync"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/ProcoreConnectionStatus.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/connections/procore/status"
     },
     {
       "screen": "artifacts/bimlog/src/pages/Profile.tsx",
@@ -10975,12 +11931,48 @@
       "apiPath": "/api/v1/projects/${projectId}/connections/procore/discovery/preview"
     },
     {
+      "screen": "artifacts/bimlog/src/pages/project/meetings/meeting-data.behavior.ts",
+      "apiPath": "/api/v1/projects/91/action-items/7"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/meetings/MeetingActionCreate.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/meetings/${meetingId}/action-items"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/meetings/MeetingActionCreate.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/meetings/${meetingId}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/meetings/MeetingCurrentViewExports.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/meetings/current-view/${format}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/meetings/MeetingDocumentImport.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/meetings/${receipt.meetingId}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/meetings/MeetingDocumentImport.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/meetings/import"
+    },
+    {
       "screen": "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/directory/companies"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/members"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/intake-agent/state"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/intake-agent/turn"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/intake-agent/mcp"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/ReportsTab.tsx",
@@ -11319,6 +12311,34 @@
       "apiPath": "/api/v1/projects/${projectId}/transmittals/${deleteTarget.id}"
     },
     {
+      "screen": "artifacts/bimlog/src/pages/ProjectAgentReview.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/insights"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/ProjectBriefingReview.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/${path}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/ProjectDocumentSearch.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/documents/${ai"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/ProjectDocumentSearch.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/files/${row.id}/download"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/ProjectInsightsReview.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/insights"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/ProjectLinksWorkspace.tsx",
+      "apiPath": "/api/v1/projects/${Number(project)}/links${path}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/ProjectUserAssignment.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/members"
+    },
+    {
       "screen": "artifacts/bimlog/src/pages/Register.tsx",
       "apiPath": "${BASE}/api/v1/auth/invitations/preview"
     },
@@ -11333,6 +12353,10 @@
     {
       "screen": "artifacts/bimlog/src/pages/ResetPassword.tsx",
       "apiPath": "${API_BASE}/api/v1/auth/reset-password"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/ResolutionMethodHistory.tsx",
+      "apiPath": "${(import.meta.env.VITE_API_URL as string|undefined)??\"\"}/api/v1/coordination-knowledge/resolution-methods/${encodeURIComponent(entityId)}/history"
     },
     {
       "screen": "artifacts/bimlog/src/pages/TeamPerformanceWorkspace.tsx",

@@ -1,3 +1,13 @@
+## Additive schema and retention correspondence
+
+Startup-created tables must have matching exported Drizzle columns, named foreign keys, defaults, checks and indexes before publication. Correct an unapproved cascade in new unpublished DDL by preserving records; do not allow a schema tool to infer destructive cleanup from an omitted declaration. Validate actual local DDL and append-only enforcement, then separately review the exact production preview/applied identity. A source safety pass is not production migration proof.
+
+## 2026-10-30 — Intake persistence and instrumented acceptance corrections
+
+A failed durable-state restore must pause writes; it must never convert a failed read into a blank autosave. Preserve current fields on save failure, serialize writes, bind readback to current user/company/project and display a verified-save result only for that exact payload. Browser-local recovery is an explicit draft choice, not authoritative server persistence. Scope changes invalidate pending callbacks and duplicate clicks cannot dispatch duplicate paid/model or proposal requests.
+
+MCP tools/list must expose the advertised protocol inputSchema, while provider model adapter field names remain internal; JSON-RPC errors use numeric protocol codes with bounded domain codes retained as error data. Controlled authenticated HTTP evidence and actual live-provider acceptance are separate. Browser error evidence requires enabling runtime observation before fresh entry; P179/P180 instrumentation omission was corrected without changing behavior assertions. Console errors are captured separately so deliberate negative responses cannot silently stand in for a clean positive path. Preserve canonical Lens retry, selection and readback safeguards when reconciling older published branches.
+
 # QUALITY.md - BIMLog Quality 4.0 Doctrine
 
 ## Silent-failure observability contract

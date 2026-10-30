@@ -1,3 +1,11 @@
+## 2026-10-30 — Pre-push schema gate correction
+
+The database safety gate was allowed to reject the candidate: three startup tables lacked Drizzle declarations and intake-state DDL contained an unapproved deletion cascade. The correction exports all three declarations and preserves records through default NO ACTION foreign keys. PROCORE_AGGREGATE_AUTH_HTTP_FINAL.log now contains19 actual controlled checks including source/startup column, foreign-key action/name, named-index and append-only-trigger correspondence. Source safety passes310 tables/398 indexes/271 startup tables. These replace the earlier undeclared/no-schema-source-delta assumptions; production preview/application and rollback remain unverified. No guard exception or destructive production action was used.
+
+## 2026-10-30 — Aggregate correction evidence and release limits
+
+Current evidence is held in the existing MAIN04.06 C-root outputs: BLOCK36_REMOTE_VERIFIED.json and RELEASE_MANIFEST, PROCORE_AGGREGATE_AUTH_HTTP_FINAL.log, PROCORE_MCP_WIRE_BEFORE/FIXED.log, PROCORE_BROWSER_BEFORE.log and PROCORE_BROWSER_FIXED/procore-intake-local-browser.json, plus aggregate connected browser receipts. The original wire-schema negative and failed-restore one-write negative are retained. Corrected browser tests verify failure recovery, exact source versions and proposal-only truth with active runtime/console observation; no canonical Procore import, OAuth-provider or Ruben live success is inferred from fixtures. P179/P180 earlier uninstrumented empty runtime lists are superseded; six earlier meeting suites already enabled observation. No gate or assertion was weakened. The aggregate merge/state bundle, migration correspondence, deployed identity and authenticated release rounds remain required.
+
 # AUDIT.md - Historical Evidence Register
 
 ## Post-120 silent-failure removal B — Builds 131–135 — 2026-09-20

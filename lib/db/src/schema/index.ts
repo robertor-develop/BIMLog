@@ -73,3 +73,4 @@ export * from "./coordination-knowledge";
 export * from "./platform-repairs";
 export * from "./launch-configuration";
 export * from "./page-agent-turns";
+export * from "./company-procore-intake";

@@ -71096,78 +71096,6 @@
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "taskId": "lorena-p1-release-repair-block02-final-20261016",
-      "reviewedThroughCommit": "287e8532e166d87fd0e560247213336877067782",
-      "reviewedAt": "2026-10-16T23:51:15.736Z",
-      "status": "local_candidate",
-      "captureTiming": "pre_release_reconciliation",
-      "authorities": [
-        {
-          "key": "ecosystem_doctrine",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Lorena P1 release repair Block 2 clarifies configured governance reviewer roles, preserves canonical contract visibility, routes EDT repair to the exact contract, and validates a same-project Operations return without changing approval authority or production data."
-        },
-        {
-          "key": "claude",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Lorena P1 release repair Block 2 clarifies configured governance reviewer roles, preserves canonical contract visibility, routes EDT repair to the exact contract, and validates a same-project Operations return without changing approval authority or production data."
-        },
-        {
-          "key": "quality",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Lorena P1 release repair Block 2 clarifies configured governance reviewer roles, preserves canonical contract visibility, routes EDT repair to the exact contract, and validates a same-project Operations return without changing approval authority or production data."
-        },
-        {
-          "key": "vision",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Lorena P1 release repair Block 2 clarifies configured governance reviewer roles, preserves canonical contract visibility, routes EDT repair to the exact contract, and validates a same-project Operations return without changing approval authority or production data."
-        },
-        {
-          "key": "platform",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Lorena P1 release repair Block 2 clarifies configured governance reviewer roles, preserves canonical contract visibility, routes EDT repair to the exact contract, and validates a same-project Operations return without changing approval authority or production data."
-        },
-        {
-          "key": "plugin",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Lorena P1 release repair Block 2 clarifies configured governance reviewer roles, preserves canonical contract visibility, routes EDT repair to the exact contract, and validates a same-project Operations return without changing approval authority or production data."
-        },
-        {
-          "key": "report_design_system",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Lorena P1 release repair Block 2 clarifies configured governance reviewer roles, preserves canonical contract visibility, routes EDT repair to the exact contract, and validates a same-project Operations return without changing approval authority or production data."
-        },
-        {
-          "key": "standards_register",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Lorena P1 release repair Block 2 clarifies configured governance reviewer roles, preserves canonical contract visibility, routes EDT repair to the exact contract, and validates a same-project Operations return without changing approval authority or production data."
-        },
-        {
-          "key": "status",
-          "result": "updated",
-          "reason": "Lorena P1 release repair Block 2 clarifies configured governance reviewer roles, preserves canonical contract visibility, routes EDT repair to the exact contract, and validates a same-project Operations return without changing approval authority or production data."
-        },
-        {
-          "key": "open_loop",
-          "result": "updated",
-          "reason": "Lorena P1 release repair Block 2 clarifies configured governance reviewer roles, preserves canonical contract visibility, routes EDT repair to the exact contract, and validates a same-project Operations return without changing approval authority or production data."
-        },
-        {
-          "key": "audit",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Lorena P1 release repair Block 2 clarifies configured governance reviewer roles, preserves canonical contract visibility, routes EDT repair to the exact contract, and validates a same-project Operations return without changing approval authority or production data."
-        }
-      ],
-      "reason": "Lorena P1 release repair Block 2 clarifies configured governance reviewer roles, preserves canonical contract visibility, routes EDT repair to the exact contract, and validates a same-project Operations return without changing approval authority or production data.",
-      "reviewedChangedPaths": [
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json"
-      ],
-      "reviewedChangeSha256": "1adacb0e0269f042335234c6f213bff9ce9448a6820ab886ceba7e709cfeba77"
-    },
-    {
       "taskId": "lorena-p1-release-repair-block03-final-20261019",
       "reviewedThroughCommit": "d6c4429ca0c313467fedefebec9ae3892847d1f3",
       "reviewedAt": "2026-10-19T13:40:00Z",
@@ -74125,78 +74053,6 @@
     },
     {
       "taskId": "viva-whole-platform-closure-block02-20261023",
-      "reviewedThroughCommit": "59763dccb7199dc5c92139f6efd6fbf4fe5044e4",
-      "reviewedAt": "2026-10-24T00:57:24.974Z",
-      "status": "local_candidate",
-      "captureTiming": "pre_release_reconciliation",
-      "authorities": [
-        {
-          "key": "ecosystem_doctrine",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 2 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "claude",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 2 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "quality",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 2 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "vision",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 2 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "platform",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 2 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "plugin",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 2 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "report_design_system",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 2 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "standards_register",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 2 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "status",
-          "result": "updated",
-          "reason": "Viva whole-platform closure Block 2 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "open_loop",
-          "result": "updated",
-          "reason": "Viva whole-platform closure Block 2 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "audit",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 2 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        }
-      ],
-      "reason": "Viva whole-platform closure Block 2 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary.",
-      "reviewedChangedPaths": [
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json"
-      ],
-      "reviewedChangeSha256": "0f1dcf11fa6a0da448814bb005a3c665450838e0f6c0cd82007e74188117eba7"
-    },
-    {
-      "taskId": "viva-whole-platform-closure-block02-20261023",
       "reviewedThroughCommit": "07c87c7bc30e713ddba22bb09d199fe717f65eee",
       "reviewedAt": "2026-10-24T01:03:19.027Z",
       "status": "local_candidate",
@@ -74637,81 +74493,6 @@
         "scripts/test-viva-block05-closure.mjs"
       ],
       "reviewedChangeSha256": "0e899442b3a2d8486598898252c9f4d866cf3247829db7b6d2269f7f4837992c"
-    },
-    {
-      "taskId": "viva-whole-platform-closure-block05-20261023",
-      "reviewedThroughCommit": "deabacf14de2f65debb89c736ba3a3095397d848",
-      "reviewedAt": "2026-10-24T02:31:15.763Z",
-      "status": "local_candidate",
-      "captureTiming": "pre_release_reconciliation",
-      "authorities": [
-        {
-          "key": "ecosystem_doctrine",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "claude",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "quality",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "vision",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "platform",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "plugin",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "report_design_system",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "standards_register",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "status",
-          "result": "updated",
-          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "open_loop",
-          "result": "updated",
-          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        },
-        {
-          "key": "audit",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
-        }
-      ],
-      "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary.",
-      "reviewedChangedPaths": [
-        "evidence/viva-whole-platform-closure-20261023-block05.json",
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "package.json",
-        "scripts/test-viva-block05-closure.mjs"
-      ],
-      "reviewedChangeSha256": "2fd7211deb976aaca73de03a3ceca3bfdf4ef1db0369f341e92ebb3eb305512d"
     },
     {
       "taskId": "viva-whole-platform-closure-block06-20261023",
@@ -76026,7 +75807,7 @@
     {
       "taskId": "bimlog-fixed-ga-build90-release-repair-20261024",
       "reviewedThroughCommit": "fba3f5afb239b1cab93988f03cf45d0682f04e89",
-      "reviewedAt": "2026-10-24T12:20:35.280Z",
+      "reviewedAt": "2026-10-24T12:20:35.28Z",
       "status": "local_candidate",
       "captureTiming": "post_commit_release_repair",
       "authorities": [
@@ -76165,7 +75946,7 @@
     {
       "taskId": "bimlog-fixed-ga-build95-release-state-repair-20261024",
       "reviewedThroughCommit": "225ce8c8480b5eeb3cd74b496ce78f891822ded7",
-      "reviewedAt": "2026-10-24T12:56:45.320Z",
+      "reviewedAt": "2026-10-24T12:56:45.32Z",
       "status": "local_candidate",
       "captureTiming": "post_commit_release_repair",
       "authorities": [
@@ -76447,7 +76228,7 @@
     {
       "taskId": "bimlog-build71-105-definitive-closure-repair-20261025",
       "reviewedThroughCommit": "f394970b776e84becb0ff493d6bbc6f521d19f63",
-      "reviewedAt": "2026-10-25T09:55:00.000Z",
+      "reviewedAt": "2026-10-25T09:55:00Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -77673,7 +77454,7 @@
     {
       "taskId": "terminal-ga-build009-priced-staffing-20261026",
       "reviewedThroughCommit": "d5f9f60e8c99c9a464f22d8c208267ce4bbaa15f",
-      "reviewedAt": "2026-10-26T18:59:01.940Z",
+      "reviewedAt": "2026-10-26T18:59:01.94Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -77745,7 +77526,7 @@
     {
       "taskId": "terminal-ga-build009-release-state-20261026",
       "reviewedThroughCommit": "07053d55899e5c32217a7d9689a7a04e24455160",
-      "reviewedAt": "2026-10-26T19:05:00.000Z",
+      "reviewedAt": "2026-10-26T19:05:00Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -77817,7 +77598,7 @@
     {
       "taskId": "terminal-ga-build009-independent-financial-approval-repair-20261026",
       "reviewedThroughCommit": "903b483721b864c09126a4e2a9c499a9a8c300fc",
-      "reviewedAt": "2026-10-26T20:33:39.000Z",
+      "reviewedAt": "2026-10-26T20:33:39Z",
       "status": "local_candidate",
       "captureTiming": "post_live_authority_defect_repair",
       "authorities": [
@@ -77889,7 +77670,7 @@
     {
       "taskId": "lorena-job-intake-production-repair-20261026",
       "reviewedThroughCommit": "2f84e03248b04473b37c88e27b6a83f8bc1f6135",
-      "reviewedAt": "2026-10-26T21:20:00.000Z",
+      "reviewedAt": "2026-10-26T21:20:00Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -77963,7 +77744,7 @@
     {
       "taskId": "lorena-recommendations-build01-trade-service-20261026",
       "reviewedThroughCommit": "46e32b62db1e03470583f92075db892b4816215c",
-      "reviewedAt": "2026-10-26T22:15:00.000Z",
+      "reviewedAt": "2026-10-26T22:15:00Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -78035,7 +77816,7 @@
     {
       "taskId": "lorena-recommendations-build02-contract-bulk-load-20261026",
       "reviewedThroughCommit": "1e899d5703d2c42c32861d6ef08aa2d5dee92ce3",
-      "reviewedAt": "2026-10-27T01:36:31.000Z",
+      "reviewedAt": "2026-10-27T01:36:31Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -78108,7 +77889,7 @@
     {
       "taskId": "lorena-recommendations-build02-atomic-shape-repair-20261026",
       "reviewedThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "reviewedAt": "2026-10-27T01:59:58.000Z",
+      "reviewedAt": "2026-10-27T01:59:58Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -78256,7 +78037,7 @@
     {
       "taskId": "lorena-recommendations-build04-service-workflow-20261027",
       "reviewedThroughCommit": "aa8b250373ef602d930dc1a5386bb9f109324974",
-      "reviewedAt": "2026-10-27T04:52:32.000Z",
+      "reviewedAt": "2026-10-27T04:52:32Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -78329,7 +78110,7 @@
     {
       "taskId": "lens-governed-fields-multiview-build010-20261027",
       "reviewedThroughCommit": "93729b93331987082c461ec167885b9dbafbd93f",
-      "reviewedAt": "2026-10-27T13:35:00.000Z",
+      "reviewedAt": "2026-10-27T13:35:00Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -78398,7 +78179,7 @@
     {
       "taskId": "lens-responsible-company-registration-live-merge-20261027",
       "reviewedThroughCommit": "5784c308389d3af65fb8f29d7bb1351d77db3f08",
-      "reviewedAt": "2026-10-27T15:11:00.000Z",
+      "reviewedAt": "2026-10-27T15:11:00Z",
       "status": "release_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -78468,7 +78249,7 @@
     {
       "taskId": "lens-viewpoint-schema-safe-publish-20261027",
       "reviewedThroughCommit": "c9f7668210b004a355fa71557ce1853721df5ec8",
-      "reviewedAt": "2026-10-27T15:47:00.000Z",
+      "reviewedAt": "2026-10-27T15:47:00Z",
       "status": "release_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -78537,7 +78318,7 @@
     {
       "taskId": "lens-complete-additive-publication-parity-20261027",
       "reviewedThroughCommit": "ed7d5d8c138732e7162352d567ecee021e6153b7",
-      "reviewedAt": "2026-10-27T15:50:00.000Z",
+      "reviewedAt": "2026-10-27T15:50:00Z",
       "status": "release_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -78606,7 +78387,7 @@
     {
       "taskId": "lorena-build5-classification-continuity-20261027",
       "reviewedThroughCommit": "c39d6783b00be2e9e4ae373caf8840397f17d5ee",
-      "reviewedAt": "2026-10-27T17:00:00.000Z",
+      "reviewedAt": "2026-10-27T17:00:00Z",
       "status": "release_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -78678,7 +78459,7 @@
     {
       "taskId": "whole-platform-audit-repair-block01-20261027",
       "reviewedThroughCommit": "06c3fb6702a01139040d2a102bc785d4e6ea758e",
-      "reviewedAt": "2026-10-27T18:30:00.000Z",
+      "reviewedAt": "2026-10-27T18:30:00Z",
       "status": "release_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -78756,7 +78537,7 @@
     {
       "taskId": "priority-identity-block-i001-i005-verification-20261027",
       "reviewedThroughCommit": "73b31aeab158dfaad57dcacb3cec367e3ece4664",
-      "reviewedAt": "2026-10-27T19:30:00.000Z",
+      "reviewedAt": "2026-10-27T19:30:00Z",
       "status": "release_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -78828,7 +78609,7 @@
     {
       "taskId": "priority-identity-production-reconciliation-20261027",
       "reviewedThroughCommit": "1110d27cad21323bc918f4e559757d1478e90090",
-      "reviewedAt": "2026-10-27T20:00:00.000Z",
+      "reviewedAt": "2026-10-27T20:00:00Z",
       "status": "production_corrected_acceptance_pending",
       "captureTiming": "post_production_reconciliation",
       "authorities": [
@@ -78974,7 +78755,7 @@
     {
       "taskId": "entire-platform-closure-block01-build005-20261027",
       "reviewedThroughCommit": "3d62e1c3a1288d0cacbc4a71bfe8d8f9096901c5",
-      "reviewedAt": "2026-10-28T02:22:00.000Z",
+      "reviewedAt": "2026-10-28T02:22:00Z",
       "status": "candidate",
       "captureTiming": "post_build_pre_push_reconciliation",
       "authorities": [
@@ -79047,7 +78828,7 @@
     {
       "taskId": "entire-platform-closure-block02-build010-20261027",
       "reviewedThroughCommit": "821c477a4a90ce04a00851384265a86326f3a8ea",
-      "reviewedAt": "2026-10-27T22:30:00.000Z",
+      "reviewedAt": "2026-10-27T22:30:00Z",
       "status": "candidate",
       "captureTiming": "post_build_pre_push_reconciliation",
       "authorities": [
@@ -79119,7 +78900,7 @@
     {
       "taskId": "entire-platform-closure-block02-lens-fixture-correction-20261028",
       "reviewedThroughCommit": "8422c813e3f3959196d8c16858f3c24b6f07ab62",
-      "reviewedAt": "2026-10-28T05:47:20.000Z",
+      "reviewedAt": "2026-10-28T05:47:20Z",
       "status": "candidate",
       "captureTiming": "post_correction_pre_release_reconciliation",
       "authorities": [
@@ -80451,6 +80232,376 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "7db1cd8dafda7b216d96815301e30e7b10bce96f6235d1997a3b588ca9ca527c"
+    },
+    {
+      "taskId": "bimtech-company31-access-and-platform-reconciliation-20261030",
+      "reviewedThroughCommit": "5fae8db29840738365ce5ecfef87a6ce1ea1ccae",
+      "reviewedAt": "2026-10-30T19:42:46Z",
+      "status": "candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The BIMTECH grant remains company-scoped and preserves existing tenant, project, role, and provider permission boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No collaborator instruction or agent operating rule changed in the reviewed implementation."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused entitlement, provider governance, intake, Lens recovery, and parity tests were added without changing quality policy."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The changes extend existing BIMLog workflows and do not alter the approved product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic platform inventory now includes the committed Procore intake and company-scoped entitlement source files."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin protocol, synchronization, or native-plugin capability changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The reviewed changes do not alter report generation, report layouts, or their design-system contract."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulatory interpretation, or compliance claim was introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record the committed owner-approved company access correction and distinguish it from the still-incomplete Procore import journey."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keep exact-version confirmation, governed import, durable receipt, authenticated release checks, and provider setup as open gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Generated disposition records remain derived evidence; the changes do not alter audit retention or disposition policy."
+        }
+      ],
+      "reason": "Review the source and generated inventory changes after the accepted P021-P030 seal; preserve all authority boundaries and record only the company-scoped access correction and still-pending Procore import gates.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "45fe954f6aa45908d7f550aa1683643b7790eea3dec82a1856d8e7cd7ac1034d"
+    },
+    {
+      "taskId": "procore-durable-versioned-proposal-20261030",
+      "reviewedThroughCommit": "484d15cbf4a85ea6935a6428670053121f2e2314",
+      "reviewedAt": "2026-10-30T20:29:11Z",
+      "status": "candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Per-user, current-company, and project scoping preserves BIMLog tenant and product boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No collaborator instruction or agent operating policy changed in this implementation."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact-source validation and focused fixtures implement existing quality expectations without changing policy."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The guided intake extends the existing product direction and retains direct expert workflows."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic source inventory now includes durable intake state and exact-version proposal code."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin behavior, protocol, or synchronization boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report output or report design-system contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation was introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record the proposal-stage implementation and distinguish passed local fixtures from missing authenticated and live-provider acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keep authenticated HTTP verification, live Procore proof, explicit confirmation, and governed import as open work."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The changes preserve existing append-only entitlement and audit policies without changing audit retention rules."
+        }
+      ],
+      "reason": "Review the durable questionnaire, current company approval checks, exact-version selection, and generated source inventory before reconciliation; do not represent proposal behavior as an import.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "425d7b658b18c5e97a5f23757396c13210db931620a2dd4ea1c3ae5abea92d09"
+    },
+    {
+      "taskId": "procore-authenticated-http-acceptance-20261030",
+      "reviewedThroughCommit": "42502df44d6b2374fde5d3456c266cef6d8bc5d7",
+      "reviewedAt": "2026-10-30T21:07:49Z",
+      "status": "candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The request verifies existing user, current-company, and project isolation; no doctrine changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No collaborator instruction or operating policy changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated HTTP fixtures strengthen verification without changing quality policy."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The intake remains proposal-only and preserves direct expert workflows."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The source inventory now includes the authenticated Procore intake HTTP acceptance suite."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin behavior or protocol changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report output or design system changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record the isolated authenticated HTTP evidence and distinguish it from browser and live-provider acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Close only the locally tested HTTP proposal gates; retain browser, live provider, import, receipt, and release gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Tests preserve the existing append-only commercial and provider approval histories."
+        }
+      ],
+      "reason": "Review authenticated state persistence, current identity and membership checks, exact-version proposal errors, and approval revocation using a disposable local database and controlled provider responses.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ef2c08431c7ae40514a9f222f2e5b4c433ed81c2e12d09e5441aa3c0510f9a77"
+    },
+    {
+      "taskId": "block36-procore-aggregate-reconciliation-20261030",
+      "reviewedThroughCommit": "4981c0e2fa232884552ad2458887ecf0767f489a",
+      "reviewedAt": "2026-10-30T21:59:14.2743135Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "agentCapable": [
+          "Preserve and inspect canonical/incoming Git histories, resolve authorized conflicts, run isolated fixtures, reconcile source-derived authority evidence and perform approved exact-source release steps"
+        ],
+        "checkedBeforeExecution": true,
+        "operatorOnly": [
+          "Normal external provider MFA or account-owner consent only if actually required; Google/email owner-presence work remains deferred"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "category": "customer_defect_or_regression",
+          "summary": "An actual built-browser negative reproduced failed questionnaire restore followed by an unintended blank autosave. The corrected flow pauses writes, verifies identity and ordered save readback, and retains a recovery path.",
+          "disposition": "captured_immediately"
+        },
+        {
+          "authorities": [
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "summary": "Company31 full commercial/internal Procore approval, current membership/revocation and company38 isolation are verified locally with actual authenticated routes and real append-only policy records; live provider and deployment proof remain open. MCP wire descriptor/error fields and P179/P180 runtime activation were corrected without weakening assertions.",
+          "disposition": "captured_immediately"
+        },
+        {
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "summary": "Normal merge preserves accepted P176-P180 and incoming Procore history with no Native changes. Stale authority hashes require truthful final reconciliation. Additive startup schemas need actual applied verification; historical unpublished total is unknown, and published source identity plus three authenticated rounds remain pending. The pre-push DB guard rejected undeclared tables and an unapproved cascade; exact additive Drizzle declarations and NO ACTION retention now pass actual local correspondence/history checks, with production preview/application still pending.",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog product identity and ecosystem boundaries remain unchanged; the owner-authorized correction stays within current company/project/provider authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing owner authorization, five-build push/ten-build release discipline and the direct deferred Google owner-presence decision remain in effect; no operating rule is amended."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Capture proven restore data-loss prevention, ordered identity-bound persistence, standard MCP wire evidence and runtime/console instrumentation requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Every legitimate module and direct expert workflow is preserved. The guided questionnaire supplements existing tools, and unfinished governed import is explicitly retained as a gap."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Regenerate deterministic source inventory for the aggregate current-approved Procore catalog, durable state, MCP surface and browser recovery corrections; additive startup schemas are not mislabeled as no migration."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native plugin, installer, bridge protocol or Autodesk load path changes. Canonical web-panel Lens retry/selection/readback safeguards are preserved and connected native acceptance remains separate."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The aggregate Procore correction does not change the shared PDF/rendering authority; accepted meeting PDF/Excel export scope and receipts remain protected by connected regression."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No regulatory/compliance interpretation or advertised protocol version changes; MCP wire fields are corrected against the existing advertised2024-11-05 schema rather than claiming new external certification."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Distinguish accepted and pushed P176-P180, controlled authenticated/browser correction tests,30 remaining frozen builds, unknown historical unpublished total and pending exact deployed/provider/live acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Preserve exact source/merge ownership, dirty work, tests, recovery evidence, browser cleanup and safe resume, including unfinished import/receipt, migration, release and authenticated acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Retain original negative evidence, corrected instrumented local acceptance and regenerated interconnection/disposition evidence; no synthetic result is promoted to production or full-program acceptance."
+        }
+      ],
+      "reason": "Review the exact aggregate candidate relative to accepted canonical4981c0e2, preserve both histories and truthfully reconcile authority before guarded production build/publication.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/cloud-files.ts",
+        "artifacts/api-server/src/lib/commercial-entitlement.ts",
+        "artifacts/api-server/src/lib/company-31-access-correction.behavior.ts",
+        "artifacts/api-server/src/lib/meeting-action-create-browser.behavior.ts",
+        "artifacts/api-server/src/lib/meeting-ai-summary-browser.behavior.ts",
+        "artifacts/api-server/src/lib/meeting-complete-journey-browser.behavior.ts",
+        "artifacts/api-server/src/lib/meeting-current-view-browser.behavior.ts",
+        "artifacts/api-server/src/lib/meeting-draft-browser.behavior.ts",
+        "artifacts/api-server/src/lib/meeting-import-browser.behavior.ts",
+        "artifacts/api-server/src/lib/meeting-lens-candidates-browser.behavior.ts",
+        "artifacts/api-server/src/lib/meeting-rfi-candidates-browser.behavior.ts",
+        "artifacts/api-server/src/lib/procore-current-provider-approval.behavior.ts",
+        "artifacts/api-server/src/lib/procore-intake-agent.ts",
+        "artifacts/api-server/src/lib/procore-intake-authenticated-http.behavior.ts",
+        "artifacts/api-server/src/lib/procore-intake-browser.behavior.ts",
+        "artifacts/api-server/src/lib/procore-intake-mcp.behavior.ts",
+        "artifacts/api-server/src/lib/procore-intake-mcp.ts",
+        "artifacts/api-server/src/lib/procore-intake-state.behavior.ts",
+        "artifacts/api-server/src/lib/procore-intake-state.ts",
+        "artifacts/api-server/src/lib/provider-governance.ts",
+        "artifacts/api-server/src/routes/agents.ts",
+        "artifacts/api-server/src/routes/connections.ts",
+        "artifacts/bimlog/src/pages/project/IntegrationsTab.tsx",
+        "artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "lib/db/src/schema/company-procore-intake.ts",
+        "lib/db/src/schema/index.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a00fd12d2c49f159f2429660de496ed01f65ecf1ecf516d66deab50ca1331b76"
     }
   ]
 }

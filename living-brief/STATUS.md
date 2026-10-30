@@ -1,4 +1,18 @@
+## 2026-10-30 — P176-P180 accepted source and Procore aggregate release candidate
+
+P176-P180 are individually accepted, regression-tested and pushed on the canonical parity branch; all five focused commits are preserved. Thirty frozen buildsP181-P210 remain. This source status is not deployment acceptance: production still reported3fe3c429/v1.05.N18-P37 at the latest observation. Ten is the current Blocks35/36 batch, not a reconciled historical unpublished total.
+
+The owner-authorized active BIMTECH CORP31 commercial entitlement and internal Procore approval cover current/future verified members independently of paid packages, including Ruben20, while project roles, company38 isolation and Procore account permissions remain intact. The normal aggregate merge preserves provider corrections and every accepted capability. Actual local authenticated catalog/status/MCP/state tests cover current approval, revocation, credential exclusion and future company grants. The built intake questionnaire now verifies restore/save/reopen, exact-version selection, controlled agent/proposal invocation and recoverable negative states. An original failed-restore blank overwrite and nonstandard MCP wire fields were corrected and retested. These are controlled local results; live provider/configuration, exact deployment, three authenticated rounds and the later confirmed governed import/receipt/record links remain open. No all-program, published or full Procore-flow completion is claimed.
+
 # STATUS.md - Current Accepted Platform State
+
+## 2026-10-30 — BIMTECH company 31 access correction candidate
+
+The owner-approved commercial entitlement and internal Procore approval are implemented as append-only, company-scoped records for active BIMTECH CORP company 31, committed at `b28766ef4a04998cf7c6ceea05429f50d4c6d49d`. Current and future verified users derive the commercial grant from current company membership; project membership, business roles, tenant isolation, user OAuth consent, and Procore source permissions remain separate. The generated platform inventory correction is committed at `5fae8db29840738365ce5ecfef87a6ce1ea1ccae`. API typechecking, focused company-31 behavior checks, and the MCP browse/proposal fixture pass. The guided intake remains proposal-only: exact-version confirmation, governed import, durable receipt, and authenticated acceptance are not complete. Procore application credentials were absent in the checked Replit secret environments, and no publish or live-access claim is made.
+
+## 2026-10-30 — Procore durable versioned proposal candidate
+
+Implementation commits `12c5eb832be9e1f4280d0f8ccd8191f02c5cbf22`, `484d15cbf4a85ea6935a6428670053121f2e2314`, and `42502df44d6b2374fde5d3456c266cef6d8bc5d7` add durable user/company/project-scoped intake, exact-version proposal checks, and authenticated HTTP acceptance fixtures. API and web typechecks, company31 authority checks, MCP fixtures, and 15 authenticated HTTP assertions pass against a disposable local PostgreSQL database. The HTTP suite uses the real auth middleware, current membership lookup, project-member guard, state store, and MCP route; provider versions are controlled fixtures. It verifies save/read across fresh tokens and server reentry, cross-user/company/project isolation, inactive/retired denial, malformed/changed/unavailable versions, and approval revocation without restart. It does not establish signed-in browser acceptance or live Procore OAuth/source permissions. The production build guard was run and correctly refused this unpushed source: no remote commit matches the source tree. No guard bypass, push, publish, import, or receipt claim is made.
 
 ## 2026-10-29 — Capability parity Block 08, P036–P040 prepublication candidate
 

@@ -11,6 +11,7 @@ export interface CloudItem {
   ref: string;
   mimeType?: string;
   size?: number;
+  versions?: Array<{ id: string; label: string; createdAt: string | null }>;
 }
 
 export interface BrowseResult { items: CloudItem[] }
@@ -142,8 +143,32 @@ async function procoreBrowse(token: string, ref: string): Promise<BrowseResult> 
   const folderParam = kind === "folder" ? `&folder_id=${b}` : "";
   const d = await j(`https://api.procore.com/rest/v1.0/folders?project_id=${projectId}${folderParam}`, token) as any;
   const folders = (d.folders || []).map((f: any) => ({ name: f.name, type: "folder" as const, ref: `folder:${projectId}:${f.id}` }));
-  const files = (d.files || []).map((f: any) => ({ name: f.name, type: "file" as const, ref: `file:${projectId}:${f.id}` }));
+   const files = await Promise.all((d.files || []).slice(0, 100).map(async (f: any) => {
+     const details = f.file_versions ? f : await j(`https://api.procore.com/rest/v1.0/files/${f.id}?project_id=${projectId}`, token);
+     return { name: f.name, type: "file" as const, ref: `file:${projectId}:${f.id}`, versions: parseProcoreFileVersions(details) };
+   }));
   return { items: [...folders, ...files] };
+}
+export function parseProcoreFileVersions(file: unknown): Array<{ id: string; label: string; createdAt: string | null }> {
+  const raw=(file as any)?.file_versions;
+  if(!Array.isArray(raw))return [];
+  return raw.flatMap((v:any)=>{
+    const id=v?.id==null?"":String(v.id);
+    if(!id)return [];
+    const label=String(v.version_number??v.version??v.name??id);
+    const date=typeof v.created_at==="string"?v.created_at:typeof v.updated_at==="string"?v.updated_at:null;
+    return [{id,label,createdAt:date}];
+  });
+}
+export async function getProcoreFileVersions(userId:number,ref:string) {
+  const match=/^file:([^:]+):([^:]+)$/.exec(ref);
+  if(!match)throw new Error("PROCORE_FILE_REF_INVALID");
+  const [,projectId,fileId]=match;
+  const token=await getValidAccessToken(userId,"procore");
+  const file=await j(`https://api.procore.com/rest/v1.0/files/${encodeURIComponent(fileId)}?project_id=${encodeURIComponent(projectId)}`,token);
+  const versions=parseProcoreFileVersions(file);
+  if(!versions.length)throw new Error("PROCORE_FILE_VERSIONS_UNAVAILABLE");
+  return {projectRef:`project:${file.project_id??projectId}`,fileId:String(file.id??fileId),name:String(file.name??""),mimeType:typeof file.mime_type==="string"?file.mime_type:null,versions};
 }
 async function procoreDownload(token: string, ref: string): Promise<DownloadResult> {
   const [, projectId, fileId] = ref.split(":");

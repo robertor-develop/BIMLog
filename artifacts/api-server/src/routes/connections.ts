@@ -12,6 +12,7 @@ import { getAiUsageSummary, sendAiUsageError } from "../lib/ai-usage";
 import {
   customerProviderCatalog,
   isProviderOperationAllowed,
+  isProviderOperationCurrentlyAllowed,
 } from "../lib/provider-governance";
 
 const router: Router = Router();
@@ -52,23 +53,28 @@ router.get("/me/connections", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/me/provider-catalog", authMiddleware, (_req, res) => {
-  res.json({
-    providers: customerProviderCatalog(_req.user!.companyId, providerConfigured),
-  });
+router.get("/me/provider-catalog", authMiddleware, async (_req, res) => {
+  const providers=customerProviderCatalog(_req.user!.companyId, providerConfigured);
+  const procore=providers.find((provider)=>provider.key==="procore");
+  if(procore){
+    const approved=await isProviderOperationCurrentlyAllowed("procore",_req.user!.companyId,"catalog");
+    procore.permissionState=approved?"approved":"approval_required";
+    procore.availability=approved?(procore.configured?"available":"setup_required"):"review_required";
+  }
+  res.set("Cache-Control","private, no-store, max-age=0").json({providers});
 });
 
 router.get("/projects/:projectId/connections/procore/status",authMiddleware,requireProjectMember(),async(req,res)=>{
   res.set("Cache-Control","private, no-store, max-age=0");
   try {
   const [connection]=await db.select().from(userConnectionsTable).where(and(eq(userConnectionsTable.userId,req.user!.userId),eq(userConnectionsTable.provider,"procore"))).limit(1);
-  const catalog=customerProviderCatalog(req.user!.companyId,providerConfigured).find(item=>item.key==="procore");
-  res.set("X-BIMLog-Project-Id",String(Number(req.params.projectId))).json({provider:"procore",configured:providerConfigured("procore"),approved:isProviderOperationAllowed("procore",req.user!.companyId,"catalog"),connection:connection?toSafe(connection):null,availability:catalog?.availability??"review_required",credentialsExposed:false});
+  const approved=await isProviderOperationCurrentlyAllowed("procore",req.user!.companyId,"catalog");
+  res.set("X-BIMLog-Project-Id",String(Number(req.params.projectId))).json({provider:"procore",configured:providerConfigured("procore"),approved,connection:connection?toSafe(connection):null,availability:approved?(providerConfigured("procore")?"available":"setup_required"):"review_required",credentialsExposed:false});
   } catch {res.status(503).json({code:"PROCORE_STATUS_UNAVAILABLE",retryable:true,credentialsExposed:false});}
 });
 
 router.post("/projects/:projectId/connections/procore/discovery/preview",authMiddleware,requireProjectMember(),async(req,res)=>{
-  if(!isProviderOperationAllowed("procore",req.user!.companyId,"browse")){res.status(403).json({code:"PROVIDER_NOT_APPROVED"});return;}
+  if(!await isProviderOperationCurrentlyAllowed("procore",req.user!.companyId,"browse")){res.status(403).json({code:"PROVIDER_NOT_APPROVED"});return;}
   if(req.body?.cancelled===true){res.json({state:"cancelled",pagesRead:0,recordsFound:0,canonicalMutation:false});return;}
   try{
     const result=await browseCloud(req.user!.userId,"procore",String(req.body?.ref||""),String(req.body?.query||""));

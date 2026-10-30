@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/auth";
 import { logClientError } from "@/lib/client-log";
 import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { FolderWizardImportPanel } from "./FolderWizardImportPanel";
+import { ProcoreIntakePanel } from "./ProcoreIntakePanel";
 import { connectorReadinessCopy, type ConnectorReadiness } from "../settings-experience";
 import { providerConnectionTruth } from "@/lib/provider-connection-truth";
 
@@ -224,6 +225,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
       </section>
 
       <FolderWizardImportPanel projectId={projectId} token={token} lang={lang} />
+      {connected("procore") && <ProcoreIntakePanel projectId={projectId} lang={lang} />}
 
       <div aria-live="polite" aria-atomic="true">
         {loading ? (
