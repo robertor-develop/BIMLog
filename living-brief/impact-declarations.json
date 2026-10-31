@@ -81039,7 +81039,7 @@
     {
       "taskId": "block36-owner-account-procore-oauth-handoff-correction-20261031",
       "reviewedThroughCommit": "52254bbd175531127742eb9c972737a31ba4f129",
-      "reviewedAt": "2026-10-31T07:44:04.5401037Z",
+      "reviewedAt": "2026-10-31T07:47:38.5763387Z",
       "status": "candidate",
       "captureTiming": "pre_release_reconciliation",
       "capabilityPreflight": {
@@ -81143,7 +81143,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "cd7afd23ec70e8e72a9cc718ec5c8ff8cc44ca9cd98a64f9fd3da7f9e275dcf3"
+      "reviewedChangeSha256": "ffdb94e8f8ed146c718618b63166b62446293354dd199f1c503be975eddfad14"
     }
   ]
 }

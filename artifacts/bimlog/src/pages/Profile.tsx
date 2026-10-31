@@ -274,7 +274,7 @@ export function Profile() {
   const [, navigate] = useLocation();
   const [emailReturnTarget] = useState(() => safeEmailReturnTarget(new URLSearchParams(window.location.search).get("returnTo")));
   const [profileArea, setProfileArea] = useState<ProfileArea>(() =>
-    ["email-sending", "connections"].includes(new URLSearchParams(window.location.search).get("section") || "") || new URLSearchParams(window.location.search).has("connected") || new URLSearchParams(window.location.search).has("connect_error") ? "connections" : "personal",
+    new URLSearchParams(window.location.search).get("section") === "connections" || new URLSearchParams(window.location.search).has("connected") || new URLSearchParams(window.location.search).has("connect_error") ? "connections" : new URLSearchParams(window.location.search).get("section") === "email-sending" ? "connections" : "personal",
   );
 
   const authHeaders = {
