@@ -4784,7 +4784,7 @@ export function MeetingsTab({
               <thead>
                 <tr>
                   {[
-                    t("Trade", "Trade"),
+                    t("Trade", "Oficio"),
                     t("Company", "Empresa"),
                     t("Name", "Nombre"),
                     t("Role", "Rol"),
@@ -4825,7 +4825,7 @@ export function MeetingsTab({
                     <Fragment key={i}>
                       <tr style={{ borderBottom: "1px solid #F3F4F6" }}>
                         <MeetingParticipantField
-                          label={t("Trade", "Trade")}
+                          label={t("Trade", "Oficio")}
                           value={a.trade}
                           onChange={(value) => {
                             const arr = [...attendees];
@@ -5738,12 +5738,12 @@ export function MeetingsTab({
                     {[
                       t("Floor/Area", "Piso/Área"),
                       t("Description", "Descripción"),
-                      "PLUMBING",
-                      "HVAC",
-                      "FIRE PROT.",
-                      "ELECTRICAL",
-                      "OTHER",
-                      "COORDINATOR",
+                      t("Plumbing", "Plomería"),
+                      t("HVAC", "Climatización"),
+                      t("Fire protection", "Protección contra incendios"),
+                      t("Electrical", "Electricidad"),
+                      t("Other", "Otro"),
+                      t("Coordinator", "Coordinador"),
                       t("Deadline", "Fecha Límite"),
                       "",
                     ].map((h) => (
