@@ -81035,6 +81035,115 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "7ff7515a2f76ea2d9b545daa7790496e8c26e0a19162c956cac823956996440b"
+    },
+    {
+      "taskId": "block36-owner-account-procore-oauth-handoff-correction-20261031",
+      "reviewedThroughCommit": "52254bbd175531127742eb9c972737a31ba4f129",
+      "reviewedAt": "2026-10-31T07:44:04.5401037Z",
+      "status": "candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "capabilityPreflight": {
+        "agentCapable": [
+          "Preserve and inspect canonical/incoming Git histories, resolve authorized conflicts, run isolated fixtures, reconcile source-derived authority evidence and perform approved exact-source release steps"
+        ],
+        "checkedBeforeExecution": true,
+        "operatorOnly": [
+          "Normal external provider MFA or account-owner consent only if actually required; Google/email owner-presence work remains deferred"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "summary": "Actual authorize route denied newly approved company until restart; fresh current grant checks and callback rechecks correct stale approvals/revocations without relaxing permissions. Signed local-only return prevents open redirects; no actual provider acceptance inferred.",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserve all capabilities, tenancy, OAuth identity, project permissions, Native boundaries and release cadence. Record the owner-account dead end, proven current-approval defect, restricted signed return and controlled tests with unfinished actual Procore live acceptance."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Preserve all capabilities, tenancy, OAuth identity, project permissions, Native boundaries and release cadence. Record the owner-account dead end, proven current-approval defect, restricted signed return and controlled tests with unfinished actual Procore live acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Preserve all capabilities, tenancy, OAuth identity, project permissions, Native boundaries and release cadence. Record the owner-account dead end, proven current-approval defect, restricted signed return and controlled tests with unfinished actual Procore live acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserve all capabilities, tenancy, OAuth identity, project permissions, Native boundaries and release cadence. Record the owner-account dead end, proven current-approval defect, restricted signed return and controlled tests with unfinished actual Procore live acceptance."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Audited existing-route OAuth entry/return and current approval correction; no module, route, schema, stored business value or backend/frontend capability inventory topology change. Generated PLATFORM inventory remains unchanged; detailed protocol and live failure are recorded in CLAUDE/QUALITY/STATUS/OPEN_LOOP/AUDIT."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserve all capabilities, tenancy, OAuth identity, project permissions, Native boundaries and release cadence. Record the owner-account dead end, proven current-approval defect, restricted signed return and controlled tests with unfinished actual Procore live acceptance."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserve all capabilities, tenancy, OAuth identity, project permissions, Native boundaries and release cadence. Record the owner-account dead end, proven current-approval defect, restricted signed return and controlled tests with unfinished actual Procore live acceptance."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserve all capabilities, tenancy, OAuth identity, project permissions, Native boundaries and release cadence. Record the owner-account dead end, proven current-approval defect, restricted signed return and controlled tests with unfinished actual Procore live acceptance."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Preserve all capabilities, tenancy, OAuth identity, project permissions, Native boundaries and release cadence. Record the owner-account dead end, proven current-approval defect, restricted signed return and controlled tests with unfinished actual Procore live acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Preserve all capabilities, tenancy, OAuth identity, project permissions, Native boundaries and release cadence. Record the owner-account dead end, proven current-approval defect, restricted signed return and controlled tests with unfinished actual Procore live acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Preserve all capabilities, tenancy, OAuth identity, project permissions, Native boundaries and release cadence. Record the owner-account dead end, proven current-approval defect, restricted signed return and controlled tests with unfinished actual Procore live acceptance."
+        }
+      ],
+      "reason": "Owner-authorized complete Procore intake correction: secure exact-version source retrieval, explicit governed document confirmation, atomic receipt/replay/storage compensation, real Documents workflow and operable recovery UI. No new schema; external provider/authenticated acceptance remains pending.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/fixture-browser-process-cleanup.ts",
+        "artifacts/api-server/src/lib/procore-connection-return.ts",
+        "artifacts/api-server/src/lib/procore-current-oauth-approval-http.behavior.ts",
+        "artifacts/api-server/src/lib/procore-intake-browser.behavior.ts",
+        "artifacts/api-server/src/middlewares/auth.ts",
+        "artifacts/api-server/src/routes/connections.ts",
+        "artifacts/bimlog/src/pages/Profile.tsx",
+        "artifacts/bimlog/src/pages/project/IntegrationsTab.tsx",
+        "artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "cd7afd23ec70e8e72a9cc718ec5c8ff8cc44ca9cd98a64f9fd3da7f9e275dcf3"
     }
   ]
 }

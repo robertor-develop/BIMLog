@@ -1,3 +1,4 @@
+import { safeProcoreIntakeReturn } from '../lib/procore-connection-return';
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { db } from "@workspace/db";
@@ -159,12 +160,13 @@ export function verifyBriefAccessToken(token: string): { userId: number; scope: 
 // Short-lived signed state for OAuth connect flows. Carries the user identity
 // through the provider redirect (the callback is a browser hop with no JWT
 // header) so the returned tokens are stored against the right user.
-export function signOAuthState(userId: number, provider: string): string {
-  return jwt.sign({ userId, provider, scope: "oauth_state" }, JWT_SECRET, { expiresIn: "15m" });
+export function signOAuthState(userId: number, provider: string, returnTo?: string): string {
+  if (returnTo && (provider !== "procore" || !safeProcoreIntakeReturn(returnTo))) throw new Error("Invalid Procore return context");
+  return jwt.sign({ userId, provider, scope: "oauth_state", ...(returnTo ? { returnTo } : {}) }, JWT_SECRET, { expiresIn: "15m" });
 }
 
-export function verifyOAuthState(token: string): { userId: number; provider: string; scope: string } {
-  return jwt.verify(token, JWT_SECRET) as { userId: number; provider: string; scope: string };
+export function verifyOAuthState(token: string): { userId: number; provider: string; scope: string; returnTo?: string } {
+  return jwt.verify(token, JWT_SECRET) as { userId: number; provider: string; scope: string; returnTo?: string };
 }
 
 export async function isSuperAdminMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {

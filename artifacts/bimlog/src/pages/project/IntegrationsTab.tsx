@@ -157,7 +157,7 @@ export function IntegrationsTab({ projectId,canWrite=false }: IntegrationsTabPro
       return;
     }
     if (provider.oauthParam && provider.availability === "available") {
-      navigate("/profile");
+      navigate(provider.key === "procore" ? `/profile?section=connections&returnTo=${encodeURIComponent(`/projects/${projectId}/integrations#procore-guided-intake`)}` : "/profile?section=connections");
       return;
     }
     navigate("/contact");
@@ -316,7 +316,7 @@ export function IntegrationsTab({ projectId,canWrite=false }: IntegrationsTabPro
                   {connectionDetail?.lastError&&<div role="alert" style={{color:"#991B1B"}}>{connectionDetail.lastError}</div>}
                   <div style={{display:"flex",flexWrap:"wrap",gap:7}}>
                     <button type="button" disabled={!isConnected||procoreBusy} onClick={()=>void previewProcoreDiscovery()}>{procoreBusy?tr("Discovering…","Descubriendo…"):tr("Preview read-only discovery","Vista previa de descubrimiento")}</button>
-                    <button type="button" onClick={()=>navigate("/profile")}>{isConnected?tr("Reconnect","Reconectar"):tr("Connect Procore","Conectar Procore")}</button>
+                    <button type="button" onClick={()=>navigate(`/profile?section=connections&returnTo=${encodeURIComponent(`/projects/${projectId}/integrations#procore-guided-intake`)}`)}>{isConnected?tr("Reconnect","Reconectar"):tr("Connect Procore","Conectar Procore")}</button>
                   </div>
                   {procoreError&&<div role="alert" style={{color:"#991B1B"}}>{tr("Discovery unavailable: ","Descubrimiento no disponible: ")}{procoreError}. {tr("No records were imported.","No se importó ningún registro.")}</div>}
                   {procorePreview&&<div role="status" style={{padding:9,borderRadius:7,background:"#EFF6FF",color:"#1E40AF"}}>{tr(`Preview ready: ${procorePreview.recordsFound} records across ${procorePreview.pagesRead} page(s). No records were imported. Continue with guided intake to review and confirm documents.`,`Vista previa lista: ${procorePreview.recordsFound} registros en ${procorePreview.pagesRead} página(s). No se importaron registros. Continúe con la incorporación guiada para revisar y confirmar documentos.`)}</div>}

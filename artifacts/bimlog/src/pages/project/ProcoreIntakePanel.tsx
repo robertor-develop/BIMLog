@@ -12,6 +12,12 @@ export function ProcoreIntakePanel({ projectId, lang, canWrite=false }: { projec
   const tr = (en: string, spanish: string) => es ? spanish : en;
   const { token, user } = useAuthStore();
   const storageKey = `bimlog-procore-intake:${user?.id ?? "unknown"}:${user?.companyId ?? "unknown"}:${projectId}`;
+  useEffect(() => {
+    if (window.location.hash !== "#procore-guided-intake") return;
+    const panel = document.getElementById("procore-guided-intake");
+    panel?.scrollIntoView({ block: "start" });
+    panel?.focus({ preventScroll: true });
+  }, [projectId]);
   const [open, setOpen] = useState(true);
   const [goal, setGoal] = useState("");
   const [needed, setNeeded] = useState("");
@@ -168,7 +174,7 @@ export function ProcoreIntakePanel({ projectId, lang, canWrite=false }: { projec
     }catch(cause){if(!controller.signal.aborted&&ticket===epoch.current)setError(cause instanceof Error?cause.message:"PROCORE_PROPOSAL_FAILED");}finally{if(ticket===epoch.current){proposalLock.current=false;setProposalBusy(false);}}
   }
 
-  return <section id="procore-guided-intake" aria-label={tr("Procore intake agent", "Agente de incorporación de Procore")} style={{ margin: "18px 0", padding: 16, border: "1px solid hsl(var(--border))", borderRadius: 12, background: "hsl(var(--card))" }}>
+  return <section id="procore-guided-intake" tabIndex={-1} aria-label={tr("Procore intake agent", "Agente de incorporación de Procore")} style={{ scrollMarginTop: 80, margin: "18px 0", padding: 16, border: "1px solid hsl(var(--border))", borderRadius: 12, background: "hsl(var(--card))" }}>
     <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
       <div>
         <h2 style={{ margin: 0, fontSize: 17 }}>{tr("Procore intake agent", "Agente de incorporación de Procore")}</h2>

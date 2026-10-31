@@ -1302,8 +1302,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/post120-build168-meeting-view-scope.behavior.ts
 - artifacts/api-server/src/lib/post120-build169-meeting-concurrency.behavior.ts
 - artifacts/api-server/src/lib/post120-build208-authorization-negative-matrix.behavior.ts
+- artifacts/api-server/src/lib/procore-connection-return.ts
 - artifacts/api-server/src/lib/procore-coordination-return.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.ts
+- artifacts/api-server/src/lib/procore-current-oauth-approval-http.behavior.ts
 - artifacts/api-server/src/lib/procore-current-provider-approval.behavior.ts
 - artifacts/api-server/src/lib/procore-document-import-http.behavior.ts
 - artifacts/api-server/src/lib/procore-document-real-files-route.behavior.ts

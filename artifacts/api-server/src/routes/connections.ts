@@ -1,3 +1,4 @@
+import { safeProcoreIntakeReturn } from '../lib/procore-connection-return';
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { userConnectionsTable, usersTable } from "@workspace/db/schema";
@@ -42,12 +43,12 @@ router.get("/me/connections", authMiddleware, async (req, res) => {
   try {
     const rows = await db.select().from(userConnectionsTable)
       .where(eq(userConnectionsTable.userId, req.user!.userId));
-    res.json(rows
-      .filter((row) => {
-        const key = providerFromParam(row.provider);
-        return !key || isProviderOperationAllowed(key, req.user!.companyId, "catalog");
-      })
-      .map(toSafe));
+    const permitted = [];
+    for (const row of rows) {
+      const key = providerFromParam(row.provider);
+      if (!key || await isProviderOperationCurrentlyAllowed(key, req.user!.companyId, "catalog")) permitted.push(toSafe(row));
+    }
+    res.json(permitted);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
@@ -173,11 +174,11 @@ router.put("/me/connections/anthropic", authMiddleware, async (req, res) => {
 // every user connects their OWN account through the flow below.
 
 // Step 1: authenticated user asks for the consent URL to open.
-router.get("/me/connections/:provider/authorize", authMiddleware, (req, res) => {
+router.get("/me/connections/:provider/authorize", authMiddleware, async (req, res) => {
   const providerParam = String(req.params.provider);
   const key = providerFromParam(providerParam);
   if (!key) { res.status(404).json({ error: "Unknown provider" }); return; }
-  if (!isProviderOperationAllowed(key, req.user!.companyId, "authorize")) {
+  if (!await isProviderOperationCurrentlyAllowed(key, req.user!.companyId, "authorize")) {
     res.status(403).json({
       error: "This connector is not approved for this company.",
       errorEs: "Este conector no está aprobado para esta empresa.",
@@ -189,7 +190,9 @@ router.get("/me/connections/:provider/authorize", authMiddleware, (req, res) => 
     res.status(503).json({ error: `${OAUTH_PROVIDERS[key].label} is not enabled on this BIMLog yet — the platform app is not configured.`, code: "PROVIDER_NOT_CONFIGURED" });
     return;
   }
-  const state = signOAuthState(req.user!.userId, key);
+  const returnTo = req.query.returnTo === undefined ? null : safeProcoreIntakeReturn(req.query.returnTo);
+  if (req.query.returnTo !== undefined && (key !== "procore" || !returnTo)) { res.status(400).json({ code: "INVALID_PROCORE_RETURN_CONTEXT" }); return; }
+  const state = signOAuthState(req.user!.userId, key, returnTo ?? undefined);
   res.json({ url: buildAuthorizeUrl(key, state, redirectUriFor(providerParam)) });
 });
 
@@ -205,17 +208,22 @@ router.get("/connections/:provider/callback", async (req, res) => {
     const code = String(req.query.code || "");
     const state = String(req.query.state || "");
     if (!code || !state) return fail("Missing authorization code");
-    let payload: { userId: number; provider: string; scope: string };
+    let payload: { userId: number; provider: string; scope: string; returnTo?: string };
     try { payload = verifyOAuthState(state); } catch { return fail("Invalid or expired connect link"); }
     if (payload.scope !== "oauth_state" || payload.provider !== key) return fail("Invalid connect state");
     const [user] = await db.select({ companyId: usersTable.companyId }).from(usersTable)
       .where(eq(usersTable.id, payload.userId)).limit(1);
-    if (!user || !isProviderOperationAllowed(key, user.companyId, "callback")) {
+    if (!user || !await isProviderOperationCurrentlyAllowed(key, user.companyId, "callback")) {
       return fail("This connector is not approved for this company");
     }
     if (!providerConfigured(key)) return fail("Provider not configured");
 
+    const callbackStillAllowed = async () => {
+      const [currentUser] = await db.select({ companyId: usersTable.companyId }).from(usersTable).where(eq(usersTable.id, payload.userId)).limit(1);
+      return !!currentUser && currentUser.companyId === user.companyId && await isProviderOperationCurrentlyAllowed(key, currentUser.companyId, "callback");
+    };
     const tok = await exchangeCodeForTokens(key, code, redirectUriFor(providerParam));
+    if (!await callbackStillAllowed()) return fail("This connector is not approved for this company.");
     if (!tok.access_token) return fail("No access token returned");
 
     // Refresh token often comes back only on first consent — keep the old one if absent.
@@ -235,6 +243,7 @@ router.get("/connections/:provider/callback", async (req, res) => {
       refreshToken,
       expiresAt: tok.expires_in ? new Date(now.getTime() + tok.expires_in * 1000).toISOString() : null,
     };
+    if (!await callbackStillAllowed()) return fail("This connector is not approved for this company.");
     await db.insert(userConnectionsTable).values({
       userId: payload.userId, provider: key, kind: cfg.kind, status: "connected",
       credentials, accountLabel, updatedAt: now,
@@ -243,7 +252,8 @@ router.get("/connections/:provider/callback", async (req, res) => {
       set: { credentials, accountLabel, status: "connected", lastError: null, updatedAt: now },
     });
 
-    res.redirect(`${appUrl}/profile?connected=${providerParam}`);
+    const intakeReturn = key === "procore" ? safeProcoreIntakeReturn(payload.returnTo) : null;
+    res.redirect(intakeReturn ? `${appUrl}${intakeReturn}` : `${appUrl}/profile?connected=${providerParam}`);
   } catch (err) {
     return fail(err instanceof Error ? err.message : "Connect failed");
   }
@@ -280,7 +290,7 @@ router.get("/me/connections/google-drive/files", authMiddleware, async (req, res
 router.get("/me/connections/:provider/browse", authMiddleware, async (req, res) => {
   const key = providerFromParam(String(req.params.provider));
   if (!key) { res.status(404).json({ error: "Unknown provider" }); return; }
-  if (!isProviderOperationAllowed(key, req.user!.companyId, "browse")) {
+  if (!await isProviderOperationCurrentlyAllowed(key, req.user!.companyId, "browse")) {
     res.status(403).json({
       error: "This file source is not approved for this company.",
       errorEs: "Esta fuente de archivos no está aprobada para esta empresa.",
@@ -308,7 +318,7 @@ router.get("/me/connections/:provider/browse", authMiddleware, async (req, res) 
 router.delete("/me/connections/:provider", authMiddleware, async (req, res) => {
   try {
     const key = providerFromParam(String(req.params.provider));
-    if (key && !isProviderOperationAllowed(key, req.user!.companyId, "disconnect")) {
+    if (key && !await isProviderOperationCurrentlyAllowed(key, req.user!.companyId, "disconnect")) {
       res.status(403).json({ error: "Provider not approved", code: "PROVIDER_NOT_APPROVED" });
       return;
     }

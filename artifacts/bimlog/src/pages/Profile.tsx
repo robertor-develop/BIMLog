@@ -150,6 +150,8 @@ interface GovernedProvider {
   label: { en: string; es: string };
   availability: "available" | "setup_required" | "review_required";
   oauthParam: string | null;
+  permissionState?: "approved" | "approval_required";
+  configured?: boolean;
 }
 
 type ProfileArea = "personal" | "work" | "security" | "connections";
@@ -272,7 +274,7 @@ export function Profile() {
   const [, navigate] = useLocation();
   const [emailReturnTarget] = useState(() => safeEmailReturnTarget(new URLSearchParams(window.location.search).get("returnTo")));
   const [profileArea, setProfileArea] = useState<ProfileArea>(() =>
-    new URLSearchParams(window.location.search).get("section") === "email-sending" ? "connections" : "personal",
+    ["email-sending", "connections"].includes(new URLSearchParams(window.location.search).get("section") || "") || new URLSearchParams(window.location.search).has("connected") || new URLSearchParams(window.location.search).has("connect_error") ? "connections" : "personal",
   );
 
   const authHeaders = {
@@ -695,7 +697,9 @@ export function Profile() {
 
   async function connectProvider(providerParam: string) {
     try {
-      const res = await fetch(`${API_BASE}/api/v1/me/connections/${providerParam}/authorize`, { headers: authHeaders });
+      const requestedReturn = new URLSearchParams(window.location.search).get("returnTo");
+      const intakeReturn = providerParam === "procore" && requestedReturn && /^\/projects\/[1-9]\d*\/integrations(?:#procore-guided-intake)?$/.test(requestedReturn) ? requestedReturn : null;
+      const res = await fetch(`${API_BASE}/api/v1/me/connections/${providerParam}/authorize${intakeReturn ? `?returnTo=${encodeURIComponent(intakeReturn)}` : ""}`, { headers: authHeaders });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not start connect");
       window.location.href = data.url; // provider consent screen (self-service)
@@ -1708,34 +1712,43 @@ export function Profile() {
         <SectionCard title={tt("Approved file sources", "Fuentes de archivos aprobadas")} icon={FolderOpen}>
           <p style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 16 }}>
             {tt(
-              "Only connectors approved for your company appear here. Read-only access is used where supported.",
-              "Aquí solo aparecen los conectores aprobados para tu empresa. Se usa acceso de solo lectura cuando es compatible.",
+              "Review company approval, application setup and your personal connection separately. Read-only access is used where supported.",
+              "Revise por separado la aprobación de la empresa, la configuración de la aplicación y su conexión personal. Se usa acceso de solo lectura cuando es compatible.",
             )}
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {governedProviders.map(p => {
               const conn = connections.find(c => c.provider === p.key);
               const label = tt(p.label.en, p.label.es);
+              const approvalMissing = p.permissionState === "approval_required";
+              const procoreSetupMissing = p.key === "procore" && p.configured === false;
               return (
-                <div key={p.key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+                <div key={p.key} style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 12, padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
                   <div style={{ width: 32, height: 32, borderRadius: 6, background: "#E8F0FE", color: "#1A73E8", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 11, flexShrink: 0 }}>{label.slice(0, 2).toUpperCase()}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600, fontSize: 13 }}>{label}</div>
                     <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
                       {conn
                         ? (conn.accountLabel ? `${tt("Connected", "Conectado")} — ${conn.accountLabel}` : tt("Connected", "Conectado"))
+                        : approvalMissing ? tt("Company approval required", "Se requiere aprobación de la empresa")
+                        : procoreSetupMissing ? tt("Procore application setup missing", "Falta configurar la aplicación de Procore")
                         : p.availability === "available"
                           ? tt("Not connected", "No conectado")
                           : tt("Setup required", "Configuración requerida")}
                     </div>
                   </div>
-                  {conn ? (
+                  {p.key === "procore" && <div style={{ flexBasis: "100%", fontSize: 12, lineHeight: 1.5 }}>
+                    {approvalMissing && <p>{tt("This company is not currently approved for Procore. A saved account connection does not replace company approval.", "Esta empresa no está aprobada actualmente para Procore. Una conexión guardada no reemplaza la aprobación de la empresa.")}</p>}
+                    {procoreSetupMissing && <p>{tt("BIMLog's Procore application configuration is missing. The platform operator must restore the existing app configuration before account sign-in can start. Your email password is not required here.", "Falta la configuración de la aplicación Procore de BIMLog. El operador de la plataforma debe restaurar la configuración existente antes de iniciar sesión. Aquí no se requiere su contraseña de correo.")}</p>}
+                    <p>{tt("After connection, return to your project's Integrations to answer the guided questionnaire, select an authorized Procore company, project and document version, review the import and explicitly confirm it. Connecting alone imports no records.", "Después de conectar, vuelva a Integraciones de su proyecto para responder el cuestionario, seleccionar una empresa, proyecto y versión de documento autorizados, revisar la importación y confirmarla expresamente. Conectar no importa registros.")}</p>
+                    {emailReturnTarget && /^\/projects\/[1-9]\d*\/integrations(?:#procore-guided-intake)?$/.test(emailReturnTarget) && <Button type="button" variant="outline" onClick={() => navigate(emailReturnTarget)}>{tt("Return to project intake", "Volver al ingreso del proyecto")}</Button>}
+                  </div>}                  {conn ? (
                     <Button size="sm" variant="outline" onClick={() => disconnectProvider(p.key)} style={{ color: "#DC2626", borderColor: "#FECACA", gap: 6, flexShrink: 0 }}>
                       <Trash2 style={{ width: 12, height: 12 }} />{tt("Disconnect", "Desconectar")}
                     </Button>
                   ) : (
                     <Button size="sm" disabled={p.availability !== "available"} onClick={() => p.oauthParam && connectProvider(p.oauthParam)} style={{ flexShrink: 0 }}>
-                      {p.availability === "available" ? tt("Connect", "Conectar") : tt("Setup required", "Configuración requerida")}
+                      {approvalMissing ? tt("Approval required", "Aprobación requerida") : p.availability === "available" ? tt("Connect", "Conectar") : tt("Setup required", "Configuración requerida")}
                     </Button>
                   )}
                 </div>

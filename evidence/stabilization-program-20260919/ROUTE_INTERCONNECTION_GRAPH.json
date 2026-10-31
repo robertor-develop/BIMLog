@@ -11786,7 +11786,7 @@
     },
     {
       "screen": "artifacts/bimlog/src/pages/Profile.tsx",
-      "apiPath": "${API_BASE}/api/v1/me/connections/${providerParam}/authorize"
+      "apiPath": "${API_BASE}/api/v1/me/connections/${providerParam}/authorize${intakeReturn"
     },
     {
       "screen": "artifacts/bimlog/src/pages/Profile.tsx",
