@@ -81241,6 +81241,104 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "749e758f01254b9459432bb46e8ae07fff28d846903384b3dae8e402766d9f3d"
+    },
+    {
+      "taskId": "block36-procore-agent-selected-review-correction-20261031",
+      "reviewedThroughCommit": "ba7e934bbd08a3b8db71a7f7342d49d1cbe1cd5c",
+      "reviewedAt": "2026-10-31T10:19:58.731106Z",
+      "status": "candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "capabilityPreflight": {
+        "agentCapable": [
+          "Preserve and inspect canonical/incoming Git histories, resolve authorized conflicts, run isolated fixtures, reconcile source-derived authority evidence and perform approved exact-source release steps"
+        ],
+        "checkedBeforeExecution": true,
+        "operatorOnly": [
+          "Normal external provider MFA or account-owner consent only if actually required; Google/email owner-presence work remains deferred"
+        ]
+      },
+      "immediateFindings": {
+        "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+        "disposition": "captured_immediately",
+        "authorities": [
+          "claude",
+          "quality",
+          "status",
+          "open_loop",
+          "audit"
+        ],
+        "summary": "Controlled built-browser proved returned agent proposal lacks operable review handoff. Preserve explicit import confirmation, current selection and exact project/company isolation while exposing review."
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Procore panel handoff only: no new backend route, capability inventory, schema, role, Native or report contract. Existing verified state and import confirmation remain authoritative; record pending provider/native/live gates."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Existing Procore panel handoff only: no new backend route, capability inventory, schema, role, Native or report contract. Existing verified state and import confirmation remain authoritative; record pending provider/native/live gates."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Existing Procore panel handoff only: no new backend route, capability inventory, schema, role, Native or report contract. Existing verified state and import confirmation remain authoritative; record pending provider/native/live gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Procore panel handoff only: no new backend route, capability inventory, schema, role, Native or report contract. Existing verified state and import confirmation remain authoritative; record pending provider/native/live gates."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Procore panel handoff only: no new backend route, capability inventory, schema, role, Native or report contract. Existing verified state and import confirmation remain authoritative; record pending provider/native/live gates."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Procore panel handoff only: no new backend route, capability inventory, schema, role, Native or report contract. Existing verified state and import confirmation remain authoritative; record pending provider/native/live gates."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Procore panel handoff only: no new backend route, capability inventory, schema, role, Native or report contract. Existing verified state and import confirmation remain authoritative; record pending provider/native/live gates."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Procore panel handoff only: no new backend route, capability inventory, schema, role, Native or report contract. Existing verified state and import confirmation remain authoritative; record pending provider/native/live gates."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Existing Procore panel handoff only: no new backend route, capability inventory, schema, role, Native or report contract. Existing verified state and import confirmation remain authoritative; record pending provider/native/live gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Existing Procore panel handoff only: no new backend route, capability inventory, schema, role, Native or report contract. Existing verified state and import confirmation remain authoritative; record pending provider/native/live gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Existing Procore panel handoff only: no new backend route, capability inventory, schema, role, Native or report contract. Existing verified state and import confirmation remain authoritative; record pending provider/native/live gates."
+        }
+      ],
+      "reason": "Repair existing MCP agent proposal to explicit document-review UI handoff without automatic import, new route, schema or authority.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/procore-intake-browser.behavior.ts",
+        "artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "fd36d9fc7c36ede349468490e4165c2378307df165cbe08cd12e84db22d93358"
     }
   ]
 }

@@ -33,6 +33,7 @@ export function ProcoreIntakePanel({ projectId, lang, canWrite=false }: { projec
   const [selected, setSelected] = useState<SelectedItem[]>([]);
   const [versionChoice,setVersionChoice]=useState<Record<string,string>>({});
   const [proposal,setProposal]=useState<string>("");
+  const [agentSources,setAgentSources]=useState<SelectedItem[] | null>(null);
   const [browsing, setBrowsing] = useState(false);
   const [restoredFor, setRestoredFor] = useState<string | null>(null);
   const ready = restoredFor === storageKey;
@@ -50,7 +51,7 @@ export function ProcoreIntakePanel({ projectId, lang, canWrite=false }: { projec
   useEffect(()=>{
     const ticket=++epoch.current,controller=new AbortController();scopeAbort.current=controller;
     activeTurn.current?.abort();activeBrowse.current?.abort();activeProposal.current?.abort();turnLock.current=false;browseLock.current=false;proposalLock.current=false;
-    setRestoredFor(null);setRestoreError('');setSaveError('');setError('');setSaveStatus('');setConversation([]);setGoal('');setNeeded('');setCompany('');setSourceProject('');setDestination(String(projectId));setSelected([]);setItems([]);setRef('');setVersionChoice({});setProposal('');setBusy(false);setBrowsing(false);setProposalBusy(false);setQuestion('');baseline.current='';setLocalRecovery(null);
+    setRestoredFor(null);setRestoreError('');setSaveError('');setError('');setSaveStatus('');setConversation([]);setGoal('');setNeeded('');setCompany('');setSourceProject('');setDestination(String(projectId));setSelected([]);setItems([]);setRef('');setVersionChoice({});setProposal('');setAgentSources(null);setBusy(false);setBrowsing(false);setProposalBusy(false);setQuestion('');baseline.current='';setLocalRecovery(null);
     try{const saved=JSON.parse(localStorage.getItem(storageKey)||'null');if(saved&&typeof saved.goal==='string'&&typeof saved.needed==='string'&&Array.isArray(saved.messages)&&saved.messages.every((m:any)=>m&&['user','assistant'].includes(m.role)&&typeof m.content==='string')&&Array.isArray(saved.selected)&&saved.selected.every((v:any)=>v&&['ref','name','versionId','versionLabel'].every(k=>typeof v[k]==='string'&&v[k].length>0)))setLocalRecovery(saved);}catch{/* Invalid local backup is never posted. */}
     if(!token)return;
     void fetch(`/api/v1/projects/${projectId}/intake-agent/state`,{headers:{Authorization:`Bearer ${token}`},signal:controller.signal}).then(verifyResponse).then(value=>{
@@ -90,7 +91,7 @@ export function ProcoreIntakePanel({ projectId, lang, canWrite=false }: { projec
   async function send(text = question) {
     if (!token || !ready || !text.trim() || turnLock.current) return;
     const ticket=epoch.current;turnLock.current=true;
-    setBusy(true); setError(""); setQuestion("");
+    setBusy(true); setError(""); setQuestion(""); setAgentSources(null);
     const controller = new AbortController();
     activeTurn.current = controller;
     const prior = conversation;
@@ -117,6 +118,13 @@ export function ProcoreIntakePanel({ projectId, lang, canWrite=false }: { projec
       if (!response.ok) throw new Error(data.code || "INTAKE_AGENT_FAILED");
       const answer = typeof data.answer === "string" && data.answer ? data.answer : tr("The agent did not return a response. Try again.", "El agente no respondió. Inténtelo de nuevo.");
       save([...next, { role: "assistant", content: answer }]);
+      const plans = Array.isArray(data.toolCalls) ? data.toolCalls.filter((call:any)=>call?.name==='bimlog_propose_intake_plan') : [];
+      if(plans.length){
+        const plan=plans[plans.length-1].result;
+        const bounded=(v:unknown)=>typeof v==='string'&&v.length>0&&v.length<=500;
+        if(!plan||plan.state!=='proposal_only'||plan.projectId!==projectId||plan.destination!==String(projectId)||plan.versionPinned!==true||plan.confirmationRequired!==true||plan.canonicalMutation!==false||!Array.isArray(plan.sources)||plan.sources.length<1||plan.sources.length>100||!plan.sources.every((v:any)=>v&&['ref','fileId','projectRef','name','versionId','versionLabel'].every(k=>bounded(v[k]))&&/^file:[^:]+:[^:]+$/.test(v.ref)&&typeof v.sourceCompanyId==='string'&&/^[1-9][0-9]*$/.test(v.sourceCompanyId))||new Set(plan.sources.map((v:any)=>v.ref)).size!==plan.sources.length)throw Error('INTAKE_AGENT_PROPOSAL_INVALID');
+        setAgentSources(plan.sources.map((v:any)=>({type:'file' as const,ref:v.ref,name:v.name,versionId:v.versionId,versionLabel:v.versionLabel,sourceCompanyId:v.sourceCompanyId,mimeType:typeof v.mimeType==='string'?v.mimeType:null})));
+      }
     } catch (cause) {
       if (!controller.signal.aborted&&ticket===epoch.current) setError(cause instanceof Error ? cause.message : tr("Could not reach the intake agent.", "No se pudo conectar con el agente de incorporación."));
     } finally { if (activeTurn.current === controller) activeTurn.current = null; if(ticket===epoch.current){turnLock.current=false;setBusy(false);} }
@@ -218,6 +226,12 @@ export function ProcoreIntakePanel({ projectId, lang, canWrite=false }: { projec
         </div>}
         {proposal&&<pre role="status" style={{whiteSpace:"pre-wrap",overflowWrap:"anywhere"}}>{proposal}</pre>}
       </div>
+      {agentSources&&<div role="status" style={{padding:12,border:"1px solid hsl(var(--border))",borderRadius:9,overflowWrap:"anywhere"}}>
+        <strong>{tr("Agent-proposed sources — not imported", "Fuentes propuestas por el agente — sin importar")}</strong>
+        <ul>{agentSources.map(v=><li key={v.ref}>{v.name} — {tr("version","versión")} {v.versionLabel} ({v.versionId})</li>)}</ul>
+        <p>{tr("Review these exact versions in the existing document panel. Your current selection stays unchanged until you choose this action; saving a document still requires explicit confirmation.","Revise estas versiones exactas en el panel de documentos. Su selección no cambia hasta elegir esta acción; guardar un documento aún requiere confirmación explícita.")}</p>
+        <button type="button" disabled={!ready||busy||proposalBusy} onClick={()=>{setSelected(agentSources);setAgentSources(null);}}>{tr("Review agent-selected sources","Revisar fuentes elegidas por el agente")}</button>
+      </div>}
       <ProcoreDocumentImportReview projectId={projectId} lang={lang} sources={selected} sourceCompanyId={company.replace(/^company:/,"")} canWrite={canWrite}/>
       <div aria-live="polite" style={{ maxHeight: 230, overflowY: "auto", display: "grid", gap: 8 }}>
         {conversation.map((message, index) => <div key={index} style={{ justifySelf: message.role === "user" ? "end" : "start", maxWidth: "92%", whiteSpace: "pre-wrap", padding: 10, borderRadius: 9, background: message.role === "user" ? "hsl(var(--accent))" : "hsl(var(--muted))", fontSize: 13 }}>{message.content}</div>)}
