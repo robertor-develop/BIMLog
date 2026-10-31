@@ -1315,6 +1315,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/procore-intake-agent.ts
 - artifacts/api-server/src/lib/procore-intake-authenticated-http.behavior.ts
 - artifacts/api-server/src/lib/procore-intake-browser.behavior.ts
+- artifacts/api-server/src/lib/procore-intake-context.behavior.ts
 - artifacts/api-server/src/lib/procore-intake-mcp.behavior.ts
 - artifacts/api-server/src/lib/procore-intake-mcp.ts
 - artifacts/api-server/src/lib/procore-intake-state.behavior.ts

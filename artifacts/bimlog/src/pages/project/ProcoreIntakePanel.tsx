@@ -95,22 +95,14 @@ export function ProcoreIntakePanel({ projectId, lang, canWrite=false }: { projec
     const controller = new AbortController();
     activeTurn.current = controller;
     const prior = conversation;
-    const submittedText = prior.length ? text.trim() : [
-      `Goal: ${goal.trim() || "not yet specified"}`,
-      `Information/documents needed: ${needed.trim() || "not yet specified"}`,
-      `Procore company: ${company || "not selected"}`,
-      `Procore project: ${sourceProject || "not selected"}`,
-      `BIMLog destination project: ${destination}`,
-      `Selected source refs: ${selected.length ? selected.map((item) => `${item.name} (${item.ref}; version ${item.versionId})`).join("; ") : "none yet"}`,
-      `Request: ${text.trim()}`,
-    ].join("\n");
+    const submittedText = text.trim();
     const next = [...prior, { role: "user" as const, content: submittedText }];
     save(next);
     try {
       const response = await fetch(`/api/v1/projects/${projectId}/intake-agent/turn`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ question: submittedText, history: prior }),
+        body: JSON.stringify({ question: submittedText, history: prior, intakeContext: { goal, needed, destinationProjectId: projectId, selectedSources: selected.map(source => ({ ref: source.ref, name: source.name, versionId: source.versionId, sourceCompanyId: source.sourceCompanyId })) } }),
         signal: controller.signal,
       });
       const data = await response.json();

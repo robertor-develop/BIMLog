@@ -179,6 +179,12 @@ try {
   assert.ok(listed.body.result.tools.some((tool: any) => tool.name === "procore_file_versions"));
   assert.ok(listed.body.result.tools.every((tool:any)=>tool.inputSchema?.type==="object"&&!Object.hasOwn(tool,"input_schema")),"MCP wire tools must expose standard inputSchema");
   checks.company31ToolsDiscoverWithCurrentApproval = true;
+  for(const intakeContext of [{goal:"goal",needed:"docs",destinationProjectId:otherProjectId,selectedSources:[]},{goal:"g".repeat(2001),needed:"docs",destinationProjectId:projectId,selectedSources:[]}]){
+    const invalidTurn=await request(current.base,`/projects/${projectId}/intake-agent/turn`,"intake-owner@example.test",31,{method:"POST",body:JSON.stringify({question:"Current request",intakeContext})});
+    assert.equal(invalidTurn.status,400);assert.equal(invalidTurn.body.code,"INTAKE_CONTEXT_INVALID");
+  }
+  checks.invalidCurrentContextDeniedBeforeAiClient = true;
+
 
   const malformedRef = await request(current.base, mcpPath, "intake-owner@example.test", 38, {
     method: "POST", body: JSON.stringify(jsonRpc("tools/call", { name: "procore_file_versions", arguments: { projectId, fileRef: "bad-ref" } })),

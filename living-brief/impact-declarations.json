@@ -81339,6 +81339,111 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "fd36d9fc7c36ede349468490e4165c2378307df165cbe08cd12e84db22d93358"
+    },
+    {
+      "taskId": "block36-procore-current-questionnaire-context-correction-20261031",
+      "reviewedThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
+      "reviewedAt": "2026-10-31T11:19:08.846606Z",
+      "status": "candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "capabilityPreflight": {
+        "agentCapable": [
+          "Preserve and inspect canonical/incoming Git histories, resolve authorized conflicts, run isolated fixtures, reconcile source-derived authority evidence and perform approved exact-source release steps"
+        ],
+        "checkedBeforeExecution": true,
+        "operatorOnly": [
+          "Normal external provider MFA or account-owner consent only if actually required; Google/email owner-presence work remains deferred"
+        ]
+      },
+      "immediateFindings": {
+        "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+        "disposition": "captured_immediately",
+        "authorities": [
+          "claude",
+          "quality",
+          "platform",
+          "status",
+          "open_loop",
+          "audit"
+        ],
+        "summary": "Controlled browser proved later turn omits changed questionnaire and current exact version. Validate descriptive project context before AI access; preserve current permission and explicit-confirmation authority."
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Procore agent request context correction and source-module test inventory only; no new backend route, workflow authority, role, schema, Native or report contract. Preserve provider governance and actual external/native acceptance gates."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Existing Procore agent request context correction and source-module test inventory only; no new backend route, workflow authority, role, schema, Native or report contract. Preserve provider governance and actual external/native acceptance gates."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Existing Procore agent request context correction and source-module test inventory only; no new backend route, workflow authority, role, schema, Native or report contract. Preserve provider governance and actual external/native acceptance gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Procore agent request context correction and source-module test inventory only; no new backend route, workflow authority, role, schema, Native or report contract. Preserve provider governance and actual external/native acceptance gates."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Existing Procore agent request context correction and source-module test inventory only; no new backend route, workflow authority, role, schema, Native or report contract. Preserve provider governance and actual external/native acceptance gates."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Procore agent request context correction and source-module test inventory only; no new backend route, workflow authority, role, schema, Native or report contract. Preserve provider governance and actual external/native acceptance gates."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Procore agent request context correction and source-module test inventory only; no new backend route, workflow authority, role, schema, Native or report contract. Preserve provider governance and actual external/native acceptance gates."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Procore agent request context correction and source-module test inventory only; no new backend route, workflow authority, role, schema, Native or report contract. Preserve provider governance and actual external/native acceptance gates."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Existing Procore agent request context correction and source-module test inventory only; no new backend route, workflow authority, role, schema, Native or report contract. Preserve provider governance and actual external/native acceptance gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Existing Procore agent request context correction and source-module test inventory only; no new backend route, workflow authority, role, schema, Native or report contract. Preserve provider governance and actual external/native acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Existing Procore agent request context correction and source-module test inventory only; no new backend route, workflow authority, role, schema, Native or report contract. Preserve provider governance and actual external/native acceptance gates."
+        }
+      ],
+      "reason": "Preserve fresh questionnaire and exact reviewed sources on every existing agent turn without clipping the user question or changing import authority.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/procore-intake-agent.ts",
+        "artifacts/api-server/src/lib/procore-intake-authenticated-http.behavior.ts",
+        "artifacts/api-server/src/lib/procore-intake-browser.behavior.ts",
+        "artifacts/api-server/src/lib/procore-intake-context.behavior.ts",
+        "artifacts/api-server/src/routes/agents.ts",
+        "artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "435b26c00e1dff673b482bb11faa72d00bfebace88459cfef3402d10045bbedc"
     }
   ]
 }
