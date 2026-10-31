@@ -255,7 +255,7 @@ export function Dashboard() {
     return Number.isInteger(value) && value > 0 ? value : null;
   });
   const [showOperationalDetails, setShowOperationalDetails] = useState(false);
-  const [showProjectControls, setShowProjectControls] = useState(false);
+  const [showProjectControls, setShowProjectControls] = useState(true);
   const [showTestGuidance, setShowTestGuidance] = useState(false);
   const [showResponsibilities, setShowResponsibilities] = useState(false);
   const [showSecondaryWorkspace, setShowSecondaryWorkspace] = useState(false);
@@ -632,7 +632,7 @@ export function Dashboard() {
               {tt("BIMLog Headquarters", "Sede BIMLog")}
             </h1>
             <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
-              {tt(
+              {isLoading ? tt("Loading your projects…", "Cargando sus proyectos…") : isError ? tt("Project list unavailable. Retry below.", "Lista de proyectos no disponible. Reintente abajo.") : tt(
                 `${projects?.length ?? 0} project${(projects?.length ?? 0) !== 1 ? "s" : ""} · ${totalFiles} files processed · Cross-project overview and administration entry point`,
                 `${projects?.length ?? 0} proyecto${(projects?.length ?? 0) !== 1 ? "s" : ""} · ${totalFiles} archivos procesados · Vista general entre proyectos y entrada de administración`,
               )}
@@ -692,68 +692,11 @@ export function Dashboard() {
 
           <section className="headquarters-secondary-workspace" aria-label={tt("More Headquarters tools", "Más herramientas de Sede")}>
             <button className="headquarters-secondary-workspace__toggle" type="button" aria-expanded={showSecondaryWorkspace} aria-controls="headquarters-secondary-workspace" onClick={() => setShowSecondaryWorkspace(value => !value)}>
-              <span><strong>{tt("More Headquarters tools", "Más herramientas de Sede")}</strong><small>{tt("Project organization, testing, briefing, responsibilities and verified totals.", "Organización de proyectos, pruebas, briefing, responsabilidades y totales verificados.")}</small></span>
+              <span><strong>{tt("More Headquarters tools", "Más herramientas de Sede")}</strong><small>{tt("Testing, briefing, responsibilities and verified totals.", "Pruebas, briefing, responsabilidades y totales verificados.")}</small></span>
               <span>{showSecondaryWorkspace ? tt("Hide tools", "Ocultar herramientas") : tt("Show tools", "Mostrar herramientas")}<ChevronDown aria-hidden className={showSecondaryWorkspace ? "is-open" : ""}/></span>
             </button>
             <div id="headquarters-secondary-workspace" className="headquarters-secondary-workspace__body" hidden={!showSecondaryWorkspace}>
 
-          <section
-            data-current-view-filter-panel="dashboard"
-            aria-label={tt("Current view filters", "Filtros de vista actual")}
-            style={{ marginBottom: 20, padding: "14px 16px", border: "1px solid hsl(var(--border))", borderRadius: 10, background: "hsl(var(--card))" }}
-          >
-            <button type="button" aria-expanded={showProjectControls} aria-controls="headquarters-project-controls" onClick={() => setShowProjectControls(value => !value)} className="dashboard-disclosure-heading">
-              <span>
-                <strong>{tt("Find and organize projects", "Buscar y organizar proyectos")}</strong>
-                <small>{tt(`${projectRows.length} of ${allProjectRows.length} visible`, `${projectRows.length} de ${allProjectRows.length} visibles`)}</small>
-              </span>
-              <span>{showProjectControls ? tt("Hide controls", "Ocultar controles") : tt("Search, filter and sort", "Buscar, filtrar y ordenar")} <ChevronDown aria-hidden className={showProjectControls ? "is-open" : ""} /></span>
-            </button>
-            <div id="headquarters-project-controls" hidden={!showProjectControls}>
-              <p className="dashboard-disclosure-copy">{tt("These controls change the visible project register and the current-view PDF.", "Estos controles cambian el registro visible de proyectos y el PDF de la vista actual.")}</p>
-              <div className="dashboard-current-view-filters" style={{ display: "grid", gridTemplateColumns: "minmax(180px, 2fr) repeat(2, minmax(140px, 1fr)) auto", gap: 10, alignItems: "end" }}>
-              <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
-                {tt("Search projects", "Buscar proyectos")}
-                <Input
-                  id="headquarters-project-search"
-                  name="projectSearch"
-                  value={projectSearch}
-                  onChange={event => setProjectSearch(event.target.value)}
-                  placeholder={tt("Name, code, client or location...", "Nombre, codigo, cliente o ubicacion...")}
-                />
-              </label>
-              <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
-                {tt("Project status", "Estado del proyecto")}
-                <select id="headquarters-project-status" name="projectStatus" className="input" value={projectStatus} onChange={event => setProjectStatus(event.target.value)}>
-                  <option value="active">{tt("Active projects", "Proyectos activos")}</option>
-                  <option value="testing">{tt("Testing projects", "Proyectos de prueba")}</option>
-                  <option value="retired">{tt("Retired projects", "Proyectos retirados")}</option>
-                  <option value="all">{tt("All projects", "Todos los proyectos")}</option>
-                </select>
-              </label>
-              <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
-                {tt("Sort projects", "Ordenar proyectos")}
-                <select id="headquarters-project-sort" name="projectSort" className="input" value={projectSort} onChange={event => setProjectSort(event.target.value as typeof projectSort)}>
-                  <option value="name_asc">{tt("Name A-Z", "Nombre A-Z")}</option>
-                  <option value="name_desc">{tt("Name Z-A", "Nombre Z-A")}</option>
-                  <option value="code_asc">{tt("Project code", "Codigo del proyecto")}</option>
-                  <option value="status_asc">{tt("Status, then name", "Estado y luego nombre")}</option>
-                </select>
-              </label>
-              <Button type="button" variant="outline" onClick={() => { setProjectSearch(""); setProjectStatus("active"); setProjectSort("name_asc"); }}>
-                {tt("Clear filters", "Limpiar filtros")}
-              </Button>
-              </div>
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10, fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))" }}>
-              <span>{tt("Visible projects", "Proyectos visibles")}: {projectRows.length}/{allProjectRows.length}</span>
-              <span>·</span>
-              <span>{tt("Status", "Estado")}: {projectStatus === "all" ? tt("All", "Todos") : projectStatus.replace(/_/g, " ")}</span>
-              <span>·</span>
-              <span>{tt("Sort", "Orden")}: {projectSort.replace(/_/g, " ")}</span>
-              {projectSearch.trim() && <><span>·</span><span>{tt("Search", "Busqueda")}: {projectSearch.trim()}</span></>}
-            </div>
-          </section>
 
           <section aria-label={tt("Test workspace reuse", "Reutilización del espacio de pruebas")} style={{ marginBottom: 20, padding: "10px 16px", border: "1px solid #BFDBFE", borderRadius: 10, background: "#EFF6FF" }}>
             <button type="button" aria-expanded={showTestGuidance} aria-controls="headquarters-test-guidance" onClick={() => setShowTestGuidance(value => !value)} className="dashboard-disclosure-heading dashboard-disclosure-heading-blue">
@@ -1049,6 +992,65 @@ export function Dashboard() {
 
           {/* SECTION 4 — Your Projects */}
           <div id="headquarters-project-register" style={{ marginBottom: 28, scrollMarginTop: 20 }}>
+            {!isLoading && !isError && <>
+          <section
+            data-current-view-filter-panel="dashboard"
+            aria-label={tt("Current view filters", "Filtros de vista actual")}
+            style={{ marginBottom: 20, padding: "14px 16px", border: "1px solid hsl(var(--border))", borderRadius: 10, background: "hsl(var(--card))" }}
+          >
+            <button type="button" aria-expanded={showProjectControls} aria-controls="headquarters-project-controls" onClick={() => setShowProjectControls(value => !value)} className="dashboard-disclosure-heading">
+              <span>
+                <strong>{tt("Find and organize projects", "Buscar y organizar proyectos")}</strong>
+                <small>{tt(`${projectRows.length} of ${allProjectRows.length} visible`, `${projectRows.length} de ${allProjectRows.length} visibles`)}</small>
+              </span>
+              <span>{showProjectControls ? tt("Hide controls", "Ocultar controles") : tt("Search, filter and sort", "Buscar, filtrar y ordenar")} <ChevronDown aria-hidden className={showProjectControls ? "is-open" : ""} /></span>
+            </button>
+            <div id="headquarters-project-controls" hidden={!showProjectControls}>
+              <p className="dashboard-disclosure-copy">{tt("These controls change the visible project register and the current-view PDF.", "Estos controles cambian el registro visible de proyectos y el PDF de la vista actual.")}</p>
+              <div className="dashboard-current-view-filters" style={{ display: "grid", gridTemplateColumns: "minmax(180px, 2fr) repeat(2, minmax(140px, 1fr)) auto", gap: 10, alignItems: "end" }}>
+              <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
+                {tt("Search projects", "Buscar proyectos")}
+                <Input
+                  id="headquarters-project-search"
+                  name="projectSearch"
+                  value={projectSearch}
+                  onChange={event => setProjectSearch(event.target.value)}
+                  placeholder={tt("Name, code, client or location...", "Nombre, codigo, cliente o ubicacion...")}
+                />
+              </label>
+              <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
+                {tt("Project status", "Estado del proyecto")}
+                <select id="headquarters-project-status" name="projectStatus" className="input" value={projectStatus} onChange={event => setProjectStatus(event.target.value)}>
+                  <option value="active">{tt("Active projects", "Proyectos activos")}</option>
+                  <option value="testing">{tt("Testing projects", "Proyectos de prueba")}</option>
+                  <option value="retired">{tt("Retired projects", "Proyectos retirados")}</option>
+                  <option value="all">{tt("All projects", "Todos los proyectos")}</option>
+                </select>
+              </label>
+              <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
+                {tt("Sort projects", "Ordenar proyectos")}
+                <select id="headquarters-project-sort" name="projectSort" className="input" value={projectSort} onChange={event => setProjectSort(event.target.value as typeof projectSort)}>
+                  <option value="name_asc">{tt("Name A-Z", "Nombre A-Z")}</option>
+                  <option value="name_desc">{tt("Name Z-A", "Nombre Z-A")}</option>
+                  <option value="code_asc">{tt("Project code", "Codigo del proyecto")}</option>
+                  <option value="status_asc">{tt("Status, then name", "Estado y luego nombre")}</option>
+                </select>
+              </label>
+              <Button type="button" variant="outline" onClick={() => { setProjectSearch(""); setProjectStatus("active"); setProjectSort("name_asc"); }}>
+                {tt("Clear filters", "Limpiar filtros")}
+              </Button>
+              </div>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10, fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))" }}>
+              <span>{tt("Visible projects", "Proyectos visibles")}: {projectRows.length}/{allProjectRows.length}</span>
+              <span>·</span>
+              <span>{tt("Status", "Estado")}: {projectStatus === "all" ? tt("All", "Todos") : projectStatus.replace(/_/g, " ")}</span>
+              <span>·</span>
+              <span>{tt("Sort", "Orden")}: {projectSort.replace(/_/g, " ")}</span>
+              {projectSearch.trim() && <><span>·</span><span>{tt("Search", "Busqueda")}: {projectSearch.trim()}</span></>}
+            </div>
+          </section>
+            </>}
             {/* Header row with heading + New Project button */}
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
               <div>
@@ -1056,7 +1058,7 @@ export function Dashboard() {
                   {t("dashboard.title")}
                 </h2>
                 <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
-                  {tt(
+                  {isLoading ? tt("Loading your projects…", "Cargando sus proyectos…") : isError ? tt("Project list unavailable. Retry below.", "Lista de proyectos no disponible. Reintente abajo.") : tt(
                     `${projectRows.length}/${allProjectRows.length} project${projectRows.length !== 1 ? "s" : ""} visible · ${visibleProjectFiles} files · ${visibleProjectMembers} team members`,
                     `${projectRows.length}/${allProjectRows.length} proyecto${projectRows.length !== 1 ? "s" : ""} visible${projectRows.length !== 1 ? "s" : ""} · ${visibleProjectFiles} archivo${visibleProjectFiles !== 1 ? "s" : ""} · ${visibleProjectMembers} miembro${visibleProjectMembers !== 1 ? "s" : ""} del equipo`,
                   )}

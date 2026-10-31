@@ -81144,6 +81144,103 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ffdb94e8f8ed146c718618b63166b62446293354dd199f1c503be975eddfad14"
+    },
+    {
+      "taskId": "block36-owner-account-procore-oauth-handoff-correction-20261031",
+      "reviewedThroughCommit": "56be15b102562adf08e9ec73d3f634f630578ecf",
+      "reviewedAt": "2026-10-31T09:47:49.764168Z",
+      "status": "candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "capabilityPreflight": {
+        "agentCapable": [
+          "Preserve and inspect canonical/incoming Git histories, resolve authorized conflicts, run isolated fixtures, reconcile source-derived authority evidence and perform approved exact-source release steps"
+        ],
+        "checkedBeforeExecution": true,
+        "operatorOnly": [
+          "Normal external provider MFA or account-owner consent only if actually required; Google/email owner-presence work remains deferred"
+        ]
+      },
+      "immediateFindings": {
+        "authorities": [
+          "claude",
+          "quality",
+          "status",
+          "open_loop",
+          "audit"
+        ],
+        "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+        "summary": "Actual account19/company30 register reports0 during pending reads and obscures active/retired scope; keep filters visible and never infer missing records or grant authority from counts. Exact role facts and unresolved cross-company grant scope remain explicit.",
+        "disposition": "captured_immediately"
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing project-register layout/loading presentation only; no route/module/schema/capability inventory, permission, lifecycle, Native, report contract or standards change. Preserve all underlying operations; record truthful tests and pending release/provider/access gates."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Existing project-register layout/loading presentation only; no route/module/schema/capability inventory, permission, lifecycle, Native, report contract or standards change. Preserve all underlying operations; record truthful tests and pending release/provider/access gates."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Existing project-register layout/loading presentation only; no route/module/schema/capability inventory, permission, lifecycle, Native, report contract or standards change. Preserve all underlying operations; record truthful tests and pending release/provider/access gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing project-register layout/loading presentation only; no route/module/schema/capability inventory, permission, lifecycle, Native, report contract or standards change. Preserve all underlying operations; record truthful tests and pending release/provider/access gates."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing project-register layout/loading presentation only; no route/module/schema/capability inventory, permission, lifecycle, Native, report contract or standards change. Preserve all underlying operations; record truthful tests and pending release/provider/access gates."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing project-register layout/loading presentation only; no route/module/schema/capability inventory, permission, lifecycle, Native, report contract or standards change. Preserve all underlying operations; record truthful tests and pending release/provider/access gates."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing project-register layout/loading presentation only; no route/module/schema/capability inventory, permission, lifecycle, Native, report contract or standards change. Preserve all underlying operations; record truthful tests and pending release/provider/access gates."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing project-register layout/loading presentation only; no route/module/schema/capability inventory, permission, lifecycle, Native, report contract or standards change. Preserve all underlying operations; record truthful tests and pending release/provider/access gates."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Existing project-register layout/loading presentation only; no route/module/schema/capability inventory, permission, lifecycle, Native, report contract or standards change. Preserve all underlying operations; record truthful tests and pending release/provider/access gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Existing project-register layout/loading presentation only; no route/module/schema/capability inventory, permission, lifecycle, Native, report contract or standards change. Preserve all underlying operations; record truthful tests and pending release/provider/access gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Existing project-register layout/loading presentation only; no route/module/schema/capability inventory, permission, lifecycle, Native, report contract or standards change. Preserve all underlying operations; record truthful tests and pending release/provider/access gates."
+        }
+      ],
+      "reason": "Bounded jobs visibility correction: direct existing filters and truthful loading/error counts; preserve authorization, lifecycle, provider and Native boundaries; no Replit Agent use.",
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/pages/Dashboard.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "749e758f01254b9459432bb46e8ae07fff28d846903384b3dae8e402766d9f3d"
     }
   ]
 }
