@@ -102,7 +102,7 @@ export function ProcoreIntakePanel({ projectId, lang, canWrite=false }: { projec
       const response = await fetch(`/api/v1/projects/${projectId}/intake-agent/turn`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ question: submittedText, history: prior, intakeContext: { goal, needed, destinationProjectId: projectId, selectedSources: selected.map(source => ({ ref: source.ref, name: source.name, versionId: source.versionId, sourceCompanyId: source.sourceCompanyId })) } }),
+        body: JSON.stringify({ question: submittedText, history: prior, intakeContext: { goal, needed, destinationProjectId: projectId, sourceCompanyRef: company, sourceProjectRef: sourceProject, selectedSources: selected.map(source => ({ ref: source.ref, name: source.name, versionId: source.versionId, sourceCompanyId: source.sourceCompanyId })) } }),
         signal: controller.signal,
       });
       const data = await response.json();

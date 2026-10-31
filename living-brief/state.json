@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "e494b9f64c7dc3d457b0f32acf416362c0cd020870d332280c70e89303ef2ccf",
+  "bundleSha256": "527e9448f0c023b51cf51b1601473d9c7726727d99f1b61fe9354065c3e40917",
   "impact": {
     "baselineCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
     "changedPaths": [
@@ -40,31 +40,31 @@
       "semanticReviewedThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewTask": "block36-procore-current-questionnaire-context-correction-20261031",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-31T11:19:08.846606Z"
+      "semanticReviewedAt": "2026-10-31T11:28:21.196450Z"
     },
     {
       "key": "claude",
       "file": "CLAUDE.md",
-      "sha256": "e5d75b1fefd6832d18a0da159704f01a6f8530a5ff6214d0d242ff9c4a2c02f4",
-      "sourceChangedAt": "2026-10-31T11:19:08.846Z",
+      "sha256": "75afab3797696651f97d1f258aa3ab51f1d2dcd13e62ed9ecdff42b702b7fe99",
+      "sourceChangedAt": "2026-10-31T11:28:21.196Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewedThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewTask": "block36-procore-current-questionnaire-context-correction-20261031",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-31T11:19:08.846606Z"
+      "semanticReviewedAt": "2026-10-31T11:28:21.196450Z"
     },
     {
       "key": "quality",
       "file": "QUALITY.md",
-      "sha256": "b83a1e1ac802ad33fe8fa177bf0f3e9964603aed65e12ff3b2e56b1e91b36518",
-      "sourceChangedAt": "2026-10-31T11:19:08.846Z",
+      "sha256": "c6aa1235601c166729bc56630edbc66c020671df6de77a0880a3c08d0f720055",
+      "sourceChangedAt": "2026-10-31T11:28:21.196Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewedThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewTask": "block36-procore-current-questionnaire-context-correction-20261031",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-31T11:19:08.846606Z"
+      "semanticReviewedAt": "2026-10-31T11:28:21.196450Z"
     },
     {
       "key": "vision",
@@ -76,19 +76,19 @@
       "semanticReviewedThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewTask": "block36-procore-current-questionnaire-context-correction-20261031",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-31T11:19:08.846606Z"
+      "semanticReviewedAt": "2026-10-31T11:28:21.196450Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "a633be93cd7998d411fc3cd045c5a4ff503c263c0c038576c2b133582f9bcf1e",
-      "sourceChangedAt": "2026-10-31T11:19:08.846Z",
+      "sourceChangedAt": "2026-10-31T11:28:21.196Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewedThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewTask": "block36-procore-current-questionnaire-context-correction-20261031",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-31T11:19:08.846606Z"
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-10-31T11:28:21.196450Z"
     },
     {
       "key": "plugin",
@@ -100,7 +100,7 @@
       "semanticReviewedThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewTask": "block36-procore-current-questionnaire-context-correction-20261031",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-31T11:19:08.846606Z"
+      "semanticReviewedAt": "2026-10-31T11:28:21.196450Z"
     },
     {
       "key": "report_design_system",
@@ -112,7 +112,7 @@
       "semanticReviewedThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewTask": "block36-procore-current-questionnaire-context-correction-20261031",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-31T11:19:08.846606Z"
+      "semanticReviewedAt": "2026-10-31T11:28:21.196450Z"
     },
     {
       "key": "standards_register",
@@ -124,43 +124,43 @@
       "semanticReviewedThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewTask": "block36-procore-current-questionnaire-context-correction-20261031",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-31T11:19:08.846606Z"
+      "semanticReviewedAt": "2026-10-31T11:28:21.196450Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "61e1ce260fe24acc4dfb6ea3353fc62f513c23eba928e3b933b1710b0ec61dce",
-      "sourceChangedAt": "2026-10-31T11:19:08.846Z",
+      "sha256": "112384d7a7633f911cc6ae76638a0dd64905be5e8124e5c2dffd815e7d282a24",
+      "sourceChangedAt": "2026-10-31T11:28:21.196Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewedThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewTask": "block36-procore-current-questionnaire-context-correction-20261031",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-31T11:19:08.846606Z"
+      "semanticReviewedAt": "2026-10-31T11:28:21.196450Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "e3dc155ec7a594bf8582d5028480f3cf7ef9fed2e4148f63d17e045580170054",
-      "sourceChangedAt": "2026-10-31T11:19:08.846Z",
+      "sha256": "de50f8fc3d27ba4fa86fa8de7db656682105b227a0ef69540f4ffd25dcc52ae9",
+      "sourceChangedAt": "2026-10-31T11:28:21.196Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewedThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewTask": "block36-procore-current-questionnaire-context-correction-20261031",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-31T11:19:08.846606Z"
+      "semanticReviewedAt": "2026-10-31T11:28:21.196450Z"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
-      "sha256": "bc91b7ac8579c720fdde337b6e25a7067505e687d2fea37fa9e61595567bd852",
-      "sourceChangedAt": "2026-10-31T11:19:08.846Z",
+      "sha256": "01c619cb8a0ac9b3c021c062712c96f4e34ffc2d531fec061ddbe47d71e48f9c",
+      "sourceChangedAt": "2026-10-31T11:28:21.196Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewedThroughCommit": "e10d999487062f134ff19d6ac6014ad2fbecf578",
       "semanticReviewTask": "block36-procore-current-questionnaire-context-correction-20261031",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-31T11:19:08.846606Z"
+      "semanticReviewedAt": "2026-10-31T11:28:21.196450Z"
     }
   ]
 }
