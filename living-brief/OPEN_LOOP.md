@@ -6865,3 +6865,11 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [x] Restore and additively prepare only the F-rooted disposable PostgreSQL proof fixture; no production data or schema was changed.
 - [ ] Push the complete Block 41 candidate normally and verify exact local/remote equality and every focused commit ancestry.
 - [ ] Continue with P206-P210 after Block 41 acceptance; publication and three authenticated production rounds are due after P210.
+
+## Parity Block 42 - P206-P210 release boundary - 2026-11-03
+
+- [x] Verify Block 41 exact local/remote equality at `414b6600cc52ff130bf934c579be8f12222735aa` and retain its five focused commits as ancestors.
+- [x] Accept P206 repair-execution bridge parity at `722ae24fb`, P207 support-conversation parity at `45b3ff959`, P208 signed Telegram webhook parity at `d50f76b18`, P209 closed-case satisfaction parity at `f8373b367`, and P210 final PUT-route parity plus Team Performance discovery at `b2c82c467`.
+- [x] Pass P206-P210 together, API/frontend TypeScript, frozen 796-route/495-gap inventory and the 11-gate principal workflow-continuity regression. The P208 local-browser retry used an isolated task-owned headless profile and passed desktop/mobile behavior with zero runtime errors.
+- [ ] Pass the exact-head complete pre-push gate, push normally and verify every focused commit plus exact local/remote equality.
+- [ ] Publish the exact P201-P210 candidate through the established Replit Shell/Publish path, verify deployed commit/version/schema/health, then pass three consecutive authenticated production rounds and independent acceptance.

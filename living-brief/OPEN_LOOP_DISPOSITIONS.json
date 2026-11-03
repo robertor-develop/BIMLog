@@ -1,18 +1,18 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "24a54b7f111fd7dd03af9ae72c2d577deb461c10040c66f9dadb4364a9064323",
-  "itemCount": 566,
+  "sourceSha256": "8081934c82cc2bf9a619ef297bba35ace08ec862095e030c70f2e25c05b44c69",
+  "itemCount": 568,
   "counts": {
-    "ACTIVE": 507,
+    "ACTIVE": 509,
     "SUPERSEDED": 47,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 397,
+    "ACTIVE_DEFECT": 398,
     "VALID_FUTURE_ROADMAP": 11,
-    "EXTERNAL_OWNER_INPUT": 99,
+    "EXTERNAL_OWNER_INPUT": 100,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 47,
     "CLOSED_WITH_EVIDENCE": 9
@@ -10859,6 +10859,44 @@
       "evidence": [
         "OPEN_LOOP.md:6867",
         "Parity Block 41 - P201-P205 - 2026-11-03"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "35df8cb2300567d6",
+      "sourceLine": 6874,
+      "heading": "Parity Block 42 - P206-P210 release boundary - 2026-11-03",
+      "statement": "Pass the exact-head complete pre-push gate, push normally and verify every focused commit plus exact local/remote equality.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6874",
+        "Parity Block 42 - P206-P210 release boundary - 2026-11-03"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "55cf44a2040f4ce7",
+      "sourceLine": 6875,
+      "heading": "Parity Block 42 - P206-P210 release boundary - 2026-11-03",
+      "statement": "Publish the exact P201-P210 candidate through the established Replit Shell/Publish path, verify deployed commit/version/schema/health, then pass three consecutive authenticated production rounds and independent acceptance.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6875",
+        "Parity Block 42 - P206-P210 release boundary - 2026-11-03"
       ],
       "currentAuthority": false
     }
