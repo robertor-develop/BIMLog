@@ -16,6 +16,76 @@
       "verification": "source route binding; runtime findings in audit/COVERAGE.md"
     },
     {
+      "route": "/auth/login",
+      "owner": "AuthLogin",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/auth/openai-key",
+      "owner": "AuthOpenAiKey",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/autodesk/hubs",
+      "owner": "AutodeskHubs",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/autodesk/login",
+      "owner": "AutodeskLogin",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/autodesk/projects/:hubId",
+      "owner": "AutodeskProjects",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/autodesk/token",
+      "owner": "AutodeskToken",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/commercial/billing-identity",
+      "owner": "CommercialBillingIdentity",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/commercial/billing-portal",
+      "owner": "CommercialBillingPortal",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/commercial/checkout",
+      "owner": "CommercialCheckout",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/commercial/providers",
+      "owner": "CommercialProviders",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
       "route": "/register",
       "owner": "Register",
       "availability": "shipping",
@@ -88,6 +158,20 @@
     {
       "route": "/all-tools",
       "owner": "AllTools",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/meeting-rfi-sources",
+      "owner": "MeetingRfiSources",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/meeting-lens-sources",
+      "owner": "MeetingLensSources",
       "availability": "gated",
       "boundary": "authenticated; feature checks still apply",
       "verification": "source route binding; runtime findings in audit/COVERAGE.md"
@@ -282,6 +366,321 @@
       "verification": "source route binding; runtime findings in audit/COVERAGE.md"
     },
     {
+      "route": "/knowledge/search",
+      "owner": "KnowledgeSearch",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/knowledge/starter-library",
+      "owner": "KnowledgeStarterLibrary",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/knowledge/taxonomy",
+      "owner": "KnowledgeTaxonomy",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/pending-work",
+      "owner": "PendingWork",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/sync-agent/mac",
+      "owner": "MacSyncAvailability",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/feature-access",
+      "owner": "FeatureAccessInspector",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/feature-catalog",
+      "owner": "FeatureCatalog",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/feature-policies",
+      "owner": "FeaturePolicyWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/feature-preferences",
+      "owner": "FeaturePreferences",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/telegram-operations",
+      "owner": "TelegramOperations",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/master-catalogs",
+      "owner": "MasterCatalogBrowser",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/my-ai-usage",
+      "owner": "MyAiUsage",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/my-connected-files",
+      "owner": "MyConnectionFiles",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/my-setup",
+      "owner": "MySetup",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/project-agent-review",
+      "owner": "ProjectAgentReview",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/project-insights-review",
+      "owner": "ProjectInsightsReview",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/intake-agent-preview",
+      "owner": "IntakeAgentPreview",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/folder-wizard-workspace",
+      "owner": "FolderWizardWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/project-links",
+      "owner": "ProjectLinksWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/plugin-project-directory",
+      "owner": "PluginProjectDirectory",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/project-user-assignment",
+      "owner": "ProjectUserAssignment",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/project-briefing-review",
+      "owner": "ProjectBriefingReview",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/lens-import-plan",
+      "owner": "LensImportPlan",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/lens-import-context",
+      "owner": "LensImportContext",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/lens-sequence-status",
+      "owner": "LensSequenceStatus",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/lens-sync-review",
+      "owner": "LensSyncReview",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/plugin-pull-review",
+      "owner": "PluginPullReview",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/find-original-clash",
+      "owner": "FindOriginalClash",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/procore-connection-status",
+      "owner": "ProcoreConnectionStatus",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/coordination-operations",
+      "owner": "CoordinationOperations",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/meeting-link-actions",
+      "owner": "MeetingLinkActions",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/project-document-search",
+      "owner": "ProjectDocumentSearch",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/edt-activation",
+      "owner": "EdtActivation",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/edt-permissions",
+      "owner": "EdtCapabilities",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/edt-changes",
+      "owner": "EdtChanges",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/edt-intake-previews",
+      "owner": "EdtIntakePreviews",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/edt-qc-review",
+      "owner": "EdtQcReview",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/edt-director-authority",
+      "owner": "EdtDirectorAuthority",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/edt-time-review",
+      "owner": "EdtTimeReview",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/edt-issuances",
+      "owner": "EdtIssuances",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/file-custody-review",
+      "owner": "FileCustodyReview",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/manual-bonus-review",
+      "owner": "ManualBonusReview",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/budget-decision-review",
+      "owner": "BudgetDecisionReview",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/apu-budget-review",
+      "owner": "ApuBudgetReview",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/plugin-sync-review",
+      "owner": "PluginSyncReview",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
       "route": "/admin",
       "owner": "AdminPanel",
       "availability": "gated",
@@ -340,6 +739,111 @@
     {
       "route": "/admin/platform-capabilities",
       "owner": "AdminPlatformCapabilities",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/admin/platform-stats",
+      "owner": "AdminPlatformStats",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/admin/projects-list",
+      "owner": "AdminProjectsList",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/admin/support-operations",
+      "owner": "AdminSupport",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/ai-control/budgets",
+      "owner": "AiControlBudgets",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/ai-control/companies",
+      "owner": "AiControlCompanies",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/ai-control/company-ai-administrators",
+      "owner": "AiControlCompanyAdministrators",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/ai-control/company-users",
+      "owner": "AiControlCompanyUsers",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/ai-control/entitlements",
+      "owner": "AiControlEntitlements",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/ai-control/estimates",
+      "owner": "AiControlEstimates",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/ai-control/prices",
+      "owner": "AiControlPrices",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/ai-control/provider-connections",
+      "owner": "AiControlProviderConnections",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/ai-control/runs",
+      "owner": "AiControlRuns",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/ai-control/status",
+      "owner": "AiControlStatus",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/ai-control/usage",
+      "owner": "AiControlUsage",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/auth/launch-step-up",
+      "owner": "AuthLaunchStepUp",
       "availability": "gated",
       "boundary": "surface permission",
       "verification": "source route binding; runtime findings in audit/COVERAGE.md"
