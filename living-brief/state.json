@@ -40,7 +40,7 @@
       "reconciledThroughCommit": "4fdde6f2d959806ed572a7447b68d16e278e5f9e",
       "semanticReviewedThroughCommit": "4fdde6f2d959806ed572a7447b68d16e278e5f9e",
       "semanticReviewTask": "bimlog-parity-block37-p181-p185-20261103",
-      "semanticReviewResult": "updated",
+      "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-11-03T17:55:00.000Z"
     },
     {
