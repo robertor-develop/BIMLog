@@ -206,9 +206,14 @@ router.post(
       return;
     }
     const title = definition[lang];
+    const sourceSnapshot = { projectId, surface, context, columns, rows };
+    const sourceHash = computeContentHash(sourceSnapshot);
+    const reportNumber = `VIEW-${sourceHash.slice(0, 10).toUpperCase()}`;
     const doc = createPdfDocument({ size: "LETTER", layout: columns.length > 4 ? "landscape" : "portrait", margin: 50, bufferPages: true });
     res.type("application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(title)}"`);
+    res.setHeader("X-BIMLog-Report-Number", reportNumber);
+    res.setHeader("X-BIMLog-Source-SHA256", sourceHash);
     doc.pipe(res);
     pdfHeader(doc, project, title, REPORT_THEMES.platform.standard, lang);
     doc.y = sectionBar(doc, lang === "es" ? "Contexto de la vista" : "Current View Context", doc.y, {
@@ -246,8 +251,7 @@ router.post(
           align: "center",
         });
     }
-    const reportNumber = `VIEW-${computeContentHash({ projectId, surface, context, columns, rows }).slice(0, 10).toUpperCase()}`;
-    finishProfessionalReport(doc, project, reportNumber, { projectId, surface, context, columns, rows }, lang);
+    finishProfessionalReport(doc, project, reportNumber, sourceSnapshot, lang);
   },
 );
 
