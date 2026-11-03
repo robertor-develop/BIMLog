@@ -81549,7 +81549,7 @@
     {
       "taskId": "bimlog-parity-block37-p181-p185-20261103",
       "reviewedThroughCommit": "4fdde6f2d959806ed572a7447b68d16e278e5f9e",
-      "reviewedAt": "2026-11-03T19:30:00.000Z",
+      "reviewedAt": "2026-11-03T17:55:00.000Z",
       "status": "candidate",
       "captureTiming": "pre_release_reconciliation",
       "capabilityPreflight": {
@@ -81620,15 +81620,13 @@
       ],
       "reason": "Reconcile P181-P185 and all proven corrective regression work before the Block 37 push while preserving the ten-build publication cadence.",
       "reviewedChangedPaths": [
-        "living-brief/AUDIT.md",
         "living-brief/CLAUDE.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/QUALITY.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "a74a85c1d79451724e9d8f1a73db0d10241a3212f6907bbf5b606ac583e44024"
+      "reviewedChangeSha256": "6286679bfc8455b2442508824340bb03e1153762b010c837bb9c005e4e24d2df"
     }
   ]
 }

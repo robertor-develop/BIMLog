@@ -6833,3 +6833,5 @@ Runtime regression passes unsent failure then edited retry, context change befor
 After Block 37 remote synchronization, 25 authorized builds remain: P186-P210 across five five-build blocks. The next block is P186-P190. Block 37 contributes five unpublished builds; Block 38 reaches the ten-build publication boundary and therefore requires full regression, publish, deployed identity verification and three authenticated production rounds. No Block 37 production or Ruben/provider acceptance is claimed.
 
 Dependency follow-up remains explicit: GHSA-g3hv-75wg-m249 and GHSA-3g3m-2fjr-6pw4 are scoped audit exceptions until ExcelJS/Archiver publish compatible patched dependency contracts. Do not restore the rejected global `glob@14`/`minimatch@11` override; keep bounded input/export controls and the exact runtime-assembly gate.
+
+Keep the corrected initial-load performance measurement in every later block. A future aggregate increase across intentionally deferred routes is telemetry for capability growth, not evidence that all lazy routes download at startup; regressions remain blocked by the unchanged initial and per-chunk limits.
