@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "generatedFrom": "tracked route graph; deterministic",
   "counts": {
-    "routeTemplates": 53,
+    "routeTemplates": 125,
     "projectSurfaces": 20,
-    "customerSurfaces": 73,
-    "viewportCases": 219
+    "customerSurfaces": 145,
+    "viewportCases": 435
   },
   "viewports": [
     {
@@ -73,6 +73,236 @@
     },
     {
       "order": 11,
+      "path": "/auth/login",
+      "guard": "public",
+      "target": "AuthLogin",
+      "samplePath": "/auth/login",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 12,
+      "path": "/auth/openai-key",
+      "guard": "authenticated",
+      "target": "AuthOpenAiKey",
+      "samplePath": "/auth/openai-key",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 13,
+      "path": "/autodesk/hubs",
+      "guard": "authenticated",
+      "target": "AutodeskHubs",
+      "samplePath": "/autodesk/hubs",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 14,
+      "path": "/autodesk/login",
+      "guard": "authenticated",
+      "target": "AutodeskLogin",
+      "samplePath": "/autodesk/login",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 15,
+      "path": "/autodesk/projects/:hubId",
+      "guard": "authenticated",
+      "target": "AutodeskProjects",
+      "samplePath": "/autodesk/projects/:hubId",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 16,
+      "path": "/autodesk/token",
+      "guard": "authenticated",
+      "target": "AutodeskToken",
+      "samplePath": "/autodesk/token",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 17,
+      "path": "/commercial/billing-identity",
+      "guard": "authenticated",
+      "target": "CommercialBillingIdentity",
+      "samplePath": "/commercial/billing-identity",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 18,
+      "path": "/commercial/billing-portal",
+      "guard": "authenticated",
+      "target": "CommercialBillingPortal",
+      "samplePath": "/commercial/billing-portal",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 19,
+      "path": "/commercial/checkout",
+      "guard": "authenticated",
+      "target": "CommercialCheckout",
+      "samplePath": "/commercial/checkout",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 20,
+      "path": "/commercial/providers",
+      "guard": "authenticated",
+      "target": "CommercialProviders",
+      "samplePath": "/commercial/providers",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 21,
       "path": "/register",
       "guard": "public",
       "target": "Register",
@@ -95,7 +325,7 @@
       ]
     },
     {
-      "order": 12,
+      "order": 22,
       "path": "/verify-email",
       "guard": "public",
       "target": "VerifyEmail",
@@ -118,7 +348,7 @@
       ]
     },
     {
-      "order": 13,
+      "order": 23,
       "path": "/reset-password",
       "guard": "public",
       "target": "ResetPasswordPage",
@@ -141,7 +371,7 @@
       ]
     },
     {
-      "order": 14,
+      "order": 24,
       "path": "/privacy",
       "guard": "public",
       "target": "Privacy",
@@ -164,7 +394,7 @@
       ]
     },
     {
-      "order": 15,
+      "order": 25,
       "path": "/terms",
       "guard": "public",
       "target": "Terms",
@@ -187,7 +417,7 @@
       ]
     },
     {
-      "order": 16,
+      "order": 26,
       "path": "/legal-notice",
       "guard": "public",
       "target": "Disclaimer",
@@ -210,7 +440,7 @@
       ]
     },
     {
-      "order": 17,
+      "order": 27,
       "path": "/disclaimer",
       "guard": "public",
       "target": "Disclaimer",
@@ -233,7 +463,7 @@
       ]
     },
     {
-      "order": 18,
+      "order": 28,
       "path": "/data-retention",
       "guard": "public",
       "target": "DataRetention",
@@ -256,7 +486,7 @@
       ]
     },
     {
-      "order": 19,
+      "order": 29,
       "path": "/dashboard",
       "guard": "authenticated",
       "target": "Dashboard",
@@ -279,7 +509,7 @@
       ]
     },
     {
-      "order": 20,
+      "order": 30,
       "path": "/pending",
       "guard": "authenticated",
       "target": "PendingItems",
@@ -302,7 +532,7 @@
       ]
     },
     {
-      "order": 21,
+      "order": 31,
       "path": "/all-tools",
       "guard": "authenticated",
       "target": "AllTools",
@@ -325,7 +555,53 @@
       ]
     },
     {
-      "order": 22,
+      "order": 32,
+      "path": "/meeting-rfi-sources",
+      "guard": "authenticated",
+      "target": "MeetingRfiSources",
+      "samplePath": "/meeting-rfi-sources",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 33,
+      "path": "/meeting-lens-sources",
+      "guard": "authenticated",
+      "target": "MeetingLensSources",
+      "samplePath": "/meeting-lens-sources",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 34,
       "path": "/lens-next",
       "guard": "authenticated",
       "target": "LensNextWorkspace",
@@ -348,7 +624,7 @@
       ]
     },
     {
-      "order": 23,
+      "order": 35,
       "path": "/projects/:id/financial/cost-structure",
       "guard": "project",
       "target": "() => <FinancialBudgetWorkspace mode=\"structure\" />",
@@ -371,7 +647,7 @@
       ]
     },
     {
-      "order": 24,
+      "order": 36,
       "path": "/projects/:id/financial/budget",
       "guard": "project",
       "target": "() => <FinancialBudgetWorkspace mode=\"budget\" />",
@@ -394,7 +670,7 @@
       ]
     },
     {
-      "order": 25,
+      "order": 37,
       "path": "/projects/:id/financial/history",
       "guard": "project",
       "target": "() => <FinancialBudgetWorkspace mode=\"history\" />",
@@ -417,7 +693,7 @@
       ]
     },
     {
-      "order": 26,
+      "order": 38,
       "path": "/projects/:id/financial/snapshots/:snapshotId",
       "guard": "project",
       "target": "() => <FinancialBudgetWorkspace mode=\"snapshot\" />",
@@ -440,7 +716,7 @@
       ]
     },
     {
-      "order": 27,
+      "order": 39,
       "path": "/projects/:id/financial/contracts",
       "guard": "project",
       "target": "FinancialContractWorkspace",
@@ -463,7 +739,7 @@
       ]
     },
     {
-      "order": 28,
+      "order": 40,
       "path": "/projects/:id/financial/contracts/:contractId/items",
       "guard": "project",
       "target": "FinancialContractItemsWorkspace",
@@ -486,7 +762,7 @@
       ]
     },
     {
-      "order": 29,
+      "order": 41,
       "path": "/projects/:id/financial/apu",
       "guard": "project",
       "target": "FinancialApuWorkspace",
@@ -509,7 +785,7 @@
       ]
     },
     {
-      "order": 30,
+      "order": 42,
       "path": "/projects/:id/commercial/team-performance",
       "guard": "project",
       "target": "TeamPerformanceWorkspace",
@@ -532,7 +808,7 @@
       ]
     },
     {
-      "order": 31,
+      "order": 43,
       "path": "/projects/:id/intake",
       "guard": "project",
       "target": "JobIntakeWorkspace",
@@ -555,7 +831,7 @@
       ]
     },
     {
-      "order": 32,
+      "order": 44,
       "path": "/projects/:id/operations",
       "guard": "project",
       "target": "JobOperationsWorkspace",
@@ -578,7 +854,7 @@
       ]
     },
     {
-      "order": 33,
+      "order": 45,
       "path": "/projects/:id/submittal-tracker",
       "guard": "project",
       "target": "LegacySubmittalTrackerRedirect",
@@ -601,7 +877,7 @@
       ]
     },
     {
-      "order": 35,
+      "order": 47,
       "path": "/help",
       "guard": "authenticated",
       "target": "HelpCenter",
@@ -624,7 +900,7 @@
       ]
     },
     {
-      "order": 36,
+      "order": 48,
       "path": "/setup-guide",
       "guard": "authenticated",
       "target": "SetupGuideRedirect",
@@ -647,7 +923,7 @@
       ]
     },
     {
-      "order": 37,
+      "order": 49,
       "path": "/training/project-setup",
       "guard": "authenticated",
       "target": "ProjectSetupTraining",
@@ -670,7 +946,7 @@
       ]
     },
     {
-      "order": 38,
+      "order": 50,
       "path": "/profile",
       "guard": "authenticated",
       "target": "Profile",
@@ -693,7 +969,7 @@
       ]
     },
     {
-      "order": 39,
+      "order": 51,
       "path": "/settings/company-profile",
       "guard": "authenticated",
       "target": "CompanyProfile",
@@ -716,7 +992,7 @@
       ]
     },
     {
-      "order": 40,
+      "order": 52,
       "path": "/settings/notifications",
       "guard": "authenticated",
       "target": "NotificationSettings",
@@ -739,7 +1015,7 @@
       ]
     },
     {
-      "order": 41,
+      "order": 53,
       "path": "/settings/financial-controls",
       "guard": "authenticated",
       "target": "FinancialControlsSettings",
@@ -762,7 +1038,7 @@
       ]
     },
     {
-      "order": 42,
+      "order": 54,
       "path": "/settings/billing-support",
       "guard": "authenticated",
       "target": "CommercialWorkspace",
@@ -785,7 +1061,7 @@
       ]
     },
     {
-      "order": 43,
+      "order": 55,
       "path": "/admin/feedback",
       "guard": "access",
       "target": "AdminPanel",
@@ -808,7 +1084,7 @@
       ]
     },
     {
-      "order": 44,
+      "order": 56,
       "path": "/company-catalogs",
       "guard": "access",
       "target": "CompanyMasterCatalogs",
@@ -831,7 +1107,7 @@
       ]
     },
     {
-      "order": 45,
+      "order": 57,
       "path": "/company-workflows",
       "guard": "access",
       "target": "CompanyDeliveryWorkflows",
@@ -854,7 +1130,7 @@
       ]
     },
     {
-      "order": 46,
+      "order": 58,
       "path": "/company-workflow-governance",
       "guard": "access",
       "target": "CompanyWorkflowGovernance",
@@ -877,7 +1153,7 @@
       ]
     },
     {
-      "order": 47,
+      "order": 59,
       "path": "/company-pricing-templates",
       "guard": "access",
       "target": "CompanyPricingTemplates",
@@ -900,7 +1176,7 @@
       ]
     },
     {
-      "order": 48,
+      "order": 60,
       "path": "/knowledge",
       "guard": "authenticated",
       "target": "CoordinationKnowledgeLibrary",
@@ -923,7 +1199,1042 @@
       ]
     },
     {
-      "order": 49,
+      "order": 61,
+      "path": "/knowledge/search",
+      "guard": "authenticated",
+      "target": "KnowledgeSearch",
+      "samplePath": "/knowledge/search",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 62,
+      "path": "/knowledge/starter-library",
+      "guard": "authenticated",
+      "target": "KnowledgeStarterLibrary",
+      "samplePath": "/knowledge/starter-library",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 63,
+      "path": "/knowledge/taxonomy",
+      "guard": "authenticated",
+      "target": "KnowledgeTaxonomy",
+      "samplePath": "/knowledge/taxonomy",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 64,
+      "path": "/pending-work",
+      "guard": "authenticated",
+      "target": "PendingWork",
+      "samplePath": "/pending-work",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 65,
+      "path": "/sync-agent/mac",
+      "guard": "authenticated",
+      "target": "MacSyncAvailability",
+      "samplePath": "/sync-agent/mac",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 66,
+      "path": "/feature-access",
+      "guard": "authenticated",
+      "target": "FeatureAccessInspector",
+      "samplePath": "/feature-access",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 67,
+      "path": "/feature-catalog",
+      "guard": "authenticated",
+      "target": "FeatureCatalog",
+      "samplePath": "/feature-catalog",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 68,
+      "path": "/feature-policies",
+      "guard": "authenticated",
+      "target": "FeaturePolicyWorkspace",
+      "samplePath": "/feature-policies",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 69,
+      "path": "/feature-preferences",
+      "guard": "authenticated",
+      "target": "FeaturePreferences",
+      "samplePath": "/feature-preferences",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 70,
+      "path": "/telegram-operations",
+      "guard": "authenticated",
+      "target": "TelegramOperations",
+      "samplePath": "/telegram-operations",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 71,
+      "path": "/master-catalogs",
+      "guard": "authenticated",
+      "target": "MasterCatalogBrowser",
+      "samplePath": "/master-catalogs",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 72,
+      "path": "/my-ai-usage",
+      "guard": "authenticated",
+      "target": "MyAiUsage",
+      "samplePath": "/my-ai-usage",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 73,
+      "path": "/my-connected-files",
+      "guard": "authenticated",
+      "target": "MyConnectionFiles",
+      "samplePath": "/my-connected-files",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 74,
+      "path": "/my-setup",
+      "guard": "authenticated",
+      "target": "MySetup",
+      "samplePath": "/my-setup",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 75,
+      "path": "/project-agent-review",
+      "guard": "authenticated",
+      "target": "ProjectAgentReview",
+      "samplePath": "/project-agent-review",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 76,
+      "path": "/project-insights-review",
+      "guard": "authenticated",
+      "target": "ProjectInsightsReview",
+      "samplePath": "/project-insights-review",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 77,
+      "path": "/intake-agent-preview",
+      "guard": "authenticated",
+      "target": "IntakeAgentPreview",
+      "samplePath": "/intake-agent-preview",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 78,
+      "path": "/folder-wizard-workspace",
+      "guard": "authenticated",
+      "target": "FolderWizardWorkspace",
+      "samplePath": "/folder-wizard-workspace",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 79,
+      "path": "/project-links",
+      "guard": "authenticated",
+      "target": "ProjectLinksWorkspace",
+      "samplePath": "/project-links",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 80,
+      "path": "/plugin-project-directory",
+      "guard": "authenticated",
+      "target": "PluginProjectDirectory",
+      "samplePath": "/plugin-project-directory",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 81,
+      "path": "/project-user-assignment",
+      "guard": "authenticated",
+      "target": "ProjectUserAssignment",
+      "samplePath": "/project-user-assignment",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 82,
+      "path": "/project-briefing-review",
+      "guard": "authenticated",
+      "target": "ProjectBriefingReview",
+      "samplePath": "/project-briefing-review",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 83,
+      "path": "/lens-import-plan",
+      "guard": "authenticated",
+      "target": "LensImportPlan",
+      "samplePath": "/lens-import-plan",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 84,
+      "path": "/lens-import-context",
+      "guard": "authenticated",
+      "target": "LensImportContext",
+      "samplePath": "/lens-import-context",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 85,
+      "path": "/lens-sequence-status",
+      "guard": "authenticated",
+      "target": "LensSequenceStatus",
+      "samplePath": "/lens-sequence-status",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 86,
+      "path": "/lens-sync-review",
+      "guard": "authenticated",
+      "target": "LensSyncReview",
+      "samplePath": "/lens-sync-review",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 87,
+      "path": "/plugin-pull-review",
+      "guard": "authenticated",
+      "target": "PluginPullReview",
+      "samplePath": "/plugin-pull-review",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 88,
+      "path": "/find-original-clash",
+      "guard": "authenticated",
+      "target": "FindOriginalClash",
+      "samplePath": "/find-original-clash",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 89,
+      "path": "/procore-connection-status",
+      "guard": "authenticated",
+      "target": "ProcoreConnectionStatus",
+      "samplePath": "/procore-connection-status",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 90,
+      "path": "/coordination-operations",
+      "guard": "authenticated",
+      "target": "CoordinationOperations",
+      "samplePath": "/coordination-operations",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 91,
+      "path": "/meeting-link-actions",
+      "guard": "authenticated",
+      "target": "MeetingLinkActions",
+      "samplePath": "/meeting-link-actions",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 92,
+      "path": "/project-document-search",
+      "guard": "authenticated",
+      "target": "ProjectDocumentSearch",
+      "samplePath": "/project-document-search",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 93,
+      "path": "/edt-activation",
+      "guard": "authenticated",
+      "target": "EdtActivation",
+      "samplePath": "/edt-activation",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 94,
+      "path": "/edt-permissions",
+      "guard": "authenticated",
+      "target": "EdtCapabilities",
+      "samplePath": "/edt-permissions",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 95,
+      "path": "/edt-changes",
+      "guard": "authenticated",
+      "target": "EdtChanges",
+      "samplePath": "/edt-changes",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 96,
+      "path": "/edt-intake-previews",
+      "guard": "authenticated",
+      "target": "EdtIntakePreviews",
+      "samplePath": "/edt-intake-previews",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 97,
+      "path": "/edt-qc-review",
+      "guard": "authenticated",
+      "target": "EdtQcReview",
+      "samplePath": "/edt-qc-review",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 98,
+      "path": "/edt-director-authority",
+      "guard": "authenticated",
+      "target": "EdtDirectorAuthority",
+      "samplePath": "/edt-director-authority",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 99,
+      "path": "/edt-time-review",
+      "guard": "authenticated",
+      "target": "EdtTimeReview",
+      "samplePath": "/edt-time-review",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 100,
+      "path": "/edt-issuances",
+      "guard": "authenticated",
+      "target": "EdtIssuances",
+      "samplePath": "/edt-issuances",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 101,
+      "path": "/file-custody-review",
+      "guard": "authenticated",
+      "target": "FileCustodyReview",
+      "samplePath": "/file-custody-review",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 102,
+      "path": "/manual-bonus-review",
+      "guard": "authenticated",
+      "target": "ManualBonusReview",
+      "samplePath": "/manual-bonus-review",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 103,
+      "path": "/budget-decision-review",
+      "guard": "authenticated",
+      "target": "BudgetDecisionReview",
+      "samplePath": "/budget-decision-review",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 104,
+      "path": "/apu-budget-review",
+      "guard": "authenticated",
+      "target": "ApuBudgetReview",
+      "samplePath": "/apu-budget-review",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 105,
+      "path": "/plugin-sync-review",
+      "guard": "authenticated",
+      "target": "PluginSyncReview",
+      "samplePath": "/plugin-sync-review",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 106,
       "path": "/admin",
       "guard": "access",
       "target": "AdminPanel",
@@ -946,7 +2257,7 @@
       ]
     },
     {
-      "order": 50,
+      "order": 107,
       "path": "/feedback",
       "guard": "authenticated",
       "target": "Dashboard",
@@ -969,7 +2280,7 @@
       ]
     },
     {
-      "order": 51,
+      "order": 108,
       "path": "/total-control",
       "guard": "access",
       "target": "TotalControl",
@@ -992,7 +2303,7 @@
       ]
     },
     {
-      "order": 52,
+      "order": 109,
       "path": "/admin/project-company-bindings",
       "guard": "access",
       "target": "ProjectCompanyBindings",
@@ -1015,7 +2326,7 @@
       ]
     },
     {
-      "order": 53,
+      "order": 110,
       "path": "/admin/fix-specific-link",
       "guard": "access",
       "target": "FixSpecificLink",
@@ -1038,7 +2349,7 @@
       ]
     },
     {
-      "order": 54,
+      "order": 111,
       "path": "/admin/launch-configuration",
       "guard": "access",
       "target": "LaunchConfiguration",
@@ -1061,7 +2372,7 @@
       ]
     },
     {
-      "order": 55,
+      "order": 112,
       "path": "/admin/master-catalogs",
       "guard": "access",
       "target": "AdminMasterCatalogs",
@@ -1084,7 +2395,7 @@
       ]
     },
     {
-      "order": 56,
+      "order": 113,
       "path": "/admin/overview",
       "guard": "access",
       "target": "AdminOverview",
@@ -1107,7 +2418,7 @@
       ]
     },
     {
-      "order": 57,
+      "order": 114,
       "path": "/admin/platform-capabilities",
       "guard": "access",
       "target": "AdminPlatformCapabilities",
@@ -1130,7 +2441,352 @@
       ]
     },
     {
-      "order": 58,
+      "order": 115,
+      "path": "/admin/platform-stats",
+      "guard": "access",
+      "target": "AdminPlatformStats",
+      "samplePath": "/admin/platform-stats",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 116,
+      "path": "/admin/projects-list",
+      "guard": "access",
+      "target": "AdminProjectsList",
+      "samplePath": "/admin/projects-list",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 117,
+      "path": "/admin/support-operations",
+      "guard": "access",
+      "target": "AdminSupport",
+      "samplePath": "/admin/support-operations",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 118,
+      "path": "/ai-control/budgets",
+      "guard": "authenticated",
+      "target": "AiControlBudgets",
+      "samplePath": "/ai-control/budgets",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 119,
+      "path": "/ai-control/companies",
+      "guard": "access",
+      "target": "AiControlCompanies",
+      "samplePath": "/ai-control/companies",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 120,
+      "path": "/ai-control/company-ai-administrators",
+      "guard": "access",
+      "target": "AiControlCompanyAdministrators",
+      "samplePath": "/ai-control/company-ai-administrators",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 121,
+      "path": "/ai-control/company-users",
+      "guard": "authenticated",
+      "target": "AiControlCompanyUsers",
+      "samplePath": "/ai-control/company-users",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 122,
+      "path": "/ai-control/entitlements",
+      "guard": "authenticated",
+      "target": "AiControlEntitlements",
+      "samplePath": "/ai-control/entitlements",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 123,
+      "path": "/ai-control/estimates",
+      "guard": "authenticated",
+      "target": "AiControlEstimates",
+      "samplePath": "/ai-control/estimates",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 124,
+      "path": "/ai-control/prices",
+      "guard": "access",
+      "target": "AiControlPrices",
+      "samplePath": "/ai-control/prices",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 125,
+      "path": "/ai-control/provider-connections",
+      "guard": "authenticated",
+      "target": "AiControlProviderConnections",
+      "samplePath": "/ai-control/provider-connections",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 126,
+      "path": "/ai-control/runs",
+      "guard": "authenticated",
+      "target": "AiControlRuns",
+      "samplePath": "/ai-control/runs",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 127,
+      "path": "/ai-control/status",
+      "guard": "authenticated",
+      "target": "AiControlStatus",
+      "samplePath": "/ai-control/status",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 128,
+      "path": "/ai-control/usage",
+      "guard": "authenticated",
+      "target": "AiControlUsage",
+      "samplePath": "/ai-control/usage",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 129,
+      "path": "/auth/launch-step-up",
+      "guard": "access",
+      "target": "AuthLaunchStepUp",
+      "samplePath": "/auth/launch-step-up",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 130,
       "path": "/living-brief",
       "guard": "access",
       "target": "LivingBrief",
@@ -1153,7 +2809,7 @@
       ]
     },
     {
-      "order": 59,
+      "order": 131,
       "path": "/pricing",
       "guard": "public",
       "target": "Pricing",
@@ -1176,7 +2832,7 @@
       ]
     },
     {
-      "order": 60,
+      "order": 132,
       "path": "/features",
       "guard": "public",
       "target": "Features",
@@ -1199,7 +2855,7 @@
       ]
     },
     {
-      "order": 61,
+      "order": 133,
       "path": "/about",
       "guard": "public",
       "target": "About",
@@ -1222,7 +2878,7 @@
       ]
     },
     {
-      "order": 62,
+      "order": 134,
       "path": "/contact",
       "guard": "public",
       "target": "Contact",
