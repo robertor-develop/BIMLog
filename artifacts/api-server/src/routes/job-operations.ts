@@ -155,7 +155,13 @@ router.patch("/projects/:projectId/operations/tasks/:taskId", run(async (req, re
   res.json(await updateJobOperationTask({ actorUserId: req.user.userId, projectId: req.params.projectId, taskId: req.params.taskId, expectedVersion: req.body?.expectedVersion, status: req.body?.status, progressPercent: req.body?.progressPercent, assigneeUserId: req.body?.assigneeUserId, startDate: req.body?.startDate, dueDate: req.body?.dueDate, predecessorTaskIds: req.body?.predecessorTaskIds }));
 }));
 router.patch("/projects/:projectId/operations/assignments/:assignmentId", run(async (req, res) => {
-  res.json(await reassignJobOperationResource({ actorUserId: req.user.userId, projectId: req.params.projectId, assignmentId: req.params.assignmentId, expectedVersion: req.body?.expectedVersion, userId: req.body?.userId, reason: req.body?.reason }));
+  const result = await reassignJobOperationResource({ actorUserId: req.user.userId, projectId: req.params.projectId, assignmentId: req.params.assignmentId, expectedVersion: req.body?.expectedVersion, userId: req.body?.userId, reason: req.body?.reason });
+  res.set({
+    "Cache-Control": "private, no-store",
+    "X-BIMLog-Project-Id": String(req.params.projectId),
+    "X-BIMLog-Assignment-Version": String(result.version),
+  });
+  res.json(result);
 }));
 router.post("/projects/:projectId/operations/priced-assignments", run(async (req, res) => {
   const result = await createJobOperationPricedAssignment({ actorUserId:req.user.userId, projectId:req.params.projectId, assignmentId:req.body?.assignmentId, demandId:req.body?.demandId, taskId:req.body?.taskId, expectedTaskVersion:req.body?.expectedTaskVersion, userId:req.body?.userId, plannedHours:req.body?.plannedHours, entryId:req.body?.entryId });
