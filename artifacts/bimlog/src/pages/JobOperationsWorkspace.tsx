@@ -2492,6 +2492,9 @@ export function JobOperationsWorkspace() {
                             <FileCheck2 size={15} />{" "}
                             {tt("Connect deliverable", "Conectar entregable")}
                           </h4>
+                          {data.files.length === 0 && <p role="status">
+                            {tt("No active project file is available. Open Files, upload or restore the intended revision, then return here to connect it.", "No hay un archivo activo del proyecto. Abra Archivos, cargue o restaure la revisión prevista y luego vuelva aquí para conectarla.")}
+                          </p>}
                           <div className="jo-grid">
                             <label>
                               {tt("Project file", "Archivo del proyecto")}
@@ -2539,7 +2542,7 @@ export function JobOperationsWorkspace() {
                           </label>
                           <button
                             className="primary"
-                            disabled={busy || !task.canControl}
+                            disabled={busy || !task.canControl || data.files.length === 0}
                           >
                             {tt("Link file", "Vincular archivo")}
                           </button>
