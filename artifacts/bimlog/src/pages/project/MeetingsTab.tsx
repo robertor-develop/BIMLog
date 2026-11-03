@@ -988,7 +988,14 @@ export function MeetingsTab({
             error: "parse_failed",
             message: "Could not read server response",
           }));
-        if (d.error === "no_openai_key") {
+        if (d.code === "LEGACY_AI_AUDIO_RETIRED") {
+          setError(
+            t(
+              "Audio transcription is temporarily unavailable until a governed audio provider is activated. Continue with manual meeting entry.",
+              "La transcripción de audio no está disponible temporalmente hasta que se active un proveedor de audio gobernado. Continúe con la entrada manual de la reunión.",
+            ),
+          );
+        } else if (d.error === "no_openai_key") {
           setShowNoKeyModal(true);
         } else {
           setError(
