@@ -964,3 +964,5 @@ Runtime regression passes unsent failure then edited retry, context change befor
 ## Block 37 execution authority - 2026-11-03
 
 Treat P181-P185 as accepted only after the focused commits, full connected regression, normal push and exact remote-head verification. Preserve the five-build/ten-build cadence: Block 37 is push-only; Block 38 triggers publication and three live rounds. Keep Lens Next as the sole customer product name; legacy lens-sync naming is internal compatibility only. Preserve every existing module, role, tenant/project boundary, provider authorization and explicit-confirmation rule.
+
+Do not force incompatible global `glob` or `minimatch` majors into ExcelJS/Archiver. Retain the patched `follow-redirects` resolution, the two narrowly documented audit exceptions, bounded upload/export controls and the production runtime assembler's exact declared-spec validation until compatible upstream releases exist.

@@ -81548,8 +81548,8 @@
     },
     {
       "taskId": "bimlog-parity-block37-p181-p185-20261103",
-      "reviewedThroughCommit": "020cfec136f2e1ac6eb476e1ee259fcc12fff369",
-      "reviewedAt": "2026-11-03T17:38:59.819Z",
+      "reviewedThroughCommit": "801c2bffde4fdcd5ca7341b5a32e32d9cb8e9720",
+      "reviewedAt": "2026-11-03T17:48:33.109Z",
       "status": "candidate",
       "captureTiming": "pre_release_reconciliation",
       "capabilityPreflight": {
@@ -81620,18 +81620,15 @@
       ],
       "reason": "Reconcile P181-P185 and all proven corrective regression work before the Block 37 push while preserving the ten-build publication cadence.",
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/AUDIT.md",
         "living-brief/CLAUDE.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
-        "living-brief/PLUGIN.md",
         "living-brief/QUALITY.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "4d878335106f8a3db84600d570d4c11c8bb4cfc48e558086930df17d66b126e3"
+      "reviewedChangeSha256": "a74a85c1d79451724e9d8f1a73db0d10241a3212f6907bbf5b606ac583e44024"
     }
   ]
 }
