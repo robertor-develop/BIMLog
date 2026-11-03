@@ -87,6 +87,12 @@ const errorEs: Record<string, string> = {
   FLOOR_HOUR_CEO_APPROVAL_REQUIRED: "Solo la autoridad del CEO puede aprobar o rechazar el estimado de horas del piso.",
   FLOOR_HOUR_LOCATION_REQUIRED: "La partida necesita una ubicación o piso canónico antes de proponer el estimado.",
   FLOOR_HOUR_POLICY_REQUIRED: "Primero apruebe la política empresarial de costo interno.",
+  FLOOR_HOUR_MANAGE_DENIED: "Solamente la gobernanza autorizada del proyecto puede proponer el estimado de horas del piso.",
+  FLOOR_HOUR_REASON_INVALID: "El motivo debe contener entre 10 y 1000 caracteres.",
+  FLOOR_HOUR_DECISION_INVALID: "La decisión debe ser aprobada o rechazada.",
+  FLOOR_HOUR_VERSION_NOT_PENDING: "El estimado no existe o ya no está pendiente.",
+  INTERNAL_COST_MANAGE_DENIED: "Solamente la gobernanza autorizada del proyecto o la empresa puede proponer costos internos.",
+  INTERNAL_COST_KIND_INVALID: "El tipo de gobernanza de costo interno no es válido.",
 };
 
 const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any, res: any) => {
@@ -115,6 +121,7 @@ router.post("/projects/:projectId/operations/internal-cost/profiles", run(async 
 }));
 router.post("/projects/:projectId/operations/internal-cost/:kind/:versionId/decision", run(async (req, res) => {
   const scope = await jobOperationScope(req.user.userId, Number(req.params.projectId));
+  if (!['policies', 'profiles'].includes(req.params.kind)) throw new FinancialControlError(400, "INTERNAL_COST_KIND_INVALID", "Internal-cost decision kind must be policies or profiles.");
   res.json(await decideInternalCostVersion({ actorUserId:req.user.userId,companyId:scope.companyId,kind:req.params.kind === 'policies' ? 'policy' : 'profile',versionId:req.params.versionId,outcome:req.body?.outcome,reason:req.body?.reason }));
 }));
 router.post("/projects/:projectId/operations/floor-hour-estimates", run(async (req,res)=>{
