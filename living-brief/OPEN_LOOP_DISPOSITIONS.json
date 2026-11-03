@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "6b5cc6d71619b1f37d7cfd7de91ae87afc88a6e865f8c17352072883e1c357b1",
-  "itemCount": 560,
+  "sourceSha256": "6a4290af7cfdbc82e477a0eed74924c574340727d0a65533e84393913d49efef",
+  "itemCount": 562,
   "counts": {
-    "ACTIVE": 501,
+    "ACTIVE": 503,
     "SUPERSEDED": 47,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 393,
+    "ACTIVE_DEFECT": 395,
     "VALID_FUTURE_ROADMAP": 11,
     "EXTERNAL_OWNER_INPUT": 97,
     "ACCEPTED_LIMITATION": 3,
@@ -10745,6 +10745,44 @@
       "evidence": [
         "OPEN_LOOP.md:6844",
         "Parity Block 38 - P186-P190 release boundary - 2026-11-03"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "e2e766527ba349e2",
+      "sourceLine": 6850,
+      "heading": "Parity Block 39 - P191-P195 push boundary - 2026-11-03",
+      "statement": "Push the complete Block 39 candidate normally and verify exact remote equality.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6850",
+        "Parity Block 39 - P191-P195 push boundary - 2026-11-03"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "c4961cd132ccf6b2",
+      "sourceLine": 6851,
+      "heading": "Parity Block 39 - P191-P195 push boundary - 2026-11-03",
+      "statement": "Continue with P196-P200 only after remote equality. Fifteen authorized builds remain across Blocks 40-42; Block 40 reaches the next ten-build publication boundary.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6851",
+        "Parity Block 39 - P191-P195 push boundary - 2026-11-03"
       ],
       "currentAuthority": false
     }
