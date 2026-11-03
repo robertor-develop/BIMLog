@@ -68,6 +68,6 @@ assert.match(workspace, /setSaveState\("error"\)/);
 assert.match(workspace, /prepareJobIntakeUpload\(form, saved\.revision\)/);
 assert.match(workspace, /Document assistance cost boundary/);
 assert.match(workspace, /0 AI credits/);
-assert.match(workspace, /catch \(cause\) \{\s*setError\(cause instanceof Error \? cause\.message : String\(cause\)\);\s*setBusy\(false\);\s*\}/);
+assert.match(workspace, /catch \(cause\) \{\s*if\(active\(\)\)\{setError\(cause instanceof Error \? cause\.message : String\(cause\)\);setBusy\(false\);\}\s*\}/);
 
 console.log("POST120_BLOCK35=PASS schema=form-state documents=bounded ai-cost=visible recovery=preserved failures=retained");
