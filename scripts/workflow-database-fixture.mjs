@@ -38,6 +38,16 @@ function runPostgresTool(command, args) {
   }
 }
 
+async function startPostgresTool(command, args, adminUrl) {
+  const result = spawnSync(command, args, { cwd: root, encoding: "utf8", windowsHide: true, timeout: 15_000 });
+  if (!result.error && result.status === 0) return;
+  if (result.error?.code === "ETIMEDOUT" && await canConnect(adminUrl)) {
+    console.log("WORKFLOW_FIXTURE_START=CONNECTED_AFTER_BOUNDED_PG_CTL_TIMEOUT");
+    return;
+  }
+  throw result.error ?? new Error(`${path.basename(command)} failed (${result.status}).\n${result.stdout ?? ""}${result.stderr ?? ""}`);
+}
+
 async function canConnect(adminUrl) {
   const probe = new Client({ connectionString: adminUrl, connectionTimeoutMillis: 1000 });
   try {
@@ -68,7 +78,7 @@ async function ensureDisposablePostgres(adminUrl) {
   let started = false;
   try {
     runPostgresTool(initdb, ["-D", dataDir, "-U", identity.username || "postgres", "--auth-local=trust", "--auth-host=trust", "--encoding=UTF8", "--locale=C"]);
-    runPostgresTool(pgCtl, ["-D", dataDir, "-l", logPath, "-o", `-h 127.0.0.1 -p ${identity.port}`, "-w", "start"]);
+    await startPostgresTool(pgCtl, ["-D", dataDir, "-l", logPath, "-o", `-h 127.0.0.1 -p ${identity.port}`, "-w", "start"], adminUrl);
     started = true;
     if (!(await canConnect(adminUrl))) throw new Error("Disposable PostgreSQL started but the approved fixture connection could not be established.");
     console.log(`WORKFLOW_FIXTURE_SERVER=STARTED port=${identity.port}`);

@@ -26,9 +26,19 @@ type PrintPdfButtonProps = {
 export async function downloadPdfResponse(
   response: Response,
   fallbackFileName: string,
+  successMessage?: (fileName: string, reportNumber: string) => string,
 ) {
   if (!response.ok) throw new Error("current_view_pdf_failed");
-  const blob = await response.blob();
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  if (new TextDecoder().decode(bytes.slice(0, 5)) !== "%PDF-") {
+    throw new Error("current_view_pdf_invalid");
+  }
+  const reportNumber = response.headers.get("X-BIMLog-Report-Number") || "";
+  const sourceHash = response.headers.get("X-BIMLog-Source-SHA256") || "";
+  if (successMessage && (!/^VIEW-[A-F0-9]{10}$/.test(reportNumber) || !/^[a-f0-9]{64}$/i.test(sourceHash))) {
+    throw new Error("current_view_pdf_receipt_invalid");
+  }
+  const blob = new Blob([bytes], { type: "application/pdf" });
   const disposition = response.headers.get("Content-Disposition") || "";
   const encodedMatch = disposition.match(/filename\*=UTF-8''([^;]+)/i);
   const plainMatch = disposition.match(/filename=\"?([^\";]+)\"?/i);
@@ -54,6 +64,22 @@ export async function downloadPdfResponse(
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(objectUrl);
+  if (successMessage) {
+    const notice = document.createElement("div");
+    notice.setAttribute("role", "status");
+    notice.setAttribute("aria-live", "polite");
+    notice.dataset.currentViewPdfSuccess = "true";
+    notice.textContent = successMessage(fileName, reportNumber);
+    Object.assign(notice.style, {
+      position: "fixed", right: "16px", bottom: "16px", zIndex: "10000",
+      maxWidth: "min(420px,calc(100vw - 32px))", padding: "12px 14px",
+      borderRadius: "8px", background: "#166534", color: "white",
+      boxShadow: "0 8px 24px rgba(15,23,42,.24)", fontSize: "14px",
+    });
+    document.body.appendChild(notice);
+    window.setTimeout(() => notice.remove(), 8000);
+  }
+  return { fileName, reportNumber, sourceHash, byteSize: bytes.byteLength };
 }
 
 export async function downloadAuthenticatedPdf(
@@ -66,7 +92,7 @@ export async function downloadAuthenticatedPdf(
     headers: { Authorization: `Bearer ${token}` },
     signal,
   });
-  await downloadPdfResponse(response, fallbackFileName);
+  return downloadPdfResponse(response, fallbackFileName);
 }
 
 export async function downloadGovernedCurrentViewPdf(
@@ -102,7 +128,9 @@ export async function downloadGovernedCurrentViewPdf(
     },
     body: JSON.stringify(payload),
   });
-  await downloadPdfResponse(response, fallbackFileName);
+  return downloadPdfResponse(response, fallbackFileName, (fileName, reportNumber) => payload.lang === "es"
+    ? `PDF descargado: ${fileName}. Comprobante ${reportNumber}.`
+    : `PDF downloaded: ${fileName}. Receipt ${reportNumber}.`);
 }
 
 export function PrintPdfButton({

@@ -7,7 +7,7 @@
     "sidebarTabs": 18,
     "sidebarLinks": 5,
     "apiRoutes": 803,
-    "frontendApiReferences": 409,
+    "frontendApiReferences": 410,
     "routeOwnedTables": 75
   },
   "compatibilityRedirects": [
@@ -12039,6 +12039,10 @@
     {
       "screen": "artifacts/bimlog/src/pages/project/RfisTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/rfis/report-settings/reset"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/RfisTab.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/rfis/report-settings/preview"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/RfisTab.tsx",
