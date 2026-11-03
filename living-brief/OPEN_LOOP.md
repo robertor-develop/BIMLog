@@ -6857,3 +6857,11 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [ ] Push the complete Block 40 candidate normally and verify exact remote equality.
 - [ ] Publish the exact ten-build Block 39/40 candidate through existing Replit Shell/Publish with schema action `NONE`; verify deployed commit/version/health/schema identity and three consecutive authenticated production rounds.
 - [ ] Continue with P201-P205 only after release acceptance. Ten authorized builds remain across Blocks 41-42; Block 41 is the next push-only boundary.
+
+## Parity Block 41 - P201-P205 - 2026-11-03
+
+- [x] Accept P201 RFI parity at `296d0be33`, P202 schedule parity at `aa85f5a12`, P203 submittal-report operations at `c685a1aa6`, P204 transmittal cancellation at `be4d7507c`, and P205 atomic workspace-state parity at `d57df5659`.
+- [x] Correct responsive submittal-report reflow and reconcile the governed route inventory, deterministic route graph and accessibility matrix through `87c58bd64`.
+- [x] Restore and additively prepare only the F-rooted disposable PostgreSQL proof fixture; no production data or schema was changed.
+- [ ] Push the complete Block 41 candidate normally and verify exact local/remote equality and every focused commit ancestry.
+- [ ] Continue with P206-P210 after Block 41 acceptance; publication and three authenticated production rounds are due after P210.

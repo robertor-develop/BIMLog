@@ -244,3 +244,8 @@ connectors, and a hidden/private connector must not be presented as a valid repo
   governed the generated PDF/DOCX.
 - Superseding correction confirms Complete RFI PDF uses the same project report-settings snapshot for its
   embedded canonical RFI pages as Standard PDF and DOCX; there is no hidden legacy-full exception.
+
+## Block 41 submittal tracking reports
+
+- The new operational submittal-report workspace exposes the existing authenticated PDF export without changing its document layout or introducing a parallel report format.
+- Report identity, report number and project scope remain visible before export; permission and export errors remain in the working context. This block changes frontend operability and responsive layout only, not the governed PDF design contract.

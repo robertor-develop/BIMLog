@@ -81877,6 +81877,91 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "51b8c7dd48f623f3861bf500df74c56076c644426f6fa6af7fd8014a4be3a40f"
+    },
+    {
+      "taskId": "bimlog-parity-block41-p201-p205-20261103",
+      "reviewedThroughCommit": "87c58bd641fc92d14a8936d7a82a257a42953835",
+      "reviewedAt": "2026-11-03T22:13:35.6177273Z",
+      "status": "candidate",
+      "captureTiming": "pre_push_reconciliation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "Implement, test, correct, commit and normally push P201-P205 while preserving all BIMLog capabilities"
+        ],
+        "operatorOnly": [
+          "External MFA or account-owner action only if a future publication flow requires it; publication is not due in Block 41"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Work remains inside BIMLog project delivery, reporting and lifecycle authority."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Block 41 scope, invariants, deterministic inventory rules and push-only cadence are durable."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused, negative, authorization, isolation, persistence, localization, accessibility, responsive and connected regression standards were applied without weakening."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "RFI, schedule, submittal reports, transmittals and cleanup remain distinct, discoverable and operable."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "A complete project submittal-report frontend route and stricter item-level project isolation were added; no production schema changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge, camera, installer or Navisworks-facing source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Submittal-report PDF became directly operable from the frontend without changing the governed PDF layout contract."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or governed citation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Five accepted builds, corrective commits, recovery evidence and push-only cadence are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Normal push remains explicit; P206-P210 and the publication boundary remain open."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "The frontend gap, isolation correction, deterministic inventories, fixture recovery and non-mutation boundaries are recorded."
+        }
+      ],
+      "reason": "Reconcile accepted P201-P205 before normal push and exact remote verification.",
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/REPORT_DESIGN_SYSTEM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "daa43093c978fd9f93dee6b667f7945468a9a5ce90d4ff74631327338be9c7ec"
     }
   ]
 }

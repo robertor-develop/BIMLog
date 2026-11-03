@@ -1,18 +1,18 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "4d94f5fbf45aace93abcfcdaeac2fb375cfd012f0545a4dea10b95c14e8e1301",
-  "itemCount": 564,
+  "sourceSha256": "24a54b7f111fd7dd03af9ae72c2d577deb461c10040c66f9dadb4364a9064323",
+  "itemCount": 566,
   "counts": {
-    "ACTIVE": 505,
+    "ACTIVE": 507,
     "SUPERSEDED": 47,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 396,
+    "ACTIVE_DEFECT": 397,
     "VALID_FUTURE_ROADMAP": 11,
-    "EXTERNAL_OWNER_INPUT": 98,
+    "EXTERNAL_OWNER_INPUT": 99,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 47,
     "CLOSED_WITH_EVIDENCE": 9
@@ -10821,6 +10821,44 @@
       "evidence": [
         "OPEN_LOOP.md:6859",
         "Parity Block 40 - P196-P200 release boundary - 2026-11-03"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "d3af13380d44273b",
+      "sourceLine": 6866,
+      "heading": "Parity Block 41 - P201-P205 - 2026-11-03",
+      "statement": "Push the complete Block 41 candidate normally and verify exact local/remote equality and every focused commit ancestry.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6866",
+        "Parity Block 41 - P201-P205 - 2026-11-03"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "e46bb73dcc2c5d1c",
+      "sourceLine": 6867,
+      "heading": "Parity Block 41 - P201-P205 - 2026-11-03",
+      "statement": "Continue with P206-P210 after Block 41 acceptance; publication and three authenticated production rounds are due after P210.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6867",
+        "Parity Block 41 - P201-P205 - 2026-11-03"
       ],
       "currentAuthority": false
     }

@@ -1847,6 +1847,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/parity/commercial-billing-portal.tsx
 - artifacts/bimlog/src/pages/parity/commercial-checkout.tsx
 - artifacts/bimlog/src/pages/parity/commercial-providers.tsx
+- artifacts/bimlog/src/pages/parity/projects-submittal-reports.tsx
 - artifacts/bimlog/src/pages/project/ActivityTab.tsx
 - artifacts/bimlog/src/pages/project/AnalyticsTab.tsx
 - artifacts/bimlog/src/pages/project/ChangeOrdersTab.tsx
@@ -1922,6 +1923,7 @@ It changes only when the code structure or curated architectural facts change.
 - /projects/:id/intake
 - /projects/:id/operations
 - /projects/:id/submittal-tracker
+- /projects/:id/submittal-reports
 - /projects/:id/:tab?
 - /help
 - /setup-guide
