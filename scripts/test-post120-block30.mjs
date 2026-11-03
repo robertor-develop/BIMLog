@@ -56,7 +56,7 @@ assert.doesNotMatch(builder, /function CompanyAssignmentBlock/, "party assignmen
 assert.match(assignment, /\/api\/v1\/projects\/\$\{projectId\}\/assign-company-user/);
 assert.match(assignment, /Authorization: `Bearer \$\{token\}`/);
 assert.match(assignment, /companyCode: assignCode[\s\S]*fullName: fullName\.trim\(\)[\s\S]*email: email\.trim\(\)\.toLowerCase\(\)[\s\S]*companyName: companyName\.trim\(\)/);
-assert.match(assignment, /disabled=\{item\.hasUsers\}/, "assigned parties cannot be resubmitted");
+assert.match(assignment, /disabled=\{item\.hasUsers\s*\|\|\s*submitting\}/, "assigned parties cannot be resubmitted and concurrent submissions remain blocked");
 assert.equal((assignment.match(/aria-label=/g) || []).length, 4, "party action and all three fields remain labeled");
 assert.match(assignment, /role="alert"/);
 assert.match(assignment, /finally[\s\S]*setSubmitting\(false\)/, "submission state recovers after every result");
