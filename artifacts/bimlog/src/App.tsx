@@ -130,6 +130,7 @@ const CommercialBillingIdentity = namedPage(() => import("@/pages/parity/commerc
 const CommercialBillingPortal = namedPage(() => import("@/pages/parity/commercial-billing-portal"), "CommercialBillingPortal");
 const CommercialCheckout = namedPage(() => import("@/pages/parity/commercial-checkout"), "CommercialCheckout");
 const CommercialProviders = namedPage(() => import("@/pages/parity/commercial-providers"), "CommercialProviders");
+const ProjectsSubmittalReports = namedPage(() => import("@/pages/parity/projects-submittal-reports"), "ProjectsSubmittalReports");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
 const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
 const About = namedPage(() => import("@/pages/About"), "About");
@@ -379,6 +380,9 @@ function Router() {
       </Route>
       <Route path="/projects/:id/submittal-tracker">
         {() => <ProjectRoute component={LegacySubmittalTrackerRedirect} />}
+      </Route>
+      <Route path="/projects/:id/submittal-reports">
+        {() => <ProjectRoute component={ProjectsSubmittalReports} />}
       </Route>
       <Route path="/projects/:id/:tab?">
         {() => <ProjectRoute component={ProjectDetail} />}
