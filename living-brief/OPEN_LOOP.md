@@ -6849,3 +6849,11 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [x] Pass focused positive/negative, authorization, isolation, persistence, localization, accessibility, responsive, connected PostgreSQL, TypeScript, frozen parity inventory, workflow-continuity and blocking platform-audit gates.
 - [x] Push the complete Block 39 candidate normally and verify exact remote equality at source `57a756bced6bdf1b2140b8f1c75a46ac77d658bf` before the final push-receipt reconciliation.
 - [ ] Continue with P196-P200 only after remote equality. Fifteen authorized builds remain across Blocks 40-42; Block 40 reaches the next ten-build publication boundary.
+
+## Parity Block 40 - P196-P200 release boundary - 2026-11-03
+
+- [x] Accept P196 current-view PDF receipt/success at `548363a59`, P197 project lifecycle at `54877ceaf`, P198 immutable RFI revision at `3b44413df`, P199 RFI attachment channels at `d9d9a9695`, and P200 native viewpoint/report-preview parity at `fbc552d3a`.
+- [x] Pass focused positive/negative, authorization, isolation, persistence, preservation, compensation, localization, accessibility, responsive, connected PostgreSQL, TypeScript, frozen parity inventory, workflow-continuity and blocking platform-audit gates across P191-P200.
+- [ ] Push the complete Block 40 candidate normally and verify exact remote equality.
+- [ ] Publish the exact ten-build Block 39/40 candidate through existing Replit Shell/Publish with schema action `NONE`; verify deployed commit/version/health/schema identity and three consecutive authenticated production rounds.
+- [ ] Continue with P201-P205 only after release acceptance. Ten authorized builds remain across Blocks 41-42; Block 41 is the next push-only boundary.

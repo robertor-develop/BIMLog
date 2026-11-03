@@ -1,18 +1,18 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "6788a67122bf5f709630b8b4483d5cf0d0ffaf5a8ee5a4153a606e9b81d15a77",
-  "itemCount": 561,
+  "sourceSha256": "4d94f5fbf45aace93abcfcdaeac2fb375cfd012f0545a4dea10b95c14e8e1301",
+  "itemCount": 564,
   "counts": {
-    "ACTIVE": 502,
+    "ACTIVE": 505,
     "SUPERSEDED": 47,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 394,
+    "ACTIVE_DEFECT": 396,
     "VALID_FUTURE_ROADMAP": 11,
-    "EXTERNAL_OWNER_INPUT": 97,
+    "EXTERNAL_OWNER_INPUT": 98,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 47,
     "CLOSED_WITH_EVIDENCE": 9
@@ -10764,6 +10764,63 @@
       "evidence": [
         "OPEN_LOOP.md:6851",
         "Parity Block 39 - P191-P195 push boundary - 2026-11-03"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "ceaaa089bdb81054",
+      "sourceLine": 6857,
+      "heading": "Parity Block 40 - P196-P200 release boundary - 2026-11-03",
+      "statement": "Push the complete Block 40 candidate normally and verify exact remote equality.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6857",
+        "Parity Block 40 - P196-P200 release boundary - 2026-11-03"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "e7671f6751223716",
+      "sourceLine": 6858,
+      "heading": "Parity Block 40 - P196-P200 release boundary - 2026-11-03",
+      "statement": "Publish the exact ten-build Block 39/40 candidate through existing Replit Shell/Publish with schema action `NONE`; verify deployed commit/version/health/schema identity and three consecutive authenticated production rounds.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6858",
+        "Parity Block 40 - P196-P200 release boundary - 2026-11-03"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "cc0f016281e89637",
+      "sourceLine": 6859,
+      "heading": "Parity Block 40 - P196-P200 release boundary - 2026-11-03",
+      "statement": "Continue with P201-P205 only after release acceptance. Ten authorized builds remain across Blocks 41-42; Block 41 is the next push-only boundary.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6859",
+        "Parity Block 40 - P196-P200 release boundary - 2026-11-03"
       ],
       "currentAuthority": false
     }
