@@ -968,3 +968,7 @@ Treat P181-P185 as accepted only after the focused commits, full connected regre
 Do not force incompatible global `glob` or `minimatch` majors into ExcelJS/Archiver. Retain the patched `follow-redirects` resolution, the two narrowly documented audit exceptions, bounded upload/export controls and the production runtime assembler's exact declared-spec validation until compatible upstream releases exist.
 
 The browser performance gate measures the initial entry and its static imports, while retaining the complete lazy-chunk aggregate as telemetry and enforcing per-chunk/route limits. Do not treat every intentionally deferred route as initial download payload or relax the existing 4 MiB initial-load, 750 KiB largest-chunk, 250 KiB non-spreadsheet lazy-chunk or 225 KiB route-chunk limits.
+
+## Block 38 release authority - 2026-11-03
+
+P186-P190 complete the second five-build interval and therefore require the established GitHub source to Replit Shell to Replit Publish path followed by exact live identity and three authenticated production rounds. Preserve the budget variance, deliverable, document-connection, floor-hour and internal-cost concepts as distinct Operations capabilities. Unknown internal-cost decision kinds must fail closed, deliverable creation must explain missing active files, and floor-hour decisions require the existing governed roles and reasons. No Replit Agent, force push, development-data copy, destructive schema action, provider credential change or Native binary change is part of this block.

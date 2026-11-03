@@ -1,18 +1,18 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "726af93d84957a2047185a4c3d48fe93f94d2cbf2b358dfa369d0c7ba0356f8e",
-  "itemCount": 558,
+  "sourceSha256": "6b5cc6d71619b1f37d7cfd7de91ae87afc88a6e865f8c17352072883e1c357b1",
+  "itemCount": 560,
   "counts": {
-    "ACTIVE": 499,
+    "ACTIVE": 501,
     "SUPERSEDED": 47,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 392,
+    "ACTIVE_DEFECT": 393,
     "VALID_FUTURE_ROADMAP": 11,
-    "EXTERNAL_OWNER_INPUT": 96,
+    "EXTERNAL_OWNER_INPUT": 97,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 47,
     "CLOSED_WITH_EVIDENCE": 9
@@ -10707,6 +10707,44 @@
       "evidence": [
         "OPEN_LOOP.md:6778",
         "Corrected program Blocks 3–4 — P011–P020"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "3802c3df3492925c",
+      "sourceLine": 6843,
+      "heading": "Parity Block 38 - P186-P190 release boundary - 2026-11-03",
+      "statement": "Publish the exact ten-build Block 37/38 candidate through the existing Replit Shell/Publish path with schema action `NONE`, then verify deployed commit/version/health and three consecutive authenticated production rounds.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6843",
+        "Parity Block 38 - P186-P190 release boundary - 2026-11-03"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "9b39799d1157147c",
+      "sourceLine": 6844,
+      "heading": "Parity Block 38 - P186-P190 release boundary - 2026-11-03",
+      "statement": "Continue only after release acceptance with P191-P195. P191-P210 remain twenty authorized builds across four five-build blocks; unresolved provider/Native field gates remain separate and are not counted as completed builds.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6844",
+        "Parity Block 38 - P186-P190 release boundary - 2026-11-03"
       ],
       "currentAuthority": false
     }

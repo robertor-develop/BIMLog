@@ -6835,3 +6835,10 @@ After Block 37 remote synchronization, 25 authorized builds remain: P186-P210 ac
 Dependency follow-up remains explicit: GHSA-g3hv-75wg-m249 and GHSA-3g3m-2fjr-6pw4 are scoped audit exceptions until ExcelJS/Archiver publish compatible patched dependency contracts. Do not restore the rejected global `glob@14`/`minimatch@11` override; keep bounded input/export controls and the exact runtime-assembly gate.
 
 Keep the corrected initial-load performance measurement in every later block. A future aggregate increase across intentionally deferred routes is telemetry for capability growth, not evidence that all lazy routes download at startup; regressions remain blocked by the unchanged initial and per-chunk limits.
+
+## Parity Block 38 - P186-P190 release boundary - 2026-11-03
+
+- [x] Accept P186 budget variance/baseline/review behavior at `838278a41`, P187 deliverable create/delete recovery at `2a67942a3`, P188 document-connection parity at `c0906744f`, P189 floor-hour proposal/decision behavior at `8d225defd`, and P190 strict internal-cost decisions at `f9344c90a`.
+- [x] Pass all five focused suites together, both package typechecks, workflow continuity, frozen route/gap inventory and blocking platform audit; push normally and verify local/remote equality at `f9344c90a574b9cc94b760e784d8f00e45ead1c2`.
+- [ ] Publish the exact ten-build Block 37/38 candidate through the existing Replit Shell/Publish path with schema action `NONE`, then verify deployed commit/version/health and three consecutive authenticated production rounds.
+- [ ] Continue only after release acceptance with P191-P195. P191-P210 remain twenty authorized builds across four five-build blocks; unresolved provider/Native field gates remain separate and are not counted as completed builds.
