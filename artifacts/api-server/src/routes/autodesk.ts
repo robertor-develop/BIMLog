@@ -27,7 +27,7 @@ router.use("/autodesk", (_req, res, next) => {
 // AUTODESK_REDIRECT_URI overrides it if ever needed.
 const REDIRECT_URI = process.env.AUTODESK_REDIRECT_URI || "https://bimlog.app/api/v1/autodesk/callback";
 
-router.get("/autodesk/token", async (_req, res) => {
+router.get("/autodesk/token", authMiddleware, async (_req, res) => {
   const clientId = process.env.APS_CLIENT_ID;
   const clientSecret = process.env.APS_CLIENT_SECRET;
 

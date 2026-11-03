@@ -73,6 +73,7 @@ function dependenciesFor(
 ): GenericApuBudgetAuthorityDependencies {
   return {
     now: () => new Date(Date.UTC(2026, 7, 5, 12, 0, clockTick++)),
+    authorizeRead: async()=>({companyId:binding.companyId}),
     loadBinding: async (projectId, projectApuVersionId) =>
       projectId === binding.projectId &&
       projectApuVersionId === binding.projectApuVersionId

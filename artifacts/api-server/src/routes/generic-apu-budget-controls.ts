@@ -46,6 +46,7 @@ export function createGenericApuBudgetControlsRouter(
 ) {
   const router = Router();
   router.use("/projects/:projectId/financial/generic-apu", authenticate);
+  router.use("/projects/:projectId/financial/generic-apu",(_req,res,next)=>{res.set("Cache-Control","private, no-store");next();});
   router.post(
     "/projects/:projectId/financial/generic-apu/:projectApuVersionId/budget-control/evaluate",
     async (req, res) => {

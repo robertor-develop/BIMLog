@@ -5,7 +5,7 @@ export type ProcoreIntakeState = {
   needed: string;
   destinationProjectId: number;
   messages: Array<{ role: "user" | "assistant"; content: string }>;
-  selectedSources: Array<{ ref: string; fileId: string; projectRef: string; versionId: string; versionLabel: string; name: string; mimeType: string | null }>;
+  selectedSources: Array<{ ref: string; fileId: string; projectRef: string; versionId: string; versionLabel: string; name: string; mimeType: string | null; sourceCompanyId?:string }>;
   updatedAt: string | null;
 };
 type Queryable = { query(text: string, values?: unknown[]): Promise<{ rows: any[] }> };
@@ -13,9 +13,9 @@ let ready: Promise<void> | null = null;
 
 export async function ensureProcoreIntakeStateSchema(client: Queryable = pool): Promise<void> {
   ready ??= client.query(`CREATE TABLE IF NOT EXISTS procore_intake_states(
-    user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    company_id integer NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
-    project_id integer NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    user_id integer NOT NULL REFERENCES users(id),
+    company_id integer NOT NULL REFERENCES companies(id),
+    project_id integer NOT NULL REFERENCES projects(id),
     goal text NOT NULL DEFAULT '',
     needed text NOT NULL DEFAULT '',
     destination_project_id integer NOT NULL,
@@ -33,7 +33,7 @@ function normalize(input: Partial<ProcoreIntakeState>, projectId: number): Omit<
       ? [{ role: m.role, content: m.content.slice(0, 2000) }] : []) : [];
   const selectedSources = Array.isArray(input.selectedSources) ? input.selectedSources.slice(0, 100).flatMap((s) =>
     s && [s.ref,s.fileId,s.projectRef,s.versionId,s.versionLabel,s.name].every((v) => typeof v === "string" && v.length <= 500)
-      ? [{ ref:s.ref,fileId:s.fileId,projectRef:s.projectRef,versionId:s.versionId,versionLabel:s.versionLabel,name:s.name,mimeType:typeof s.mimeType==="string"?s.mimeType.slice(0,200):null }] : []) : [];
+      ? [{ ref:s.ref,fileId:s.fileId,projectRef:s.projectRef,versionId:s.versionId,versionLabel:s.versionLabel,name:s.name,mimeType:typeof s.mimeType==="string"?s.mimeType.slice(0,200):null,...(typeof s.sourceCompanyId==="string"&&/^[1-9]\d*$/.test(s.sourceCompanyId)?{sourceCompanyId:s.sourceCompanyId}:{}) }] : []) : [];
   return {
     goal: typeof input.goal === "string" ? input.goal.slice(0, 2000) : "",
     needed: typeof input.needed === "string" ? input.needed.slice(0, 2000) : "",

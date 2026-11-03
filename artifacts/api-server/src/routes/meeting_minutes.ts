@@ -1,3 +1,4 @@
+import { MeetingImportFailure, normalizeMeetingImportData, meetingImportFileName, meetingImportTimestamp } from "../lib/meeting-import-contract";
 import { Router } from "express";
 import crypto from "crypto";
 import * as XLSX from "xlsx";
@@ -91,6 +92,35 @@ import {
 } from "../lib/meeting-current-view-scope";
 
 const router: Router = Router();
+
+ // Meeting detail operations share the same current tenant boundary. A stale
+ // cross-company membership alone must never authorize this record family.
+ router.use("/projects/:projectId/meetings/:meetingId", authMiddleware, async (req,res,next) => {
+   const raw=String(req.params.meetingId);
+   if(raw!=="current-view"&&raw!=="draft"&&raw!=="import"&&raw!=="lens-viewpoint-candidates"&&raw!=="rfi-candidates"&&raw!=="submittal-candidates"&&raw!=="transcribe-audio"&&!/^\d+$/.test(raw)){next();return;}
+   const projectId=Number(req.params.projectId),meetingId=raw==="current-view"||raw==="draft"||raw==="import"||raw==="lens-viewpoint-candidates"||raw==="rfi-candidates"||raw==="submittal-candidates"||raw==="transcribe-audio"?null:Number(raw);
+   if(!Number.isSafeInteger(projectId)||projectId<=0||(meetingId!==null&&(!Number.isSafeInteger(meetingId)||meetingId<=0))){res.status(400).json({error:"valid_meeting_identity_required"});return;}
+   try {
+     const result=await db.execute(sql`SELECT (actor.is_super_admin OR (actor.company_id=COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id) AND EXISTS(SELECT 1 FROM project_members pm WHERE pm.project_id=p.id AND pm.user_id=actor.id AND pm.status='active'))) allowed FROM projects p JOIN users creator ON creator.id=p.created_by_id JOIN users actor ON actor.id=${req.user!.userId} WHERE p.id=${projectId} AND p.status<>'archived'`);
+     if(result.rows[0]?.allowed!==true){res.status(403).json({error:"current_project_company_access_required"});return;}
+     res.set({"Cache-Control":"private, no-store","X-BIMLog-Project-Id":String(projectId)});
+     next();
+   }catch{res.status(503).json({error:"meeting_authority_unavailable"});}
+ });
+
+
+
+router.use("/projects/:projectId/meetings/draft", authMiddleware, async (req,res,next)=>{
+ if(!["GET","PUT","DELETE"].includes(req.method)){next();return;}
+ const raw=req.method==="PUT"?req.body?.meeting_id:req.query.meeting_id;
+ const meetingId=raw===undefined||raw===null?null:
+   typeof raw==="number"||typeof raw==="string"&&/^\d+$/.test(raw)?Number(raw):NaN;
+ if(meetingId!==null&&(!Number.isSafeInteger(meetingId)||meetingId<=0)){res.status(400).json({error:"valid_meeting_identity_required"});return;}
+ try{
+  if(meetingId!==null){const [meeting]=await db.select({id:meetingMinutesTable.id}).from(meetingMinutesTable).where(and(eq(meetingMinutesTable.id,meetingId),eq(meetingMinutesTable.projectId,Number(req.params.projectId)),isNull(meetingMinutesTable.deletedAt))).limit(1);if(!meeting){res.status(404).json({error:"meeting_not_found"});return;}}
+  res.locals.meetingDraftId=meetingId;next();
+ }catch{res.status(503).json({error:"meeting_draft_authority_unavailable"});}
+});
 
 const safePdfText = safeMeetingReportText;
 
@@ -1731,7 +1761,7 @@ router.get(
       doc.end();
     } catch (err) {
       if (!res.headersSent) {
-        res.status(500).json({ error: "meeting_current_view_export_failed" });
+        res.status(err instanceof Error && err.message === "meeting_view_date_range_invalid" ? 400 : 500).json({ error: err instanceof Error && err.message === "meeting_view_date_range_invalid" ? err.message : "meeting_current_view_export_failed" });
       } else {
         res.end();
       }
@@ -1844,7 +1874,7 @@ router.get(
   requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
-    const meetingId = req.query.meeting_id ? Number(req.query.meeting_id) : null;
+    const meetingId: number | null = res.locals.meetingDraftId;
     try {
       const [draft] = await db.select().from(meetingDraftsTable).where(and(
         eq(meetingDraftsTable.projectId, projectId),
@@ -1870,7 +1900,7 @@ router.put(
   requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
-    const meetingId = req.body?.meeting_id ? Number(req.body.meeting_id) : null;
+    const meetingId: number | null = res.locals.meetingDraftId;
     const payload = req.body?.payload;
     if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
       res.status(400).json({ error: "draft_payload_required" });
@@ -1885,6 +1915,8 @@ router.put(
           isNull(meetingMinutesTable.deletedAt),
         )).limit(1);
         if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
+        const expected=req.body?.canonical_updated_at;
+        if(expected!==undefined&&expected!==null&&(typeof expected!=="string"||!Number.isFinite(Date.parse(expected))||Date.parse(expected)!==meeting.updatedAt.getTime())){res.status(409).json({error:"meeting_draft_canonical_version_changed"});return;}
         canonicalUpdatedAt = meeting.updatedAt;
       }
       const now = new Date();
@@ -1920,7 +1952,7 @@ router.delete(
   requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
-    const meetingId = req.query.meeting_id ? Number(req.query.meeting_id) : null;
+    const meetingId: number | null = res.locals.meetingDraftId;
     await db.delete(meetingDraftsTable).where(and(
       eq(meetingDraftsTable.projectId, projectId),
       eq(meetingDraftsTable.userId, req.user!.userId),
@@ -2127,9 +2159,9 @@ router.get(
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     const q = String(req.query.q ?? "").trim();
-    const meetingId = req.query.meeting_id
-      ? Number(req.query.meeting_id)
-      : null;
+    const rawMeeting=req.query.meeting_id;
+    const meetingId=rawMeeting===undefined?null:typeof rawMeeting==="string"&&/^\d+$/.test(rawMeeting)?Number(rawMeeting):NaN;
+    if(meetingId!==null&&(!Number.isSafeInteger(meetingId)||meetingId<=0)){res.status(400).json({error:"valid_meeting_identity_required"});return;}
     try {
       let alreadyLinked = new Set<number>();
       if (meetingId !== null) {
@@ -2336,9 +2368,19 @@ router.get(
     const responsibleFilter = String(req.query.responsible ?? "")
       .trim()
       .toLowerCase();
-    const meetingId = req.query.meeting_id
-      ? Number(req.query.meeting_id)
-      : null;
+    const rawMeeting = req.query.meeting_id;
+    const meetingId = rawMeeting === undefined
+      ? null
+      : typeof rawMeeting === "string" && /^\d+$/.test(rawMeeting)
+        ? Number(rawMeeting)
+        : Number.NaN;
+    if (
+      meetingId !== null &&
+      (!Number.isSafeInteger(meetingId) || meetingId <= 0)
+    ) {
+      res.status(400).json({ error: "valid_meeting_identity_required" });
+      return;
+    }
     try {
       let alreadyLinked = new Set<number>();
       if (meetingId !== null) {
@@ -2537,9 +2579,9 @@ router.get(
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     const q = String(req.query.q ?? "").trim();
-    const meetingId = req.query.meeting_id
-      ? Number(req.query.meeting_id)
-      : null;
+    const rawMeeting=req.query.meeting_id;
+    const meetingId=rawMeeting===undefined?null:typeof rawMeeting==="string"&&/^\d+$/.test(rawMeeting)?Number(rawMeeting):NaN;
+    if(meetingId!==null&&(!Number.isSafeInteger(meetingId)||meetingId<=0)){res.status(400).json({error:"valid_meeting_identity_required"});return;}
     try {
       let alreadyLinked = new Set<number>();
       if (meetingId !== null) {
@@ -3151,6 +3193,7 @@ router.get(
           and(
             eq(meetingMinutesTable.id, meetingId),
             eq(meetingMinutesTable.projectId, projectId),
+            isNull(meetingMinutesTable.deletedAt),
           ),
         );
       if (!meeting) {
@@ -3280,7 +3323,7 @@ router.patch(
               eq(meetingMinutesTable.id, meetingId),
               eq(meetingMinutesTable.projectId, projectId),
               isNull(meetingMinutesTable.deletedAt),
-              sql`date_trunc('milliseconds', ${meetingMinutesTable.updatedAt}) = ${existingUpdatedAt}`,
+              sql`date_trunc('milliseconds', ${meetingMinutesTable.updatedAt}) = ${existingUpdatedAt.toISOString()}::timestamp`,
             ),
           )
           .returning();
@@ -3361,6 +3404,7 @@ router.post(
           and(
             eq(meetingMinutesTable.id, meetingId),
             eq(meetingMinutesTable.projectId, projectId),
+            isNull(meetingMinutesTable.deletedAt),
           ),
         );
       if (!meeting) {
@@ -3368,6 +3412,9 @@ router.post(
         return;
       }
 
+      if(req.body?.expected_updated_at && new Date(req.body.expected_updated_at).getTime() !== new Date(meeting.updatedAt).getTime()){
+        res.status(409).json({error:"meeting_stale_update"});return;
+      }
       const prompt = `You are a construction project manager. Summarize these meeting notes and extract action items.
 Meeting: ${meeting.title} on ${new Date(meeting.meetingDate).toLocaleDateString()}
 Notes: ${meeting.notes ?? "(no notes)"}
@@ -3386,11 +3433,18 @@ Return JSON only: { "summary": "...", "action_items": [{ "description": "...", "
       const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
       const parsed = JSON.parse(text.replace(/```json\n?|```/g, "").trim());
 
-      await db
-        .update(meetingMinutesTable)
-        .set({ aiSummary: parsed.summary, updatedAt: new Date() })
-        .where(eq(meetingMinutesTable.id, meetingId));
-      res.json(parsed);
+      if (typeof parsed.summary !== "string" || parsed.summary.length > 16000) {
+        res.status(502).json({error:"meeting_summary_response_invalid"}); return;
+      }
+      const [saved] = await db.update(meetingMinutesTable)
+        .set({aiSummary:parsed.summary,updatedAt:nextMeetingVersionTimestamp(meeting.updatedAt)})
+        .where(and(eq(meetingMinutesTable.id,meetingId),eq(meetingMinutesTable.projectId,projectId),
+          isNull(meetingMinutesTable.deletedAt),
+          sql`date_trunc('milliseconds', ${meetingMinutesTable.updatedAt}) = ${new Date(meeting.updatedAt).toISOString()}::timestamp`))
+        .returning({updatedAt:meetingMinutesTable.updatedAt});
+      if(!saved){res.status(409).json({error:"meeting_stale_update"});return;}
+      res.json({...parsed,meeting:{id:meetingId,projectId,updatedAt:saved.updatedAt}});
+
     } catch (err) {
       if (sendAiUsageError(res, err)) return;
       res
@@ -3424,56 +3478,52 @@ router.post(
       return;
     }
     try {
-      const actionInputs = resolveMeetingActionInputs(body);
-      const created = await db
-        .insert(actionItemsTable)
-        .values(
-          actionInputs.map((item) => ({
-            meetingId,
-            projectId,
-            description: item.description,
-            assignedToId: item.assignedToId,
-            assignedToName: item.assignedToName,
-            assignedToExternalEmail: item.assignedToExternalEmail,
-            dueDate: item.dueDate,
-            status: "open" as const,
-          })),
-        )
-        .returning();
-
-      // Notify assigned BIMLog users
-      for (const item of created) {
-        if (item.assignedToId) {
-          await createNotification(
-            item.assignedToId,
-            projectId,
-            "action_item_due",
-            "New Action Item",
-            item.description,
-            `/projects/${projectId}/meetings`,
-          );
+      let actionInputs: ReturnType<typeof resolveMeetingActionInputs>;
+      try { actionInputs = resolveMeetingActionInputs(body); }
+      catch { res.status(400).json({error:"meeting_action_input_invalid"}); return; }
+      let idempotencyDigest: string | null = null;
+      try { idempotencyDigest = meetingCommandIdempotencyDigest(req.get("Idempotency-Key"), {projectId,userId:req.user!.userId,command:"meeting.actions.create"}); }
+      catch { res.status(400).json({error:"meeting_idempotency_key_invalid"}); return; }
+      const payloadDigest = crypto.createHash("sha256").update(JSON.stringify(actionInputs)).digest("hex");
+      const outcome = await db.transaction(async tx => {
+        const [meeting] = await tx.select({id:meetingMinutesTable.id}).from(meetingMinutesTable)
+          .where(and(eq(meetingMinutesTable.id,meetingId),eq(meetingMinutesTable.projectId,projectId),isNull(meetingMinutesTable.deletedAt))).limit(1).for("share");
+        if(!meeting) throw new MeetingClashLinkError(404,"meeting_not_found");
+        if(idempotencyDigest) {
+          await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${idempotencyDigest}))`);
+          const [event] = await tx.select({details:activityLogTable.details}).from(activityLogTable).where(and(
+            eq(activityLogTable.projectId,projectId),eq(activityLogTable.entityType,"action_items"),
+            eq(activityLogTable.entityId,meetingId),eq(activityLogTable.userId,req.user!.userId),
+            sql`${activityLogTable.details} LIKE ${'%"idempotencyDigest":"'+idempotencyDigest+'"%'}`)).limit(1);
+          if(event) {
+            const receipt=JSON.parse(event.details || "{}");
+            if(receipt.payloadDigest!==payloadDigest)throw new MeetingClashLinkError(409,"meeting_action_retry_payload_changed");
+            const ids=Array.isArray(receipt.actionIds)?receipt.actionIds.filter((id:unknown)=>Number.isSafeInteger(id)&&Number(id)>0):[];
+            if(!ids.length)throw new MeetingClashLinkError(409,"meeting_action_receipt_invalid");
+            const rows=await tx.select().from(actionItemsTable).where(and(eq(actionItemsTable.projectId,projectId),eq(actionItemsTable.meetingId,meetingId),inArray(actionItemsTable.id,ids))).orderBy(asc(actionItemsTable.id));
+            if(rows.length!==ids.length)throw new MeetingClashLinkError(409,"meeting_action_receipt_unavailable");
+            return {rows,replayed:true};
+          }
         }
-      }
-
-      await db.insert(activityLogTable).values({
-        projectId,
-        userId: req.user!.userId,
-        userFullName: req.user!.fullName,
-        userCompanyName: req.user!.companyName,
-        actionType: "create",
-        entityType: "action_items",
-        entityId: meetingId,
-        fileNameBefore: null,
-        fileNameAfter: null,
-        details: `Created ${created.length} action item(s) for meeting`,
-      });
-      res.status(201).json(created);
-    } catch (err) {
-      res
-        .status(500)
-        .json({
-          error: err instanceof Error ? err.message : "Internal server error",
+        const rows = await tx.insert(actionItemsTable).values(actionInputs.map(item=>({
+          meetingId,projectId,description:item.description,assignedToId:item.assignedToId,
+          assignedToName:item.assignedToName,assignedToExternalEmail:item.assignedToExternalEmail,dueDate:item.dueDate,status:"open" as const,
+        }))).returning();
+        await tx.insert(activityLogTable).values({
+          projectId,userId:req.user!.userId,userFullName:req.user!.fullName,userCompanyName:req.user!.companyName,
+          actionType:"create",entityType:"action_items",entityId:meetingId,fileNameBefore:null,fileNameAfter:null,
+          details:JSON.stringify({event:"meeting.actions.created",idempotencyDigest,payloadDigest,actionIds:rows.map(row=>row.id)}),
         });
+        return {rows,replayed:false};
+      });
+      if(!outcome.replayed) for(const item of outcome.rows) if(item.assignedToId) {
+        try { await createNotification(item.assignedToId,projectId,"action_item_due","New Action Item",item.description,`/projects/${projectId}/meetings`); }
+        catch { console.warn("[meeting-actions] saved action notification unavailable"); }
+      }
+      res.set("Idempotency-Replayed",String(outcome.replayed)).status(outcome.replayed?200:201).json(outcome.rows);
+    } catch (err) {
+      if(err instanceof MeetingClashLinkError){res.status(err.status).json({error:err.code});return;}
+      res.status(500).json({error:"meeting_action_create_failed"});
     }
   },
 );
@@ -3521,7 +3571,7 @@ router.get(
 router.patch(
   "/projects/:projectId/action-items/:itemId",
   authMiddleware,
-  requireProjectMember(),
+  requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     const itemId = Number(req.params.itemId);
@@ -3572,9 +3622,11 @@ router.post(
   authMiddleware,
   requireProjectMember(),
   (_req, res) => {
+    res.set({ "Cache-Control": "private, no-store", "X-BIMLog-Audio-Capability": "governed-provider-required" });
     res.status(410).json({
       code: "LEGACY_AI_AUDIO_RETIRED",
       error: "Audio transcription is temporarily unavailable while it is migrated to governed AI connections.",
+      nextStep: "Use manual meeting entry now. A governed audio provider connection must be activated before transcription can resume.",
     });
   },
 );
@@ -3585,14 +3637,32 @@ router.post(
   singleFileUpload({ fileSize: 50 * 1024 * 1024 }),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
+    res.set("X-BIMLog-Meeting-Import-Contract","v1");
     try {
       if (!req.file) {
         res.status(400).json({ error: "no_file" });
         return;
       }
+      const file=req.file;
+      if(file.buffer.length===0)throw new MeetingImportFailure(400,"meeting_import_empty_file");
+      const sourceFileName=meetingImportFileName(file.originalname);
+      const inputSha256=crypto.createHash("sha256").update(file.buffer).digest("hex");
+      const idempotencyDigest=meetingCommandIdempotencyDigest(req.get("Idempotency-Key"),{projectId,userId:req.user!.userId,command:"meeting.import"});
+      const outcome=await db.transaction(async tx=>{
+        if(idempotencyDigest){
+          await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${idempotencyDigest},0))`);
+          const [prior]=await tx.select({entityId:activityLogTable.entityId,details:activityLogTable.details}).from(activityLogTable).where(and(eq(activityLogTable.projectId,projectId),eq(activityLogTable.userId,req.user!.userId),eq(activityLogTable.actionType,"import"),eq(activityLogTable.entityType,"meeting"),ilike(activityLogTable.details,`%"idempotencyDigest":"${idempotencyDigest}"%`))).limit(1);
+          if(prior){
+            const receipt=parseMeetingCommandReceipt(prior.details);
+            if(!receipt||receipt.inputSha256!==inputSha256||receipt.sourceFileName!==sourceFileName)throw new MeetingImportFailure(409,"meeting_import_retry_source_changed");
+            const [record]=await tx.select().from(meetingMinutesTable).where(and(eq(meetingMinutesTable.id,Number(prior.entityId)),eq(meetingMinutesTable.projectId,projectId),isNull(meetingMinutesTable.deletedAt))).limit(1);
+            if(!record)throw new MeetingImportFailure(409,"meeting_import_receipt_record_unavailable");
+            return {record,replayed:true,attendeeCount:Number(receipt.attendeeCount),actionItemCount:Number(receipt.actionItemCount)};
+          }
+        }
       const { chunks, isPdf, pdfBase64 } = await extractFileText(
-        req.file.buffer,
-        req.file.originalname,
+        file.buffer,
+        sourceFileName,
       );
       const anthropic = await getAnthropicClientForUser({
         userId: req.user!.userId,
@@ -3650,7 +3720,7 @@ Extract the meeting information. Return ONLY valid JSON, no markdown. Use null f
               ? extractMsg.content[0].text
               : "{}";
           const clean = text.replace(/```json\n?|```/g, "").trim();
-          const parsed = JSON.parse(clean);
+          const parsed = normalizeMeetingImportData(JSON.parse(clean),false);
           data = {
             title: parsed.title ?? null,
             meetingDate: parsed.meetingDate ?? null,
@@ -3670,7 +3740,8 @@ Extract the meeting information. Return ONLY valid JSON, no markdown. Use null f
             data.actionItems.length,
           );
         } catch (e) {
-          console.error("[meeting-import] PDF direct extraction failed:", e);
+          if(e instanceof MeetingImportFailure)throw e;
+          throw new MeetingImportFailure(502,"meeting_import_extraction_failed");
         }
       } else {
         for (const chunk of chunks) {
@@ -3704,7 +3775,7 @@ ${chunk}`,
                 ? extractMsg.content[0].text
                 : "{}";
             const clean = text.replace(/```json\n?|```/g, "").trim();
-            const chunkData = JSON.parse(clean);
+            const chunkData = normalizeMeetingImportData(JSON.parse(clean),false);
             data.title = data.title || chunkData.title || null;
             data.meetingDate =
               data.meetingDate || chunkData.meetingDate || null;
@@ -3724,19 +3795,19 @@ ${chunk}`,
                 ...chunkData.actionItems,
               ];
           } catch (e) {
-            console.error("[meeting-import] chunk extraction failed:", e);
+            if(e instanceof MeetingImportFailure)throw e;
+            throw new MeetingImportFailure(502,"meeting_import_extraction_failed");
           }
         }
       } // end else (non-PDF)
 
-      const [meeting] = await db
+      data=normalizeMeetingImportData(data);
+      const [meeting] = await tx
         .insert(meetingMinutesTable)
         .values({
           projectId,
-          title: data.title || req.file.originalname,
-          meetingDate: data.meetingDate
-            ? new Date(data.meetingDate)
-            : new Date(),
+          title: data.title || sourceFileName,
+          meetingDate: meetingImportTimestamp(data),
           location: data.location || null,
           notes: data.notes || null,
           createdById: req.user!.userId,
@@ -3746,7 +3817,7 @@ ${chunk}`,
       if (data.attendees?.length > 0) {
         const validAttendees = data.attendees.filter((a: any) => a.fullName);
         if (validAttendees.length > 0) {
-          await db.insert(meetingAttendeesTable).values(
+          await tx.insert(meetingAttendeesTable).values(
             validAttendees.map((a: any) => ({
               meetingId: meeting.id,
               fullName: a.fullName,
@@ -3762,7 +3833,7 @@ ${chunk}`,
       if (data.actionItems?.length > 0) {
         const validItems = data.actionItems.filter((ai: any) => ai.description);
         if (validItems.length > 0) {
-          await db.insert(actionItemsTable).values(
+          await tx.insert(actionItemsTable).values(
             validItems.map((ai: any) => ({
               meetingId: meeting.id,
               projectId,
@@ -3775,7 +3846,7 @@ ${chunk}`,
         }
       }
 
-      await db.insert(activityLogTable).values({
+      await tx.insert(activityLogTable).values({
         projectId,
         userId: req.user!.userId,
         userFullName: req.user!.fullName ?? "",
@@ -3783,21 +3854,21 @@ ${chunk}`,
         actionType: "import",
         entityType: "meeting",
         entityId: meeting.id,
-        details: `Imported meeting minutes from ${req.file.originalname} — ${data.attendees?.length ?? 0} attendees, ${data.actionItems?.length ?? 0} action items`,
+        details: JSON.stringify({version:1,kind:"meeting-import",idempotencyDigest,inputSha256,sourceFileName,byteCount:file.buffer.length,attendeeCount:data.attendees.filter((a:any)=>a.fullName).length,actionItemCount:data.actionItems.filter((a:any)=>a.description).length}),
       });
 
-      res.json({
-        imported: 1,
-        meetingId: meeting.id,
-        title: meeting.title,
-        message: "Meeting imported successfully",
+      return {record:meeting,replayed:false,attendeeCount:data.attendees.filter((a:any)=>a.fullName).length,actionItemCount:data.actionItems.filter((a:any)=>a.description).length};
       });
+      if(outcome.replayed)res.set("Idempotency-Replayed","true");
+      res.json({imported:1,projectId,meetingId:outcome.record.id,title:outcome.record.title,inputSha256,sourceFileName,byteCount:file.buffer.length,attendeeCount:outcome.attendeeCount,actionItemCount:outcome.actionItemCount,replayed:outcome.replayed,idempotencyProtected:Boolean(idempotencyDigest),message:"Meeting imported successfully"});
     } catch (err) {
       if (sendAiUsageError(res, err)) return;
+      if(err instanceof MeetingImportFailure){res.status(err.status).json({error:err.code});return;}
+      if(err instanceof Error&&err.message==="meeting_idempotency_key_invalid"){res.status(400).json({error:err.message});return;}
       console.error("[meeting-import]", err);
       res
         .status(500)
-        .json({ error: err instanceof Error ? err.message : String(err) });
+        .json({ error: "meeting_import_failed" });
     }
   },
 );

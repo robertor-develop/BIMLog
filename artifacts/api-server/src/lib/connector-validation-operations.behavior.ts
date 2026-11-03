@@ -38,11 +38,11 @@ assert.equal(released, true);
 assert.match(calls[0]?.sql ?? "", /BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY/);
 assert.match(calls[1]?.sql ?? "", /pm\.status='active' AND pm\.role='project_admin'/);
 assert.deepEqual(calls[1]?.values, [11, 23, 71]);
-assert.match(calls[2]?.sql ?? "", /c\.company_id=\$2 AND c\.provider='sharepoint'/);
-assert.match(calls[2]?.sql ?? "", /a\.details->>'projectId'=\$3::text/);
-assert.match(calls[2]?.sql ?? "", /ORDER BY a\.created_at DESC,a\.id DESC LIMIT \$4/);
+assert.match(calls[2]?.sql ?? "", /c\.company_id=\$1 AND c\.provider='sharepoint'/);
+assert.match(calls[2]?.sql ?? "", /a\.details->>'projectId'=\$2::text/);
+assert.match(calls[2]?.sql ?? "", /ORDER BY a\.created_at DESC,a\.id DESC LIMIT \$3/);
 assert.doesNotMatch(calls[2]?.sql ?? "", /secret_ciphertext|secret_iv|secret_tag|wrapped_data_key|wrap_iv|wrap_tag|SELECT\s+\*/i);
-assert.deepEqual(calls[2]?.values, [11, 23, 71, 20]);
+assert.deepEqual(calls[2]?.values, [23, 71, 20]);
 assert.equal(calls[3]?.sql, "COMMIT");
 
 let rolledBack = false;

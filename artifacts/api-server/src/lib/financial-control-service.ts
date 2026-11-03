@@ -881,6 +881,9 @@ export async function revokeFinancialGrant(input: {
         "FIN_AUTHORITY_CHANGED",
         "Financial Administrator authority changed.",
       );
+    await client.query(`SELECT pg_advisory_xact_lock(hashtextextended($1,0))`,[`financial-revoke:${input.grantId}`]);
+    const existingRevocation=await client.query(`SELECT id FROM financial_authority_revocations WHERE grant_id=$1 LIMIT 1`,[input.grantId]);
+    if(existingRevocation.rows[0])throw new FinancialControlError(409,"FIN_GRANT_ALREADY_REVOKED","The financial authority grant is already revoked. Reload its saved history.");
     const id = crypto.randomUUID();
     await client.query(
       `INSERT INTO financial_authority_revocations(id,grant_id,reason,revoked_by_id) VALUES($1,$2,$3,$4)`,

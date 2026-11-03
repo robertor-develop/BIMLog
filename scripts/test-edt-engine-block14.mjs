@@ -8,12 +8,13 @@ function run(command, args) {
 }
 
 const routes = readFileSync("artifacts/api-server/src/routes/edt-engine.ts", "utf8");
-assert.match(routes, /ACTIVATION_PLAN_NOT_SERVER_RESOLVED/);
+assert.match(routes, /requestResolvedEdtActivation\(/);
+assert.match(routes, /approveResolvedEdtActivation\(/);
 assert.match(routes, /ECONOMIC_PLAN_NOT_SERVER_RESOLVED/);
 assert.match(routes, /TIME_AMOUNT_NOT_SERVER_RESOLVED/);
-assert.doesNotMatch(routes, /requestResolvedEdtActivation|approveResolvedEdtActivation/,
-  "service preparation must not silently open the user-facing mutations");
+assert.doesNotMatch(routes, /nodes:\s*body\.nodes|workItems:\s*body\.workItems|actor:\s*body/,
+  "authorized activation must still reject browser-authored authority and plans");
 run("pnpm", ["run", "test:edt-engine-block13"]);
 for (const build of [342, 343, 344, 345])
   run("pnpm", ["--filter", "@workspace/api-server", "run", `test:edt-engine-build${build}`]);
-console.log("EDT_ENGINE_BLOCK14_RESULT=PASS exact candidate, server-owned intent/approval, real-schema SQL and closed routes");
+console.log("EDT_ENGINE_BLOCK14_RESULT=PASS exact candidate and server-owned intent/approval; P147 HTTP/UI acceptance is separate");

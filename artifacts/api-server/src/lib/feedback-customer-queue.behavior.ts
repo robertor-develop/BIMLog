@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {customerFeedbackQueueProgress} from './feedback-customer-queue';
+const now=new Date('2026-10-29T12:00:00Z'),row={state:'claimed',attempts:1,lease_expires_at:'2026-10-29T12:05:00Z',next_attempt_at:'2026-10-29T11:59:00Z',lease_token:'private',lease_owner:'worker-secret'};
+assert.equal(customerFeedbackQueueProgress(row,now).phase,'processing');
+assert.equal(customerFeedbackQueueProgress({...row,lease_expires_at:'2026-10-29T11:59:00Z'},now).phase,'awaiting_recovery');
+assert.equal(customerFeedbackQueueProgress({...row,state:'pending'},now).phase,'queued');
+assert.equal(customerFeedbackQueueProgress({...row,state:'retry-required'},now).phase,'retry_scheduled');
+assert.equal(customerFeedbackQueueProgress({...row,state:'dead-letter'},now).phase,'needs_attention');
+assert.equal(customerFeedbackQueueProgress({...row,state:'blocked'},now).phase,'needs_attention');
+assert.equal(customerFeedbackQueueProgress({...row,state:'unknown'},now).phase,'status_unavailable');
+const delivered=customerFeedbackQueueProgress({...row,state:'delivered'},now);assert.equal(delivered.phase,'delivered');assert.equal(delivered.processingUntil,null);assert.equal(delivered.nextAttemptAt,null);
+assert.equal(customerFeedbackQueueProgress({...row,attempts:-1,lease_expires_at:'bad'},now).attempts,0);
+assert.equal(customerFeedbackQueueProgress(row,now).maxAttempts,3);
+assert.doesNotMatch(JSON.stringify(customerFeedbackQueueProgress(row,now)),/private|worker-secret|lease_token|lease_owner/);
+console.log('Customer queue: live/expired claim, scheduled retry, terminal states and secret exclusion PASS');

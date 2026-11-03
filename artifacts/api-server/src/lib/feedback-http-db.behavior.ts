@@ -73,6 +73,8 @@ await testPool.query(`
   CREATE TABLE projects(id integer PRIMARY KEY, name text NOT NULL, code text NOT NULL, status text NOT NULL, created_by_id integer NOT NULL REFERENCES users(id), created_at timestamp NOT NULL DEFAULT now(), updated_at timestamp NOT NULL DEFAULT now());
   CREATE TABLE project_members(id serial PRIMARY KEY, project_id integer NOT NULL REFERENCES projects(id), user_id integer NOT NULL REFERENCES users(id), role text NOT NULL, joined_at timestamp NOT NULL DEFAULT now(), permissions_override jsonb, status text DEFAULT 'active');
   INSERT INTO companies VALUES (1,'A'),(2,'B'); INSERT INTO users VALUES (11,'a@test.invalid','A',1,false),(22,'b@test.invalid','B',2,false),(33,'admin@test.invalid','Admin',1,true); INSERT INTO projects VALUES (101,'A project','A-1','active',11,now(),now()); INSERT INTO project_members(project_id,user_id,role,status) VALUES(101,11,'member','active');
+  ALTER TABLE companies ADD COLUMN retired_into_company_id integer;
+  ALTER TABLE users ADD COLUMN password_hash text NOT NULL DEFAULT 'isolated-fixture-password-hash';
 `);
 const lockOwner = await testPool.connect();
 await lockOwner.query("BEGIN");
@@ -719,7 +721,11 @@ try {
     },
   });
   assert.equal(csv.status, 200);
+  assert.match(csv.headers.get('Content-Type')??'',/text\/csv/);
   assert.match(await csv.text(), /'=HYPERLINK/);
+  assert.ok((await testPool.query("SELECT count(*)::int n FROM feedback_audit_events WHERE event_type='admin_exported' AND reason='fixture review'")).rows[0].n>0);
+  assert.equal((await fetch(`${base}/feedback/admin/export.csv`,{headers:{Authorization:`Bearer ${tokenAdmin}`}})).status,400);
+  assert.equal((await fetch(`${base}/feedback/admin/export.csv`,{headers:{Authorization:`Bearer ${tokenA}`,'X-Export-Reason':'ordinary user must not export'}})).status,403);
   assert.equal(
     (
       await testPool.query(
@@ -729,7 +735,25 @@ try {
     ).rows[0].retention_hold,
     true,
   );
-  console.log("feedback DB/HTTP contract: 38/38 passed");
+  const claimedProjection=await testPool.query(`UPDATE feedback_operations_outbox SET state='claimed',attempts=1,lease_owner='private-fixture-worker',lease_token='private-fixture-token',lease_expires_at=now()+interval '5 minutes' WHERE feedback_id=$1 RETURNING id`,[id]);
+  assert.equal(claimedProjection.rowCount,1);
+  const ownRoute=async()=>{const response=await fetch(`${base}/feedback/mine`,{headers:{Authorization:`Bearer ${tokenA}`}});assert.equal(response.status,200);const data=await response.json() as {feedback:Array<{id:number;operationsRoute:any}>};return data.feedback.find(row=>row.id===id)!.operationsRoute;};
+  const processingRoute=await ownRoute();assert.equal(processingRoute.queue.phase,'processing');assert.equal(processingRoute.queue.attempts,1);assert.equal(processingRoute.receipt,null);assert.doesNotMatch(JSON.stringify(processingRoute),/private-fixture|lease_token|lease_owner/);
+  await testPool.query(`UPDATE feedback_operations_outbox SET state='delivered',receipt_id=$2,receipt_revision=1,settled_at=now(),case_digest='private-fixture-digest' WHERE feedback_id=$1`,[id,`bimlog-feedback-${'a'.repeat(64)}`]);
+  const deliveredRoute=await ownRoute();assert.equal(deliveredRoute.queue.phase,'delivered');assert.equal(deliveredRoute.receipt.caseRevision,1);assert.match(deliveredRoute.receipt.receiptId,/^bimlog-feedback-[a-f0-9]{64}$/);assert.doesNotMatch(JSON.stringify(deliveredRoute),/private-fixture|lease_token|lease_owner|case_digest/);
+  const otherMine=await fetch(`${base}/feedback/mine`,{headers:{Authorization:`Bearer ${tokenB}`}});assert.equal(otherMine.status,200);assert.equal((await otherMine.json() as {feedback:Array<{id:number}>}).feedback.some(row=>row.id===id),false);
+  for(const endpoint of ['/feedback-agent/claim',`/feedback-agent/${claimedProjection.rows[0].id}/result`])assert.equal((await fetch(`${base}${endpoint}`,{method:'POST',headers:{Authorization:`Bearer ${tokenA}`,'Content-Type':'application/json'},body:'{}'})).status,401);
+  const beforeComment=(await testPool.query('SELECT status,version FROM feedback_items WHERE id=$1',[id])).rows[0];
+  const commentResponse=await fetch(`${base}/feedback/${id}/comments`,{method:'POST',headers:{Authorization:`Bearer ${tokenA}`,'Content-Type':'application/json'},body:JSON.stringify({comment:'Additional field evidence from the customer.'})});assert.equal(commentResponse.status,201);const savedComment=await commentResponse.json() as {comment:{id:number;text:string;createdAt:string}};assert.equal(savedComment.comment.text,'Additional field evidence from the customer.');assert.ok(savedComment.comment.id);
+  assert.deepEqual((await testPool.query('SELECT status,version FROM feedback_items WHERE id=$1',[id])).rows[0],beforeComment);
+  const reopenedHistory=await fetch(`${base}/feedback/${id}/history`,{headers:{Authorization:`Bearer ${tokenA}`}});assert.equal(reopenedHistory.status,200);assert.match(await reopenedHistory.text(),/Additional field evidence from the customer/);
+  for(const comment of ['',' '.repeat(10)])assert.equal((await fetch(`${base}/feedback/${id}/comments`,{method:'POST',headers:{Authorization:`Bearer ${tokenA}`,'Content-Type':'application/json'},body:JSON.stringify({comment})})).status,400);
+  const boundedComment=await fetch(`${base}/feedback/${id}/comments`,{method:'POST',headers:{Authorization:`Bearer ${tokenA}`,'Content-Type':'application/json'},body:JSON.stringify({comment:'x'.repeat(4001)})});assert.equal(boundedComment.status,201);assert.equal((await boundedComment.json() as {comment:{text:string}}).comment.text.length,4000);
+  await testPool.query(`INSERT INTO feedback_audit_events(feedback_id,actor_user_id,event_type,reason) VALUES($1,33,'commented','PRIVATE_STAFF_COMMENT_MUST_STAY_INTERNAL')`,[id]);
+  const privateHistory=await fetch(`${base}/feedback/${id}/history`,{headers:{Authorization:`Bearer ${tokenA}`}});assert.equal(privateHistory.status,200);assert.doesNotMatch(await privateHistory.text(),/PRIVATE_STAFF_COMMENT_MUST_STAY_INTERNAL/);
+  assert.equal((await fetch(`${base}/feedback/${id}/comments`,{method:'POST',headers:{Authorization:`Bearer ${tokenB}`,'Content-Type':'application/json'},body:JSON.stringify({comment:'Cross-tenant comment must be denied.'})})).status,403);
+  assert.equal((await testPool.query('SELECT count(*)::int n FROM feedback_audit_events WHERE feedback_id=$1 AND reason=$2',[id,'Cross-tenant comment must be denied.'])).rows[0].n,0);
+  console.log("feedback DB/HTTP contract: 38 existing checks plus safe queue/result projection, tenant isolation, native boundary and persisted comment positive/negative checks passed");
 } finally {
   server.closeIdleConnections();
   server.closeAllConnections();

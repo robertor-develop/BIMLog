@@ -105,6 +105,7 @@ export interface ReverseAuthorizedGenericApuBudgetOverrideInput {
 
 export interface GenericApuBudgetAuthorityDependencies {
   readonly now: () => Date;
+  readonly authorizeRead: (input:{actorUserId:number;projectId:number})=>Promise<{companyId:number}>;
   readonly loadBinding: (
     projectId: number,
     projectApuVersionId: string,
@@ -242,9 +243,11 @@ export async function evaluateAuthorizedGenericApuBudgetControlWithDependencies(
   const actorUserId = positiveId(input.actorUserId, "actorUserId");
   const projectId = positiveId(input.projectId, "projectId");
   const projectApuVersionId = stableId(input.projectApuVersionId, "projectApuVersionId");
+  const readScope=await dependencies.authorizeRead({actorUserId,projectId});
   const binding = await dependencies.loadBinding(projectId, projectApuVersionId);
   if (!binding)
     fail(404, "APU_AUTHORITY_BINDING_NOT_FOUND", "The project APU authority binding was not found in the authenticated project scope.");
+  requireCompanyScope(binding.companyId,readScope.companyId);
   if (
     binding.projectId !== projectId ||
     binding.projectApuVersionId !== projectApuVersionId ||
@@ -408,6 +411,7 @@ function productionTransaction(): GenericApuBudgetAuthorityTransaction {
         let activeBinding: GenericApuAuthorityBinding | null = null;
         const dependencies: GenericApuBudgetAuthorityDependencies = {
           now: () => new Date(),
+          authorizeRead: async ({actorUserId,projectId})=>{const auth=await authorizeFinancialOperation({actorUserId,projectId,featureKey:"cost.budget.view",operation:"read",client});return {companyId:auth.scope.companyId};},
           loadBinding: async (projectId, id) => {
             activeBinding = await loadBinding(client, projectId, id);
             return activeBinding;

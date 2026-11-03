@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import {createLensNextApiClient} from "./lens-next-client";
+import type {LensNextIssue} from "./lens-next-types";
+const issue={identity:{projectId:91,serverId:7,viewpointId:"fixture",lifecycleStatus:"active",revisionNumber:1},mutationVersion:1} as LensNextIssue;
+const item={id:"fixture-viewpoint",issue_id:7,project_id:91,viewpoint_type:"coordination",lifecycle_status:"active",display_order:0,is_primary:true,name:"Fixture saved viewpoint"};
+const client=(override:Record<string,unknown>={},status=200)=>createLensNextApiClient({token:"synthetic-local-token",fetchImpl:async(input,init)=>{assert.match(String(input),/\/projects\/91\/clash-reports\/lens-next\/issues\/7\/viewpoints$/);assert.equal(new Headers(init?.headers).get("Authorization"),"Bearer synthetic-local-token");return Response.json({success:true,contractVersion:"lens-issue-viewpoints.v1",issueId:7,viewpoints:[{...item,...override}]},{status});}});
+assert.equal((await client().loadIssueViewpoints(issue))[0].name,"Fixture saved viewpoint");
+await assert.rejects(()=>client({project_id:92}).loadIssueViewpoints(issue),/identity mismatch/);
+await assert.rejects(()=>client({issue_id:8}).loadIssueViewpoints(issue),/identity mismatch/);
+await assert.rejects(()=>client({project_id:undefined}).loadIssueViewpoints(issue),/identity mismatch/);
+await assert.rejects(()=>client({},403).loadIssueViewpoints(issue));
+console.log("Lens Issue client behavior: exact saved scope accepted, foreign project/issue and missing scope rejected, HTTP403 rejected PASS");

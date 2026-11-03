@@ -1,3 +1,4 @@
+import { IntakeSourceRemoval } from "@/components/job-intake/IntakeSourceRemoval";
 import { IntakeCommercialReadiness } from "@/components/job-intake/IntakeCommercialReadiness";
 import { IntakeContractConnection } from "@/components/job-intake/IntakeContractConnection";
 import { GenericResourcePlan } from "@/components/job-intake/GenericResourcePlan";
@@ -151,6 +152,7 @@ export function JobIntakeWorkspace() {
     saveRetryRef = useRef(0),
     autosaveErrorRef = useRef(""),
     activationInFlightRef = useRef(false),
+    uploadInFlightRef = useRef<string|null>(null),
     saveTimerRef = useRef<number | null>(null);
   const openCommercialPrerequisite = (destination: string, stage: IntakeStage = "scope", item = `ji-${stage}`) => {
     preserveJobIntakeActiveStage(projectId, stage);
@@ -344,7 +346,7 @@ export function JobIntakeWorkspace() {
     if (!intake) return;
     const returnContext = parseIntakeResume(window.location.search, projectId);
     const restored = returnContext?.stage ?? readJobIntakeActiveStage(projectId);
-    setActive(restored === "documents" ? "identity" : restored);
+    setActive(restored === "documents" && returnContext?.stage !== "documents" ? "identity" : restored);
     preserveJobIntakeActiveStage(projectId, restored);
     if (restored === "documents") document.getElementById("ji-documents")?.setAttribute("open", "");
     const item = returnContext?.item ?? readJobIntakeActiveItem(projectId);
@@ -683,11 +685,15 @@ export function JobIntakeWorkspace() {
   };
   const upload = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if(uploadInFlightRef.current)return;
+    const action=crypto.randomUUID(),originProject=projectId;uploadInFlightRef.current=action;
+    const active=()=>uploadInFlightRef.current===action&&projectIdRef.current===originProject;
     const form = event.currentTarget;
     setBusy(true);
     setError("");
     try {
       const saved = await persist(dataRef.current);
+      if(!active())return;
       if (!saved)
         throw new Error(
           tt(
@@ -699,8 +705,10 @@ export function JobIntakeWorkspace() {
         method: "POST",
         body: prepareJobIntakeUpload(form, saved.revision),
       });
+      if(!active())return;
       form.reset();
       await load();
+      if(!active())return;
       setNotice(
         tt(
           "Source document preserved and indexed.",
@@ -708,11 +716,15 @@ export function JobIntakeWorkspace() {
         ),
       );
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
-      setBusy(false);
+      if(active()){setError(cause instanceof Error ? cause.message : String(cause));setBusy(false);}
+    } finally {
+      if(uploadInFlightRef.current===action)uploadInFlightRef.current=null;
     }
   };
   const snapshotRequest = useRef(0);
+  const mappingAction = useRef<string|null>(null),mappingContext = useRef("");
+  mappingContext.current=JSON.stringify([projectId,mappingDocument?.id,mappingForm]);
+  useEffect(()=>{mappingAction.current=null;uploadInFlightRef.current=null;setMappingBusy(false);return()=>{mappingAction.current=null;uploadInFlightRef.current=null;};},[projectId,token]);
   const selectSnapshot = async (id: string) => {
     const request = ++snapshotRequest.current;
     const originProject = projectId;
@@ -731,6 +743,7 @@ export function JobIntakeWorkspace() {
     }
   };
   const openMapper = (doc: any) => {
+    if(mappingAction.current)return;
     const nextMapping = defaultJobIntakeMappingForm(doc);
     if (!nextMapping) return;
     setMappingDocument(doc);
@@ -739,33 +752,40 @@ export function JobIntakeWorkspace() {
     setError("");
   };
   const previewMapping = async () => {
-    if (!mappingDocument) return;
+    if (!mappingDocument||mappingAction.current) return;
+    const action=crypto.randomUUID(),context=mappingContext.current;mappingAction.current=action;
+    const active=()=>mappingAction.current===action&&mappingContext.current===context;
     setMappingBusy(true);
+    setMappingPreview(null);
     setError("");
     try {
-      setMappingPreview(
-        await api(
+      const preview=await api(
           `/projects/${projectId}/intake/documents/${mappingDocument.id}/mapping-preview`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(buildJobIntakeMappingRequest(mappingForm)),
           },
-        ),
-      );
+        );
+      if(!active())return;
+      if(preview.documentId!==mappingDocument.id||preview.sourceHash!==mappingDocument.sourceHash||preview.sheetName!==mappingForm.sheetName||preview.headerRow!==mappingForm.headerRow||preview.nameColumn!==mappingForm.nameColumn||preview.quantityColumn!==mappingForm.quantityColumn||!Array.isArray(preview.rows)||!Array.isArray(preview.issues)||!/^[a-f0-9]{64}$/.test(preview.mappingFingerprint))throw new Error(tt("Mapping evidence does not match this exact retained source and column selection.","La evidencia de mapeo no coincide con esta fuente conservada y selección de columnas exactas."));
+      setMappingPreview(preview);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
+      if(active())setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
-      setMappingBusy(false);
+      if(mappingAction.current===action){mappingAction.current=null;setMappingBusy(false);}
     }
   };
   const applyMapping = async () => {
-    if (!mappingDocument || !mappingPreview) return;
+    if (!mappingDocument || !mappingPreview||mappingAction.current||mappingPreview.issues?.length||!mappingPreview.rows?.length) return;
+    const action=crypto.randomUUID(),context=mappingContext.current;mappingAction.current=action;
+    const active=()=>mappingAction.current===action&&mappingContext.current===context;
     setBusy(true);
     setMappingBusy(true);
     setError("");
     try {
       const saved = await persist(dataRef.current);
+      if(!active())return;
       if (!saved)
         throw new Error(
           tt(
@@ -785,6 +805,8 @@ export function JobIntakeWorkspace() {
           }),
         },
       );
+      if(!active())return;
+      if(result.project?.id!==projectId||result.revision!==saved.revision+1||!result.events?.some((event:any)=>event.eventType==="contract_items_imported"&&event.afterRevision===result.revision&&event.evidence?.documentId===mappingDocument.id&&event.evidence?.sourceHash===mappingDocument.sourceHash&&event.evidence?.mappingFingerprint===mappingPreview.mappingFingerprint))throw new Error(tt("The mapped save could not be verified. Reopen Intake to inspect the saved source history before importing again.","No se verificó el guardado mapeado. Reabra Ingreso e inspeccione el historial guardado antes de importar otra vez."));
       revisionRef.current = result.revision;
       intakeRef.current = result;
       dataRef.current = result.data;
@@ -805,10 +827,9 @@ export function JobIntakeWorkspace() {
         .getElementById("ji-scope")
         ?.scrollIntoView({ behavior: "smooth" });
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
+      if(active())setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
-      setBusy(false);
-      setMappingBusy(false);
+      if(mappingAction.current===action){mappingAction.current=null;setBusy(false);setMappingBusy(false);}
     }
   };
   const activate = async () => {
@@ -1490,42 +1511,7 @@ export function JobIntakeWorkspace() {
                               )}
                             </button>
                           )}
-                          <button
-                            className="danger"
-                            aria-label={tt(
-                              "Remove document",
-                              "Eliminar documento",
-                            )}
-                            title={tt("Remove document", "Eliminar documento")}
-                            onClick={async () => {
-                              setBusy(true);
-                              setError("");
-                              try {
-                                const saved = await persist(dataRef.current);
-                                if (!saved)
-                                  throw new Error(
-                                    tt(
-                                      "The Intake is not ready to save.",
-                                      "El ingreso no está listo para guardar.",
-                                    ),
-                                  );
-                                await api(
-                                  `/projects/${projectId}/intake/documents/${doc.id}?expectedRevision=${saved.revision}`,
-                                  { method: "DELETE" },
-                                );
-                                await load();
-                              } catch (cause) {
-                                setError(
-                                  cause instanceof Error
-                                    ? cause.message
-                                    : String(cause),
-                                );
-                                setBusy(false);
-                              }
-                            }}
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                          <IntakeSourceRemoval projectId={projectId} document={doc} status={intake.status} persist={()=>persist(dataRef.current)} api={api} onVerified={load}/>
                         </div>
                       </div>
                     ),

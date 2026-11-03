@@ -12,7 +12,7 @@ import {
   submittalsTable,
   usersTable,
 } from "@workspace/db/schema";
-import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { authMiddleware, requirePermission, requireProjectMember } from "../middlewares/auth";
 import {
   addPageNumbers,
@@ -29,6 +29,42 @@ import {
 } from "../lib/pdf-kit";
 
 const router: Router = Router();
+
+router.use("/projects/:projectId/milestones", authMiddleware, async (req, res, next) => {
+  const projectId = Number(req.params.projectId);
+  if (!Number.isSafeInteger(projectId) || projectId <= 0) {
+    res.status(400).json({ error: "invalid_project_id" });
+    return;
+  }
+  try {
+    const result = await db.execute(sql`
+      SELECT (
+        actor.is_super_admin OR (
+          actor.company_id = COALESCE(
+            (SELECT company_id FROM project_company_binding_versions WHERE project_id = project.id ORDER BY version DESC LIMIT 1),
+            creator.company_id
+          )
+          AND EXISTS (
+            SELECT 1 FROM project_members member
+            WHERE member.project_id = project.id AND member.user_id = actor.id AND member.status = 'active'
+          )
+        )
+      ) AS allowed
+      FROM projects project
+      JOIN users creator ON creator.id = project.created_by_id
+      JOIN users actor ON actor.id = ${req.user!.userId}
+      WHERE project.id = ${projectId} AND project.status <> 'archived'
+    `);
+    if (result.rows[0]?.allowed !== true) {
+      res.status(403).json({ error: "current_project_company_access_required" });
+      return;
+    }
+    res.set({ "Cache-Control": "private, no-store", "X-BIMLog-Project-Id": String(projectId) });
+    next();
+  } catch {
+    res.status(503).json({ error: "milestone_authority_unavailable" });
+  }
+});
 
 const DEFAULT_BUCKETS = [
   { name: "This Week", bucketType: "system", sortOrder: 10 },
@@ -968,12 +1004,14 @@ router.post("/projects/:projectId/milestones", authMiddleware, requirePermission
     status?: string;
     bucket_id?: number;
   };
-  if (!body.title || !body.due_date) { res.status(400).json({ error: "title and due_date required" }); return; }
+  const title = body.title?.trim();
+  const dueDate = body.due_date ? new Date(body.due_date) : null;
+  if (!title || !dueDate || Number.isNaN(dueDate.getTime())) { res.status(400).json({ error: "valid title and due_date required" }); return; }
   try {
     const [ms] = await db.insert(projectMilestonesTable).values({
       projectId,
-      title: body.title,
-      dueDate: new Date(body.due_date),
+      title,
+      dueDate,
       itemType: body.item_type || (body.linked_module === "3d_model" ? "3d_model" : "milestone"),
       buildingLevel: body.building_level || null,
       trade: body.trade || null,
@@ -1006,7 +1044,7 @@ router.post("/projects/:projectId/milestones", authMiddleware, requirePermission
       entityId: ms.id,
       fileNameBefore: null,
       fileNameAfter: null,
-      details: `Created schedule item: ${body.title}`,
+      details: `Created schedule item: ${title}`,
     });
     res.status(201).json(ms);
   } catch (err) {
@@ -1027,6 +1065,9 @@ router.patch("/projects/:projectId/milestones/:milestoneId", authMiddleware, req
     assigned_user_id: number | null;
     notes: string;
   }>;
+  if (!Number.isSafeInteger(msId) || msId <= 0) { res.status(400).json({ error: "invalid_milestone_id" }); return; }
+  if (body.title !== undefined && !body.title.trim()) { res.status(400).json({ error: "valid_title_required" }); return; }
+  if (body.due_date !== undefined && Number.isNaN(new Date(body.due_date).getTime())) { res.status(400).json({ error: "valid_due_date_required" }); return; }
   try {
     const updates: Record<string, unknown> = { updatedAt: new Date() };
     if (body.title !== undefined) updates.title = body.title;
@@ -1061,6 +1102,7 @@ router.patch("/projects/:projectId/milestones/:milestoneId", authMiddleware, req
 router.delete("/projects/:projectId/milestones/:milestoneId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const msId = Number(req.params.milestoneId);
+  if (!Number.isSafeInteger(msId) || msId <= 0) { res.status(400).json({ error: "invalid_milestone_id" }); return; }
   try {
     const [deleted] = await db.delete(projectMilestonesTable)
       .where(and(eq(projectMilestonesTable.id, msId), eq(projectMilestonesTable.projectId, projectId)))

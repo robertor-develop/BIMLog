@@ -64,6 +64,8 @@ const admin = {
       id: "context-2",
       base_currency: "CAD",
       reporting_currency: "USD",
+      permitted_transaction_currencies: ["CAD","USD","EUR"],
+      scope_type: "company",project_id:null,reason:"Synthetic saved currency context",created_by_id:71,created_at:"2026-07-20T12:00:00.000Z",
       version: 2,
       effective_from: "2026-07-20T12:00:00.000Z",
       effective_to: null,
@@ -77,6 +79,7 @@ const admin = {
       authority: "financial_administrator",
       version: 1,
       revoked_at: null,
+      user_id:71,scope_type:"company",project_id:null,effective_from:"2026-07-20T12:00:00.000Z",effective_to:null,reason:"Synthetic administrator grant",granted_by_id:71,
     },
   ],
   policies: [
@@ -106,13 +109,14 @@ const admin = {
   ],
 };
 const app = express();
+const fixtureToken=`${Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url')}.${Buffer.from(JSON.stringify({sub:user.id,exp:Math.floor(Date.now()/1000)+3600})).toString('base64url')}.synthetic-local-browser-fixture`;
 app.use(express.json({ limit: "32kb" }));
 app.get("/browser-seed", (req, res) => {
   const lang = req.query.lang === "es" ? "es" : "en";
   res
     .type("html")
     .send(
-      `<script>localStorage.setItem('bimlog-auth',${JSON.stringify(JSON.stringify({ state: { token: "browser-proof-token", user }, version: 0 }))});localStorage.setItem('bimlog-lang','${lang}');location.replace('/settings/financial-controls')</script>`,
+      `<script>localStorage.setItem('bimlog-auth',${JSON.stringify(JSON.stringify({ state: { token: fixtureToken, user, changedAt:Date.now() }, version: 1 }))});localStorage.setItem('bimlog-lang','${lang}');location.replace('/settings/financial-controls')</script>`,
     );
 });
 app.get("/api/v1/auth/me", (_req, res) =>
@@ -123,7 +127,9 @@ app.get("/api/v1/auth/me", (_req, res) =>
   }),
 );
 app.get("/api/v1/financial-controls/state", (_req, res) => res.json(state));
-app.get("/api/v1/financial-controls/admin", (_req, res) => res.json(admin));
+let malformedAdmin=false;
+app.post('/fixture/admin-shape',(req,res)=>{malformedAdmin=req.body.invalid===true;res.json({ok:true});});
+app.get("/api/v1/financial-controls/admin", (_req, res) => res.json(malformedAdmin?{...admin,contexts:[{}]}:admin));
 app.get("/api/v1/projects", (_req, res) => res.json([]));
 app.get("/api/v1/notifications/unread-count", (_req, res) =>
   res.json({ count: 0 }),
@@ -155,6 +161,9 @@ const server = app.listen(3133, "127.0.0.1"),
     ],
     { stdio: "ignore", windowsHide: true },
   );
+let shutdownBrowser:(()=>Promise<void>)|null=null;
+let completedResult:unknown=null;
+try {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 let page: any;
 for (let i = 0; i < 60; i++) {
@@ -181,8 +190,11 @@ await new Promise<void>((resolve, reject) => {
 });
 let sequence = 0;
 const pending = new Map<number, (value: any) => void>();
+const runtimeErrors:string[]=[],apiFailures:string[]=[];
 socket.onmessage = (event) => {
   const message = JSON.parse(String(event.data));
+  if(message.method==='Runtime.exceptionThrown')runtimeErrors.push(JSON.stringify(message.params.exceptionDetails));
+  if(message.method==='Network.responseReceived'&&String(message.params.response.url).includes('127.0.0.1:3133/api/')&&message.params.response.status>=400)apiFailures.push(`${message.params.response.status} ${message.params.response.url}`);
   if (message.id && pending.has(message.id)) {
     pending.get(message.id)!(message);
     pending.delete(message.id);
@@ -204,15 +216,22 @@ const evaluate = async (expression: string) => {
     throw new Error(JSON.stringify(response.result.exceptionDetails));
   return response.result?.result?.value;
 };
+shutdownBrowser=async()=>{
+  const exited=new Promise<void>(resolve=>browser.once('exit',()=>resolve()));
+  if(socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify({id:++sequence,method:'Browser.close'}));
+  if(browser.exitCode===null)await Promise.race([exited,delay(5000)]);
+  socket.close();
+};
 await cdp("Runtime.enable");
 await cdp("Page.enable");
+await cdp('Network.enable');await cdp('Page.reload',{ignoreCache:true});
 let body = "";
 for (let i = 0; i < 60; i++) {
   await delay(250);
   body = String(await evaluate("document.body.innerText"));
   if (body.includes("Financial context version")) break;
 }
-assert.match(body, /Cost & Financial Control/);
+assert.match(body, /Cost & Financial Control/,JSON.stringify(runtimeErrors));
 assert.match(body, /Commercial gate/);
 assert.match(body, /ENT_COMING_LATER/);
 assert.match(
@@ -232,6 +251,12 @@ fs.writeFileSync(
   path.join(outputDir, "financial-controls-desktop-en.png"),
   Buffer.from(desktopShot.result.data, "base64"),
 );
+await evaluate(`fetch('/fixture/admin-shape',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({invalid:true})}).then(()=>{[...document.querySelectorAll('button')].find(button=>button.textContent.includes('Refresh current financial scope')).click()})`);
+for(let i=0;i<60;i++){await delay(100);body=String(await evaluate('document.body.innerText'));if(body.includes('Invalid financial administration response'))break;}
+assert.match(body,/Invalid financial administration response/);assert.match(body,/Retry selected financial scope/);
+await evaluate(`fetch('/fixture/admin-shape',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({invalid:false})}).then(()=>{[...document.querySelectorAll('button')].find(button=>button.textContent.includes('Retry selected financial scope')).click()})`);
+for(let i=0;i<60;i++){await delay(100);body=String(await evaluate('document.body.innerText'));if(body.includes('Financial context version'))break;}
+assert.match(body,/Financial context version/);
 await cdp("Emulation.setDeviceMetricsOverride", {
   width: 390,
   height: 844,
@@ -274,17 +299,26 @@ const result = {
     "commercial denial visible",
     "explicit authority visible",
     "no financial records or money movement claim visible",
+    "malformed administration response fails visibly and retry recovers",
+    "no browser runtime exceptions or local API failures",
   ],
   screenshots: [
     "financial-controls-desktop-en.png",
     "financial-controls-mobile-es.png",
   ],
+  runtimeErrors,apiFailures,
 };
-fs.writeFileSync(
-  path.join(outputDir, "financial-control-browser.json"),
-  `${JSON.stringify(result, null, 2)}\n`,
-);
-console.log(JSON.stringify(result, null, 2));
-socket.close();
-browser.kill();
-await new Promise<void>((resolve) => server.close(() => resolve()));
+assert.deepEqual(runtimeErrors,[]);assert.deepEqual(apiFailures,[]);
+completedResult=result;
+} finally {
+  await shutdownBrowser?.();
+  if(browser.exitCode===null)browser.kill();
+  server.closeIdleConnections();server.closeAllConnections();
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+  const expectedProfile=path.resolve(os.tmpdir(),`bimlog-financial-browser-${process.pid}`);
+  if(path.resolve(profileDir)!==expectedProfile)throw new Error('Task browser profile identity mismatch');
+  await new Promise(resolve=>setTimeout(resolve,1000));
+  fs.rmSync(expectedProfile,{recursive:true,force:true,maxRetries:20,retryDelay:150});
+}
+fs.writeFileSync(path.join(outputDir,"financial-control-browser.json"),`${JSON.stringify(completedResult,null,2)}\n`);
+console.log(JSON.stringify(completedResult,null,2));

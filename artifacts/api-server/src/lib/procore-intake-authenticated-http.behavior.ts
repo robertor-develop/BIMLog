@@ -6,12 +6,16 @@ import { createAgentsRouter } from "../routes/agents";
 import { startCompanyProviderApprovalMigration } from "./provider-governance";
 import { callProcoreIntakeTool } from "./procore-intake-mcp";
 import { parseProcoreFileVersions } from "./cloud-files";
+import connectionsRouter from "../routes/connections";
+import { getTableConfig } from "drizzle-orm/pg-core";
+import {companyCommercialEntitlementEventsTable,companyProviderApprovalEventsTable,procoreIntakeStatesTable} from "@workspace/db/schema";
+import { startCommercialEntitlementMigration, effectiveCommercialAccessForUser } from "./commercial-entitlement";
 
 const connectionString = process.env.PROD_DATABASE_URL;
 if (!connectionString) throw new Error("An isolated local PROD_DATABASE_URL is required.");
 const database = new URL(connectionString);
 if (!["127.0.0.1", "localhost", "::1"].includes(database.hostname) ||
-    database.port !== "55434" || database.pathname !== "/procore_intake_http_test") {
+    !["55434", "55439"].includes(database.port) || database.pathname !== "/procore_intake_http_test") {
   throw new Error("Refusing to run outside the disposable local Procore intake HTTP database.");
 }
 
@@ -60,8 +64,12 @@ let providerSnapshot = {
   mimeType: "application/pdf",
 };
 let rawVersionPayload: unknown = [{ id: "version-1", version_number: "1", created_at: "2026-10-30T00:00:00.000Z" }];
+await pool.query(`CREATE TABLE user_connections(id serial PRIMARY KEY,user_id integer NOT NULL REFERENCES users(id),provider text NOT NULL,kind text,status text NOT NULL DEFAULT 'connected',credentials jsonb,account_label text,metadata jsonb,last_error text,created_at timestamp NOT NULL DEFAULT now(),updated_at timestamp NOT NULL DEFAULT now())`);
+await pool.query(`INSERT INTO user_connections(user_id,provider,kind,credentials,account_label) VALUES($1,'procore','file_source','{"accessToken":"fixture-private-secret"}','Fixture authorized source')`,[userIds.get('intake-owner@example.test')]);
+await startCommercialEntitlementMigration();
 const app = express();
 app.use(express.json({ limit: "32kb" }));
+app.use("/api/v1",connectionsRouter);
 app.use("/api/v1", createAgentsRouter({
   callIntakeTool: (actor, name, input) => callProcoreIntakeTool(actor, name, input, {
     versions: async (_userId, ref) => {
@@ -97,7 +105,7 @@ async function request(base: string, path: string, email?: string, claimedCompan
   const text = await response.text();
   let body: any = null;
   try { body = text ? JSON.parse(text) : null; } catch { /* retain plain response */ }
-  return { status: response.status, body, text };
+  return { status: response.status, body, text, headers:response.headers };
 }
 const statePath = `/projects/${projectId}/intake-agent/state`;
 const mcpPath = `/projects/${projectId}/intake-agent/mcp`;
@@ -116,6 +124,14 @@ try {
   server = current.server;
   assert.equal((await request(current.base, statePath)).status, 401);
   checks.unauthenticatedDenied = true;
+  const catalog31=await request(current.base,'/me/provider-catalog','intake-owner@example.test');assert.equal(catalog31.status,200);const procore31=catalog31.body.providers.find((p:any)=>p.key==='procore');assert.equal(procore31.permissionState,'approved');assert.notEqual(procore31.availability,'review_required');
+  const catalog38=await request(current.base,'/me/provider-catalog','company38@example.test',38);assert.equal(catalog38.body.providers.find((p:any)=>p.key==='procore').permissionState,'approval_required');
+  const status31=await request(current.base,`/projects/${projectId}/connections/procore/status`,'intake-owner@example.test');assert.equal(status31.status,200);assert.equal(status31.body.approved,true);assert.equal(status31.headers.get('x-bimlog-project-id'),String(projectId));assert.equal(status31.body.connection.status,'connected');assert.equal(status31.text.includes('fixture-private-secret'),false);
+  checks.company31CatalogApprovalAndSafeConnectionStatus=true;
+  const future31=(await pool.query(`INSERT INTO users(email,full_name,password_hash,company_id) VALUES('future31@example.test','Future company31 member','unused',31) RETURNING id`)).rows[0].id;
+  const future38=(await pool.query(`INSERT INTO users(email,full_name,password_hash,company_id) VALUES('future38@example.test','Future other member','unused',38) RETURNING id`)).rows[0].id;
+  const full31=await effectiveCommercialAccessForUser(future31),full38=await effectiveCommercialAccessForUser(future38);assert.equal(full31.package,true);assert.equal(full31.budget,true);assert.equal(full31.contracts,true);assert.equal(full38.package,false);
+  checks.futureCompany31FullCommercialGrantWithoutPackageAndCompany38Isolation=true;
 
   const save = await request(current.base, statePath, "intake-owner@example.test", 38, {
     method: "PUT", body: JSON.stringify({
@@ -125,6 +141,9 @@ try {
     }),
   });
   assert.equal(save.status, 200);
+  assert.equal(save.headers.get("x-bimlog-project-id"),String(projectId));
+  assert.equal(save.headers.get("x-bimlog-caller-id"),String(userIds.get("intake-owner@example.test")));
+  assert.equal(save.headers.get("x-bimlog-company-id"),"31");
   assert.equal(save.body.state.destinationProjectId, projectId);
   assert.equal(save.body.state.goal, "Review submittals");
   checks.staleCompanyClaimUsesCurrentDatabaseCompany = true;
@@ -158,12 +177,20 @@ try {
   });
   assert.equal(listed.status, 200);
   assert.ok(listed.body.result.tools.some((tool: any) => tool.name === "procore_file_versions"));
+  assert.ok(listed.body.result.tools.every((tool:any)=>tool.inputSchema?.type==="object"&&!Object.hasOwn(tool,"input_schema")),"MCP wire tools must expose standard inputSchema");
   checks.company31ToolsDiscoverWithCurrentApproval = true;
+  for(const intakeContext of [{goal:"goal",needed:"docs",destinationProjectId:projectId,sourceCompanyRef:"company:39",sourceProjectRef:"project:31:120",selectedSources:[]},{goal:"goal",needed:"docs",destinationProjectId:otherProjectId,selectedSources:[]},{goal:"g".repeat(2001),needed:"docs",destinationProjectId:projectId,selectedSources:[]}]){
+    const invalidTurn=await request(current.base,`/projects/${projectId}/intake-agent/turn`,"intake-owner@example.test",31,{method:"POST",body:JSON.stringify({question:"Current request",intakeContext})});
+    assert.equal(invalidTurn.status,400);assert.equal(invalidTurn.body.code,"INTAKE_CONTEXT_INVALID");
+  }
+  checks.invalidCurrentContextDeniedBeforeAiClient = true;
+
 
   const malformedRef = await request(current.base, mcpPath, "intake-owner@example.test", 38, {
     method: "POST", body: JSON.stringify(jsonRpc("tools/call", { name: "procore_file_versions", arguments: { projectId, fileRef: "bad-ref" } })),
   });
-  assert.equal(malformedRef.body.error.code, "PROCORE_FILE_REF_INVALID");
+  assert.equal(malformedRef.body.error.data.code, "PROCORE_FILE_REF_INVALID");
+  assert.ok(Number.isInteger(malformedRef.body.error.code),"JSON-RPC errors require numeric codes");
   checks.malformedVersionReferenceRejected = true;
 
   const proposal = await request(current.base, mcpPath, "intake-owner@example.test", 38, {
@@ -180,7 +207,7 @@ try {
   const malformedVersions = await request(current.base, mcpPath, "intake-owner@example.test", 31, {
     method: "POST", body: JSON.stringify(jsonRpc("tools/call", { name: "bimlog_propose_intake_plan", arguments: sourceInput() })),
   });
-  assert.equal(malformedVersions.body.error.code, "PROCORE_VERSION_UNAVAILABLE");
+  assert.equal(malformedVersions.body.error.data.code, "PROCORE_VERSION_UNAVAILABLE");
   checks.malformedProviderVersionsRejected = true;
 
   rawVersionPayload = [{ id: "version-1", version_number: "1" }];
@@ -188,13 +215,13 @@ try {
   const changed = await request(current.base, mcpPath, "intake-owner@example.test", 31, {
     method: "POST", body: JSON.stringify(jsonRpc("tools/call", { name: "bimlog_propose_intake_plan", arguments: sourceInput() })),
   });
-  assert.equal(changed.body.error.code, "PROCORE_SOURCE_CHANGED");
+  assert.equal(changed.body.error.data.code, "PROCORE_SOURCE_CHANGED");
   providerSnapshot = { ...providerSnapshot, name: "Submittal.pdf" };
   rawVersionPayload = [];
   const unavailable = await request(current.base, mcpPath, "intake-owner@example.test", 31, {
     method: "POST", body: JSON.stringify(jsonRpc("tools/call", { name: "bimlog_propose_intake_plan", arguments: sourceInput() })),
   });
-  assert.equal(unavailable.body.error.code, "PROCORE_VERSION_UNAVAILABLE");
+  assert.equal(unavailable.body.error.data.code, "PROCORE_VERSION_UNAVAILABLE");
   checks.changedAndUnavailableProviderVersionsRejected = true;
 
   await pool.query(`INSERT INTO company_provider_approval_events(
@@ -207,8 +234,9 @@ try {
   const revokedCall = await request(current.base, mcpPath, "intake-owner@example.test", 31, {
     method: "POST", body: JSON.stringify(jsonRpc("tools/call", { name: "procore_file_versions", arguments: { projectId, fileRef: "file:120:700" } })),
   });
-  assert.equal(revokedCall.body.error.code, "PROVIDER_NOT_APPROVED");
+  assert.equal(revokedCall.body.error.data.code, "PROVIDER_NOT_APPROVED");
   checks.approvalRevocationTakesEffectWithoutRestart = true;
+  const revokedStatus=await request(current.base,`/projects/${projectId}/connections/procore/status`,"intake-owner@example.test");assert.equal(revokedStatus.body.approved,false);
 
   await close(current.server);
   server = undefined;
@@ -225,6 +253,21 @@ try {
   assert.equal(retired.body.code, "AUTHORITY_INVALID");
   checks.retiredCompanySessionDenied = true;
 
+  const ping=await request(current.base,mcpPath,"intake-owner@example.test",31,{method:"POST",body:JSON.stringify(jsonRpc("ping"))});
+  assert.equal(ping.status,401,"Retired account cannot ping across the authenticated boundary");
+  checks.standardMcpWireSchemaAndNumericErrors=true;
+  for(const table of [companyCommercialEntitlementEventsTable,companyProviderApprovalEventsTable,procoreIntakeStatesTable]){
+    const config=getTableConfig(table);
+    const actualColumns=(await pool.query(`SELECT column_name,is_nullable FROM information_schema.columns WHERE table_schema='public' AND table_name=$1 ORDER BY column_name`,[config.name])).rows;
+    assert.deepEqual(actualColumns,config.columns.map(c=>({column_name:c.name,is_nullable:c.notNull?'NO':'YES'})).sort((a,b)=>a.column_name.localeCompare(b.column_name)),'Startup columns must match the exported Drizzle declaration');
+    const foreign=(await pool.query(`SELECT conname,confdeltype FROM pg_constraint WHERE conrelid=$1::regclass AND contype='f' ORDER BY conname`,[config.name])).rows;
+    assert.deepEqual(foreign,config.foreignKeys.map(f=>({conname:f.getName(),confdeltype:'a'})).sort((a,b)=>a.conname.localeCompare(b.conname)),'New foreign keys must retain records rather than cascade deletion');
+    const indexes=(await pool.query(`SELECT indexname FROM pg_indexes WHERE schemaname='public' AND tablename=$1`,[config.name])).rows.map(r=>r.indexname);
+    for(const item of config.indexes)assert.ok(indexes.includes(item.config.name),'Declared startup index must exist');
+  }
+  await assert.rejects(pool.query(`UPDATE company_provider_approval_events SET enabled=false WHERE company_id=31`),/append-only/);
+  await assert.rejects(pool.query(`UPDATE company_commercial_entitlement_events SET enabled=false WHERE company_id=31`),/append-only/);
+  checks.additiveStartupSchemaMatchesDrizzleAndPreservesHistory=true;
   console.log(JSON.stringify({ suite: "procore-intake-authenticated-http", provider: "controlled fixture only", passed: Object.keys(checks).length, checks }, null, 2));
 } finally {
   if (server) await close(server);

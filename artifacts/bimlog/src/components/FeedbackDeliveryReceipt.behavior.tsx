@@ -1,0 +1,11 @@
+import React from 'react';
+import assert from 'node:assert/strict';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {FeedbackDeliveryReceipt} from './FeedbackDeliveryReceipt';
+const receipt={receiptId:'bimlog-feedback-example',caseRevision:2,settledAt:'2026-10-29T12:00:00Z'};
+const current=renderToStaticMarkup(<FeedbackDeliveryReceipt receipt={receipt} currentRevision={2} es={false}/>);
+assert.match(current,/current revision/);assert.match(current,/does not mean the issue is fixed/);
+const old=renderToStaticMarkup(<FeedbackDeliveryReceipt receipt={receipt} currentRevision={3} es={true}/>);
+assert.match(old,/revisión anterior/);assert.match(old,/no significa/);
+assert.match(renderToStaticMarkup(<FeedbackDeliveryReceipt receipt={null} currentRevision={3} es={false}/>),/No completed agent-delivery receipt/);
+console.log('Rendered feedback receipt: current, older, pending and Spanish states PASS');

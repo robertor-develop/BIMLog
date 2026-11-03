@@ -1025,7 +1025,7 @@ export async function getFinancialBudgetWorkspace(input: {
 }) {
   await waitForFinancialBudgetMigration();
   const projectId = positiveId(input.projectId, "projectId");
-  await authorizeFinancialOperation({
+  const authorization=await authorizeFinancialOperation({
     actorUserId: input.actorUserId,
     projectId,
     featureKey: input.snapshotId ? "cost.report.view" : "cost.budget.view",
@@ -1048,10 +1048,11 @@ export async function getFinancialBudgetWorkspace(input: {
       "PROJECT_NOT_FOUND",
       "Project not found.",
     );
+  if(Number(project.company_id)!==authorization.scope.companyId)throw new FinancialControlError(403,"FIN_COMPANY_CONTEXT_CHANGED","The current project company context changed. Reopen financial records.");
   const structures = (
     await pool.query(
-      `SELECT s.*,l.library_id,l.version library_version FROM project_cost_structure_versions s JOIN company_cost_library_versions l ON l.id=s.library_version_id WHERE s.project_id=$1 ORDER BY s.version DESC`,
-      [projectId],
+      `SELECT s.*,l.library_id,l.version library_version FROM project_cost_structure_versions s JOIN company_cost_library_versions l ON l.id=s.library_version_id WHERE s.project_id=$1 AND l.company_id=$2 ORDER BY s.version DESC`,
+      [projectId,authorization.scope.companyId],
     )
   ).rows;
   const libraries = (
@@ -1075,14 +1076,14 @@ export async function getFinancialBudgetWorkspace(input: {
     await pool.query(
       `SELECT b.id,b.budget_id,b.version,b.structure_version_id,b.currency,b.status,b.purpose,b.calculated_total,b.content_fingerprint,b.revision,b.prepared_by_id,b.submitted_at,b.reviewed_at,b.approved_at,b.approved_snapshot_id,b.created_at,
         EXISTS(SELECT 1 FROM financial_authority_journal j WHERE j.project_id=b.project_id AND j.event_type='budget_self_approval_override_used' AND j.entity_type='project_budget_version' AND j.entity_id=b.id) self_approval_override
-       FROM project_budget_versions b WHERE b.project_id=$1 ORDER BY b.created_at DESC`,
-      [projectId],
+       FROM project_budget_versions b WHERE b.project_id=$1 AND b.company_id=$2 ORDER BY b.created_at DESC`,
+      [projectId,authorization.scope.companyId],
     )
   ).rows;
   const snapshots = (
     await pool.query(
-      `SELECT * FROM approved_budget_snapshots WHERE project_id=$1 ORDER BY approved_at DESC`,
-      [projectId],
+      `SELECT * FROM approved_budget_snapshots WHERE project_id=$1 AND company_id=$2 ORDER BY approved_at DESC`,
+      [projectId,authorization.scope.companyId],
     )
   ).rows;
   let snapshot = null;

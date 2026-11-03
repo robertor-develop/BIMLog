@@ -65,7 +65,8 @@ function tree(nodes: any[]) {
 
 async function response(client: any, workflow: any) {
   const nodes = (await client.query(`SELECT * FROM contract_item_workflow_nodes WHERE workflow_id=$1 ORDER BY sequence,id`, [workflow.id])).rows;
-  return { workflow: { id: workflow.id, projectId: Number(workflow.project_id), contractId: workflow.contract_id, contractVersionId: workflow.contract_version_id, stableLineId: workflow.stable_line_id, displayName: workflow.display_name, templateKey: workflow.template_key, status: workflow.status, revision: Number(workflow.revision), updatedAt: new Date(workflow.updated_at).toISOString() }, nodes: tree(nodes) };
+  const history = (await client.query(`SELECT id,node_id,actor_user_id,event_type,before_state,after_state,reason,occurred_at FROM contract_item_workflow_events WHERE workflow_id=$1 ORDER BY occurred_at,id`, [workflow.id])).rows;
+  return { workflow: { id: workflow.id, projectId: Number(workflow.project_id), contractId: workflow.contract_id, contractVersionId: workflow.contract_version_id, stableLineId: workflow.stable_line_id, displayName: workflow.display_name, templateKey: workflow.template_key, status: workflow.status, revision: Number(workflow.revision), updatedAt: new Date(workflow.updated_at).toISOString() }, nodes: tree(nodes), history };
 }
 
 export async function getContractItemWorkflow(input: { actorUserId: number; projectId: unknown; contractId: unknown; stableLineId: unknown }) {
@@ -85,6 +86,7 @@ export async function initializeContractItemWorkflow(input: { actorUserId: numbe
     await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.prepare", operation: "prepare", client });
     const scope = await itemScope(client, projectId, contractId, stableLineId);
     await assertLegacyWorkflowEditable(client, scope, projectId, contractId, stableLineId);
+    await client.query(`SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, [`contract-item-workflow:${scope.contract_version_id}:${stableLineId}`]);
     let workflow = (await client.query(`SELECT * FROM contract_item_workflows WHERE contract_version_id=$1 AND stable_line_id=$2 FOR UPDATE`, [scope.contract_version_id, stableLineId])).rows[0];
     if (workflow) return response(client, workflow);
     const snapshot = scope.contract_item_snapshot ?? {};

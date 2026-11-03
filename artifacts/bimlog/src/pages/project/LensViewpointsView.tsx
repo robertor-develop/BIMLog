@@ -12,6 +12,7 @@ import { mergeLensTradeOptions } from "@/features/lens-next/lens-trade-options";
 const API = "/api/v1";
 interface LensViewpoint {
   id: number;
+  projectId:number;
   viewpointId: string;
   displayId?: string | null;
   navisworksGuid?: string | null;
@@ -152,6 +153,12 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const [viewpoints, setViewpoints] = useState<LensViewpoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const contextEpoch=useRef(0),actionLock=useRef(false);
+  const exportLock=useRef(false);
+  const [exporting,setExporting]=useState(false);
+  const [repairing,setRepairing]=useState(false);
+  const [resetting,setResetting]=useState(false);
+  useEffect(()=>setResetting(false),[projectId,token]);
   // Drives the refresh banner. Only true when a background poll detects the
   // server's viewpoint set differs from what is currently displayed - never shown
   // speculatively. Reset to false whenever we (re)load the displayed list.
@@ -221,13 +228,22 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const [newTrade, setNewTrade] = useState("");
   const [tradeSaving, setTradeSaving] = useState(false);
   const [tradeError, setTradeError] = useState("");
+  const catalogRequest=useRef(0);
+  useEffect(()=>{setTradeSaving(false);setTradeError("");setNewTrade("");setCustomTrades([]);},[projectId,token]);
   // null = still checking, true = plugin reachable, false = not reachable.
   const [pluginConnected, setPluginConnected] = useState<boolean | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   const [history, setHistory] = useState<LensReport[]>([]);
+  const [reportHistoryError,setReportHistoryError]=useState("");
+  const [reportHistoryLoading,setReportHistoryLoading]=useState(false);
+  const [deletingReport,setDeletingReport]=useState<number|null>(null);
+  const reportHistoryRequest=useRef(0);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const pdfLock=useRef(false);
+  const [reportError,setReportError]=useState("");
+  useEffect(()=>{pdfLock.current=false;setGenerating(false);setReportModalOpen(false);setReportError("");},[projectId,token]);
   const [members, setMembers] = useState<{ userFullName: string; userCompanyName: string }[]>([]);
   const todayIso = new Date().toISOString().slice(0, 10);
   const [form, setForm] = useState({
@@ -301,43 +317,43 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     }
   };
 
-  const loadViewpoints = async () => {
+  const loadViewpoints = async (expectedId?:number,expectEmpty=false) => {
+    const context=contextEpoch.current;
     setLoading(true);
     setError("");
     try {
       const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-pull`, { headers });
       if (r.ok) {
         const d = await r.json();
+        if(context!==contextEpoch.current)return false;
+        if(d.success!==true||!Array.isArray(d.viewpoints)||!d.viewpoints.every((row:LensViewpoint)=>Number.isSafeInteger(row.id)&&row.projectId===projectId))throw new Error("Invalid project viewpoint inventory");
+        if(expectedId&&!d.viewpoints.some((row:LensViewpoint)=>row.id===expectedId))throw new Error("Saved revision was not present in refreshed project records");
+        if(expectEmpty&&d.viewpoints.length)throw new Error(t("Reset inventory is not empty. Reload before continuing.","El inventario no está vacío. Recargue antes de continuar."));
         setViewpoints(d.viewpoints ?? []);
         setSelectedIds(new Set());
         setUpdatesAvailable(false);
+        setHistoryData({});
+        return true;
       } else {
         const d = await r.json().catch(() => ({}));
+        if(context!==contextEpoch.current)return false;
         setError(d.message || d.error || "Failed to load viewpoints");
+        if([401,403].includes(r.status)){setViewpoints([]);setHistoryData({});setSelectedIds(new Set());}
+        return false;
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if(context===contextEpoch.current)setError(e instanceof Error ? e.message : String(e));return false;
     } finally {
-      setLoading(false);
+      if(context===contextEpoch.current)setLoading(false);
     }
   };
 
-  useEffect(() => { loadViewpoints(); }, [projectId]);
+  useEffect(() => {contextEpoch.current++;actionLock.current=false;exportLock.current=false;setExporting(false);setRepairing(false);setFloorCorrectionOpen(false);setResponsibleOpen(false);setFloorCorrectionPhase("input");setResponsiblePhase("input");setViewpoints([]);setSelectedIds(new Set());setHistoryData({});setHistoryOpen({});setActionModal(null);setActionError("");setActionPhase("input");void loadViewpoints();return()=>{contextEpoch.current++;}; }, [projectId,token]);
 
   // Silently refetch the viewpoint list (no loading spinner) so the table can
   // be refreshed on demand (manual refresh banner) without a loading flicker.
   const refreshViewpoints = async () => {
-    try {
-      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-pull`, { headers });
-      if (r.ok) {
-        const d = await r.json();
-        setViewpoints(d.viewpoints ?? []);
-        setSelectedIds(new Set());
-        setUpdatesAvailable(false);
-      }
-    } catch {
-      /* transient network error - keep the current list, the user can retry */
-    }
+    await loadViewpoints();
   };
 
   // Mirror the currently displayed viewpoint ids so the background poll can compare
@@ -389,11 +405,13 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
 
   useEffect(() => {
     let cancelled = false;
+    const request=++catalogRequest.current;
     (async () => {
       try {
         const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/responsible-companies`, { headers });
-        if (!cancelled && r.ok) {
+        if (!cancelled && request===catalogRequest.current && r.ok) {
           const d = await r.json();
+          if(cancelled||request!==catalogRequest.current||d.projectId!==projectId||d.success!==true)return;
           if (Array.isArray(d.companies)) {
             setResponsibleCompanies(d.companies.filter((x: unknown): x is string => typeof x === "string" && x.trim() !== ""));
           }
@@ -407,7 +425,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     })();
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId]);
+  }, [projectId,token]);
 
   // Lens Next owns its authenticated bridge on 127.0.0.1:8766. Do not report the
   // retired unauthenticated 8765 endpoint as Lens Next connection state.
@@ -472,65 +490,76 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   };
 
   const deleteReport = async (id: number) => {
+    if (!canWrite || actionLock.current) return;
     if (!window.confirm(t("Delete this report record? This cannot be undone.", "¿Eliminar este reporte del historial? Esto no se puede deshacer."))) return;
-    const prev = history;
-    setHistory(p => p.filter(rp => rp.id !== id));
+    actionLock.current=true;
+    const context=contextEpoch.current;
+    setDeletingReport(id);
+    setReportHistoryError("");
     try {
-      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reports/${id}`, {
-        method: "DELETE",
-        headers,
-      });
-      if (!r.ok) {
-        setHistory(prev);
-        const d = await r.json().catch(() => ({}));
-        setError(d.message || d.error || "Failed to delete report");
-      }
-    } catch (e) {
-      setHistory(prev);
-      setError(e instanceof Error ? e.message : String(e));
+      const response=await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reports/${id}`,{method:"DELETE",headers});
+      const receipt=await response.json().catch(()=>({}));
+      if (context!==contextEpoch.current) return;
+      if (!response.ok) throw new Error(receipt.message||receipt.error||t("Failed to delete report","No se pudo eliminar el reporte"));
+      if (receipt.success!==true||receipt.id!==id) throw new Error(t("Invalid report deletion receipt.","Respuesta de eliminación de reporte inválida."));
+      if (!await loadHistory(id)) throw new Error(t("Deletion response received, but history could not be reopened. Reload report history.","Se recibió la eliminación, pero no se pudo reabrir el historial. Recargue el historial."));
+      if (context!==contextEpoch.current) return;
+      showToast(t("Report record deleted; audit retained.","Registro de reporte eliminado; auditoría conservada."));
+    } catch(error) {
+      if(context===contextEpoch.current)setReportHistoryError(error instanceof Error?error.message:String(error));
+    } finally {
+      if(context===contextEpoch.current){actionLock.current=false;setDeletingReport(null);}
     }
   };
 
   const resetTestData = async () => {
-    const c = window.prompt(t(
-      "DANGER - permanently delete ALL Lens viewpoints, sequence counters, report history and revision history for THIS project (testing reset). Type RESET to confirm.",
-      "PELIGRO - eliminar permanentemente TODAS las vistas Lens, contadores, historial de reportes e historial de revisiones de ESTE proyecto (reinicio de prueba). Escriba RESET para confirmar."
+    if(!canWrite||actionLock.current)return;
+    actionLock.current=true;
+    const context=contextEpoch.current;
+    const confirmation=window.prompt(t(
+      `DANGER - permanently delete ALL Lens viewpoints, captures, counters and report/revision history for project ${projectId} (testing reset). Type RESET to confirm.`,
+      `PELIGRO - eliminar TODAS las vistas Lens, capturas, contadores e historial de reportes/revisiones del proyecto ${projectId} (prueba). Escriba RESET para confirmar.`
     ));
-    if (c !== "RESET") return;
-    try {
-      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reset-test-data`, {
-        method: "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ confirm: "RESET" }),
-      });
-      if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.message || d.error || "Reset failed"); return; }
-      setViewpoints([]);
-      setHistory([]);
-      await loadViewpoints();
-      await loadHistory();
-      const msg = t("Lens test data reset", "Datos de prueba Lens reiniciados");
-      setToast(msg);
-      setTimeout(() => setToast(cur => (cur === msg ? null : cur)), 2800);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    }
+    if(confirmation!=="RESET"){actionLock.current=false;return;}
+    setResetting(true);setError("");
+    try{
+      const response=await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reset-test-data`,{method:"POST",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({confirm:"RESET"})});
+      const receipt=await response.json().catch(()=>({}));
+      if(context!==contextEpoch.current)return;
+      if(!response.ok)throw new Error(receipt.message||receipt.error||t("Reset failed","No se pudo reiniciar"));
+      if(receipt.success!==true||!Number.isInteger(receipt.viewpointsDeleted))throw new Error(t("Invalid test reset receipt.","Respuesta de reinicio inválida."));
+      if(!await loadViewpoints(undefined,true)||!await loadHistory(undefined,true))throw new Error(t("Reset response received, but empty records could not be verified. Reload the viewpoints and report history.","Se recibió el reinicio, pero no se verificaron los registros vacíos. Recargue las vistas y el historial."));
+      if(context!==contextEpoch.current)return;
+      showToast(t("Lens test data reset; empty records verified.","Datos de prueba Lens reiniciados; registros vacíos verificados."));
+    }catch(error){if(context===contextEpoch.current)setError(error instanceof Error?error.message:String(error));}
+    finally{if(context===contextEpoch.current){actionLock.current=false;setResetting(false);}}
   };
 
   const repairChains = async () => {
+    if (!canWrite || actionLock.current) return;
+    actionLock.current = true;
+    const context = contextEpoch.current;
+    setRepairing(true);
+    setError("");
     try {
       const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/repair-lifecycle`, {
         method: "POST",
         headers: { ...headers, "Content-Type": "application/json" },
       });
       const d = await r.json().catch(() => ({}));
+      if (context !== contextEpoch.current) return;
       if (!r.ok) { setError(d.message || d.error || "Repair failed"); return; }
-      await loadViewpoints();
+      if (d.success !== true || !Number.isInteger(d.repaired) || !Number.isInteger(d.checked)) throw new Error(t("Invalid repair receipt.", "Respuesta de reparación inválida."));
+      if (!await loadViewpoints()) throw new Error(t("Saved response received, but records could not be reopened. Reload before another action.", "Se recibió la respuesta de guardado, pero no se pudieron reabrir los registros. Recargue antes de otra acción."));
+      if (context !== contextEpoch.current) return;
       showToast(t(
-        `Repaired ${d.repaired ?? 0} orphaned chain record(s)`,
-        `Se repararon ${d.repaired ?? 0} registro(s) huerfanos de cadena`
+        `Repaired ${d.repaired} orphaned chain record(s); skipped ${d.skipped ?? 0} conflicting record(s)`,
+        `Se repararon ${d.repaired} registro(s) huerfanos de cadena; se omitieron ${d.skipped ?? 0} registro(s) en conflicto`
       ));
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (context === contextEpoch.current) setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      if (context === contextEpoch.current) { actionLock.current = false; setRepairing(false); }
     }
   };
 
@@ -552,11 +581,14 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   };
 
   const submitFloorCorrection = async () => {
+    if (!canWrite || actionLock.current) return;
+    const context = contextEpoch.current;
     const floor = floorCorrectionFloor.trim();
     const reason = floorCorrectionReason.trim();
     if (selectedIds.size === 0) { setFloorCorrectionError(t("Select at least one viewpoint.", "Seleccione al menos una vista.")); return; }
     if (!floor) { setFloorCorrectionError(t("Select the correct floor.", "Seleccione el piso correcto.")); return; }
     if (!reason) { setFloorCorrectionError(t("A reason is required for audit history.", "Se requiere un motivo para el historial.")); return; }
+    actionLock.current = true;
     setFloorCorrectionPhase("submitting");
     setFloorCorrectionError("");
     try {
@@ -566,11 +598,15 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         body: JSON.stringify({ ids: Array.from(selectedIds), floor, reason }),
       });
       const d = await r.json().catch(() => ({}));
+      if (context !== contextEpoch.current) return;
       if (!r.ok) {
         setFloorCorrectionPhase("input");
         setFloorCorrectionError(d.message || d.error || t("Floor correction failed.", "No se pudo corregir el piso."));
         return;
       }
+      if (d.success !== true || !Number.isInteger(d.updated) || !Number.isInteger(d.matched)) throw new Error(t("Invalid floor correction receipt.", "Respuesta de corrección de piso inválida."));
+      if (!await loadViewpoints()) throw new Error(t("Saved response received, but records could not be reopened. Reload before another action.", "Se recibió la respuesta de guardado, pero no se pudieron reabrir los registros. Recargue antes de otra acción."));
+      if (context !== contextEpoch.current) return;
       setFloorCorrectionOpen(false);
       setFloorCorrectionPhase("input");
       setSelectedIds(new Set());
@@ -578,10 +614,12 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         `Corrected floor on ${d.updated ?? 0} viewpoint(s); checked ${d.expanded ?? d.matched ?? 0} chain-linked record(s)`,
         `Piso corregido en ${d.updated ?? 0} vista(s); se revisaron ${d.expanded ?? d.matched ?? 0} registro(s) de cadena`
       ));
-      await loadViewpoints();
     } catch (e) {
+      if (context !== contextEpoch.current) return;
       setFloorCorrectionPhase("input");
       setFloorCorrectionError(e instanceof Error ? e.message : String(e));
+    } finally {
+      if (context === contextEpoch.current) actionLock.current = false;
     }
   };
 
@@ -595,11 +633,14 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   };
 
   const submitResponsibleCompany = async () => {
+    if (!canWrite || actionLock.current) return;
+    const context = contextEpoch.current;
     const company = responsibleCompany.trim();
     const reason = responsibleReason.trim();
     if (selectedIds.size === 0) { setResponsibleError(t("Select at least one viewpoint.", "Seleccione al menos una vista.")); return; }
     if (!company) { setResponsibleError(t("Responsible Company is required.", "La empresa responsable es obligatoria.")); return; }
     if (!reason) { setResponsibleError(t("A reason is required for audit history.", "Se requiere un motivo para el historial.")); return; }
+    actionLock.current = true;
     setResponsiblePhase("submitting");
     setResponsibleError("");
     try {
@@ -609,11 +650,15 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         body: JSON.stringify({ ids: Array.from(selectedIds), responsibleCompany: company, reason }),
       });
       const d = await r.json().catch(() => ({}));
+      if (context !== contextEpoch.current) return;
       if (!r.ok) {
         setResponsiblePhase("input");
         setResponsibleError(d.message || d.error || t("Responsible Company update failed.", "No se pudo actualizar la empresa responsable."));
         return;
       }
+      if (d.success !== true || !Number.isInteger(d.updated) || !Number.isInteger(d.matched)) throw new Error(t("Invalid company update receipt.", "Respuesta de actualización de empresa inválida."));
+      if (!await loadViewpoints()) throw new Error(t("Saved response received, but records could not be reopened. Reload before another action.", "Se recibió la respuesta de guardado, pero no se pudieron reabrir los registros. Recargue antes de otra acción."));
+      if (context !== contextEpoch.current) return;
       setResponsibleOpen(false);
       setResponsiblePhase("input");
       setSelectedIds(new Set());
@@ -622,10 +667,12 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         `Set Responsible Company on ${d.updated ?? 0} viewpoint(s); checked ${d.expanded ?? d.matched ?? 0} chain-linked record(s)`,
         `Empresa responsable aplicada en ${d.updated ?? 0} vista(s); se revisaron ${d.expanded ?? d.matched ?? 0} registro(s) de cadena`
       ));
-      await loadViewpoints();
     } catch (e) {
+      if (context !== contextEpoch.current) return;
       setResponsiblePhase("input");
       setResponsibleError(e instanceof Error ? e.message : String(e));
+    } finally {
+      if (context === contextEpoch.current) actionLock.current = false;
     }
   };
 
@@ -656,10 +703,12 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   // then either a success toast + reload or an inline error inside the modal.
   // No native dialogs and no silent success - every click ends in a visible result.
   const submitAction = async () => {
-    if (!actionModal) return;
+    if (!actionModal||!canWrite||actionLock.current) return;
+    const context=contextEpoch.current;
     const m = actionModal;
     if (m.type === "edit" && m.note.trim() === "") { setActionError(t("A note is required.", "La nota es requerida.")); return; }
     if (m.type === "reassign" && !trades.includes(m.trade)) { setActionError(t("Select a valid trade.", "Seleccione una disciplina valida.")); return; }
+    actionLock.current=true;
     setActionError("");
     setActionPhase("submitting");
     try {
@@ -673,12 +722,16 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify(call.body),
       });
+      if(context!==contextEpoch.current)return;
       if (!r.ok) {
         const d = await r.json().catch(() => ({}));
         setActionPhase("input");
         setActionError(d.message || d.error || t("The action failed. Please try again.", "La accion fallo. Intentelo de nuevo."));
         return;
       }
+      const result=await r.json();if(result.success!==true||!Number.isSafeInteger(result.viewpoint?.id))throw new Error("Saved viewpoint response was invalid");
+      if(!await loadViewpoints(result.viewpoint.id))throw new Error(t("Saved response received, but records could not be reopened. Reload before another action.","Respuesta guardada recibida, pero no se pudieron reabrir los registros. Recargue antes de otra acción."));
+      if(context!==contextEpoch.current)return;
       setActionModal(null);
       setActionPhase("input");
       showToast(
@@ -686,11 +739,10 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         : m.type === "reassign" ? t("Viewpoint reassigned", "Vista reasignada")
         : t("Viewpoint voided", "Vista anulada")
       );
-      await loadViewpoints();
     } catch (e) {
-      setActionPhase("input");
-      setActionError(e instanceof Error ? e.message : String(e));
+      if(context===contextEpoch.current){setActionPhase("input");setActionError(e instanceof Error ? e.message : String(e));}
     }
+    finally{if(context===contextEpoch.current)actionLock.current=false;}
   };
 
   const createRfi = (v: LensViewpoint) => {
@@ -752,18 +804,21 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const toggleHistory = async (id: number) => {
     const willOpen = !historyOpen[id];
     setHistoryOpen(p => ({ ...p, [id]: willOpen }));
-    if (willOpen && !historyData[id]) {
+    if (willOpen && (!historyData[id]||historyData[id]==="error")) {
+      const context=contextEpoch.current;
       setHistoryData(p => ({ ...p, [id]: "loading" }));
       try {
         const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/${id}/history`, { headers });
         if (r.ok) {
           const d = await r.json();
+          if(context!==contextEpoch.current)return;
+          if(d.success!==true||!Array.isArray(d.chain)||!Array.isArray(d.events))throw new Error("Invalid revision history");
           setHistoryData(p => ({ ...p, [id]: { chain: d.chain ?? [], events: d.events ?? [] } }));
         } else {
-          setHistoryData(p => ({ ...p, [id]: "error" }));
+          if(context===contextEpoch.current)setHistoryData(p => ({ ...p, [id]: "error" }));
         }
       } catch {
-        setHistoryData(p => ({ ...p, [id]: "error" }));
+        if(context===contextEpoch.current)setHistoryData(p => ({ ...p, [id]: "error" }));
       }
     }
   };
@@ -846,6 +901,11 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   }, [focusViewpointId, viewpoints]);
 
   const exportExcel = async () => {
+    if (exportLock.current) return;
+    exportLock.current = true;
+    const context = contextEpoch.current;
+    setExporting(true);
+    setError("");
     const params = new URLSearchParams({
       trade: fTrade,
       floor: fFloor,
@@ -856,7 +916,10 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     try {
       const response = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/export-excel?${params}`, { headers });
       if (!response.ok) throw new Error(`Export failed (${response.status})`);
+      if (!response.headers.get("content-type")?.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) throw new Error(t("Invalid Excel export response.", "Respuesta de exportación Excel inválida."));
       const blob = await response.blob();
+      if (context !== contextEpoch.current) return;
+      if (!blob.size) throw new Error(t("The Excel export is empty.", "La exportación Excel está vacía."));
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -864,25 +927,37 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
-      console.error("Lens Excel export failed", err);
-      alert(t("Excel export failed. Please try again.", "La exportacion a Excel fallo. Intente de nuevo."));
+      if (context === contextEpoch.current) setError(err instanceof Error ? err.message : t("Excel export failed. Please try again.", "La exportacion a Excel fallo. Intente de nuevo."));
+    } finally {
+      if (context === contextEpoch.current) { exportLock.current = false; setExporting(false); }
     }
   };
 
-  const loadHistory = async () => {
+  const loadHistory = async (deletedId?: number,expectEmpty=false) => {
+    const context=contextEpoch.current;
+    const request=++reportHistoryRequest.current;
+    setReportHistoryLoading(true);
+    setReportHistoryError("");
     try {
-      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reports`, { headers });
-      if (r.ok) {
-        const d = await r.json();
-        setHistory(d.reports ?? []);
-      }
-    } catch {
-      /* transient - the history list simply stays as-is */
+      const response=await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reports`,{headers});
+      const data=await response.json().catch(()=>({}));
+      if(context!==contextEpoch.current||request!==reportHistoryRequest.current)return false;
+      if(!response.ok)throw new Error(data.message||data.error||t("Unable to load report history.","No se pudo cargar el historial de reportes."));
+      if(data.projectId!==projectId||!Array.isArray(data.reports)||data.reports.some((row:LensReport)=>!Number.isSafeInteger(row.id)||typeof row.reportNumber!=="string"))throw new Error(t("Invalid report history response.","Respuesta de historial inválida."));
+      if(deletedId!==undefined&&data.reports.some((row:LensReport)=>row.id===deletedId))throw new Error(t("Deleted report is still present. Reload history.","El reporte eliminado sigue presente. Recargue el historial."));
+      if(expectEmpty&&data.reports.length)throw new Error(t("Reset report history is not empty. Reload before continuing.","El historial no está vacío. Recargue antes de continuar."));
+      setHistory(data.reports);
+      return true;
+    } catch(error) {
+      if(context===contextEpoch.current&&request===reportHistoryRequest.current){setHistory([]);setReportHistoryError(error instanceof Error?error.message:String(error));}
+      return false;
+    } finally {
+      if(context===contextEpoch.current&&request===reportHistoryRequest.current)setReportHistoryLoading(false);
     }
   };
-  useEffect(() => { loadHistory(); }, [projectId]);
+  useEffect(()=>{setHistory([]);setDeletingReport(null);void loadHistory();},[projectId,token]);
 
   const onLogoFile = (file?: File | null) => {
     if (!file) return;
@@ -892,6 +967,10 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   };
 
   const exportPdf = async () => {
+    if (pdfLock.current) return;
+    pdfLock.current=true;
+    const context=contextEpoch.current;
+    setReportError("");
     setGenerating(true);
     try {
       const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/report`, {
@@ -919,12 +998,16 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           filters: { priority: form.fPriority, status: form.fStatus, floor: form.fFloor, trade: form.fTrade, reportType: form.fReportType },
         }),
       });
+      if (context !== contextEpoch.current) return;
       if (!r.ok) {
         const d = await r.json().catch(() => ({}));
-        showToast(d.message || d.error || t("Failed to generate report", "No se pudo generar el reporte"));
+        setReportError(d.message || d.error || t("Failed to generate report", "No se pudo generar el reporte"));
         return;
       }
+      if (!r.headers.get("content-type")?.includes("application/pdf") || !r.headers.get("X-Lens-Report-Number") || !/^[a-f0-9]{64}$/i.test(r.headers.get("X-Lens-Report-Hash") || "")) throw new Error(t("Invalid PDF report receipt. No download was started.", "Respuesta de reporte PDF inválida. No se inició la descarga."));
       const blob = await r.blob();
+      if (context !== contextEpoch.current) return;
+      if (!blob.size) throw new Error(t("The PDF report is empty.", "El reporte PDF está vacío."));
       const cd = r.headers.get("Content-Disposition") || "";
       const m = cd.match(/filename="([^"]+)"/);
       const fname = m ? m[1] : `Lens-Report-${projectId}.pdf`;
@@ -935,34 +1018,44 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url),1000);
       setReportModalOpen(false);
       showToast(t("Report generated", "Reporte generado"));
       loadHistory();
     } catch (e) {
-      showToast(e instanceof Error ? e.message : String(e));
+      if (context === contextEpoch.current) setReportError(e instanceof Error ? e.message : String(e));
     } finally {
-      setGenerating(false);
+      if (context === contextEpoch.current) {pdfLock.current=false;setGenerating(false);}
     }
   };
 
   const selStyle = { border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13 } as const;
   const saveTrade = async () => {
+    if(!canWrite||actionLock.current)return;
+    const context=contextEpoch.current;
     const name = newTrade.trim().replace(/\s+/g, " ");
     if (name.length < 2) { setTradeError(t("Enter a trade name.", "Ingrese una disciplina.")); return; }
+    actionLock.current=true;
     setTradeSaving(true); setTradeError("");
     try {
       const response = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/trades`, {
         method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ name }),
       });
       const body = await response.json().catch(() => ({}));
+      if(context!==contextEpoch.current)return;
       if (!response.ok) throw new Error(body.message || body.error || t("Could not save trade.", "No se pudo guardar la disciplina."));
-      const saved = String(body.trade?.name ?? name).trim();
-      setCustomTrades(current => Array.from(new Set([...current, saved])).sort((a, b) => a.localeCompare(b)));
+      if(body.success!==true||body.projectId!==projectId||!Number.isSafeInteger(body.trade?.id)||typeof body.trade?.name!=="string"||body.trade.name.toLocaleLowerCase("en-US")!==name.toLocaleLowerCase("en-US"))throw new Error(t("Invalid saved trade receipt.","Respuesta de disciplina guardada inválida."));
+      const saved=body.trade.name;
+      const request=++catalogRequest.current;
+      const reopened=await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/responsible-companies`,{headers});
+      const catalog=await reopened.json().catch(()=>({}));
+      if(context!==contextEpoch.current)return;
+      if(request!==catalogRequest.current||!reopened.ok||catalog.success!==true||catalog.projectId!==projectId||!Array.isArray(catalog.trades)||!catalog.trades.every((value:unknown)=>typeof value==="string")||!catalog.trades.includes(saved))throw new Error(t("Trade saved, but its project catalog could not be reopened. Retry to verify the saved trade.","Disciplina guardada, pero no se pudo reabrir el catálogo. Reintente para verificarla."));
+      setCustomTrades(catalog.trades);
       setFTrade(saved); setNewTrade("");
       showToast(t(`${saved} is available for later use.`, `${saved} quedo disponible para uso posterior.`));
-    } catch (err) { setTradeError(err instanceof Error ? err.message : String(err)); }
-    finally { setTradeSaving(false); }
+    } catch (err) { if(context===contextEpoch.current)setTradeError(err instanceof Error ? err.message : String(err)); }
+    finally { if(context===contextEpoch.current){actionLock.current=false;setTradeSaving(false);} }
   };
 
   return (
@@ -988,7 +1081,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8, flex: "0 1 auto" }}>
           <PrintPdfButton lang={lang} onClick={openReportModal} disabled={loading} className="lens-current-view-print shrink-0" currentViewSummary={lensCurrentViewSummary} />
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button className="btn btn-sm btn-outline" onClick={exportExcel}
+          <button className="btn btn-sm btn-outline" onClick={exportExcel} disabled={exporting} aria-busy={exporting}
             title={t("Download the current Lens table as an Excel register", "Descargar la tabla Lens actual como registro Excel")}
             style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Download size={14} /> {t("Lens Register Excel", "Excel del registro Lens")}
@@ -997,6 +1090,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
             <button
               className="btn btn-sm btn-outline"
               onClick={repairChains}
+              disabled={repairing} aria-busy={repairing}
               title={t("Repair orphaned revision chains if stale Navisworks metadata marked current rows as superseded", "Reparar cadenas huerfanas si metadatos antiguos de Navisworks marcaron filas vigentes como reemplazadas")}
               style={{ display: "flex", alignItems: "center", gap: 6, color: "#1D4ED8", borderColor: "#93C5FD" }}
             >
@@ -1007,6 +1101,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
             <button
               className="btn btn-sm btn-outline"
               onClick={resetTestData}
+              disabled={resetting} aria-busy={resetting}
               title={t("Testing only: clears Lens viewpoints, counters, reports, and revision history for this project", "Solo pruebas: borra vistas Lens, contadores, reportes e historial de revisiones de este proyecto")}
               style={{ display: "flex", alignItems: "center", gap: 6, color: "#B45309", borderColor: "#F59E0B" }}
             >
@@ -1113,8 +1208,9 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
       )}
 
       {error && (
-        <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", color: "#DC2626", fontSize: 13, marginBottom: 14 }}>
+        <div role="alert" style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", color: "#DC2626", fontSize: 13, marginBottom: 14 }}>
           {error}
+          <button disabled={loading||actionPhase==="submitting"} onClick={()=>void loadViewpoints()}>{t("Reload saved viewpoints","Recargar vistas guardadas")}</button>
         </div>
       )}
 
@@ -1455,14 +1551,18 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         </div>
       )}
 
-      {history.length > 0 && (
+      {(
         <div style={{ marginTop: 28 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
             <History size={16} color="#1E3A5F" />
             <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#111827" }}>
               {t("Report History", "Historial de Reportes")}
             </h3>
+            <button className="btn btn-sm btn-outline" disabled={reportHistoryLoading||deletingReport!==null} onClick={()=>void loadHistory()}>{t("Reload report history","Recargar historial de reportes")}</button>
           </div>
+          {reportHistoryLoading&&<p role="status">{t("Loading report history…","Cargando historial de reportes…")}</p>}
+          {reportHistoryError&&<p role="alert">{reportHistoryError}</p>}
+          {!reportHistoryLoading&&!reportHistoryError&&history.length===0&&<p>{t("No reports generated yet. Use Print PDF to create a report.","Aún no hay reportes. Use Imprimir PDF para crear un reporte.")}</p>}
           <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
@@ -1495,11 +1595,11 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
                       <td style={{ padding: "8px 12px", fontSize: 12, color: "#6B7280" }}>{WATERMARK_LABEL[rp.watermarkType ?? ""] ?? "-"}</td>
                       <td style={{ padding: "8px 12px", fontSize: 12, color: "#6B7280", whiteSpace: "nowrap" }}>{rp.isExecutiveOnePager ? t("Executive", "Ejecutivo") : t("Full", "Completo")}</td>
                       <td style={{ padding: "8px 12px", textAlign: "right", whiteSpace: "nowrap" }}>
-                        <button className="btn btn-sm btn-outline" onClick={() => deleteReport(rp.id)}
+                        {canWrite&&<button className="btn btn-sm btn-outline" disabled={deletingReport!==null||reportHistoryLoading} onClick={() => deleteReport(rp.id)}
                           title={t("Delete this report record", "Eliminar este reporte")}
                           style={{ fontSize: 11, padding: "4px 8px", color: "#DC2626", borderColor: "#FECACA", display: "inline-flex", alignItems: "center", gap: 4 }}>
                           <Trash2 size={12} /> {t("Delete", "Eliminar")}
-                        </button>
+                        </button>}
                       </td>
                     </tr>
                   );
@@ -1522,6 +1622,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
         >
           <div
+            role="dialog" aria-modal="true" aria-label={t("Batch Correct Floor", "Corregir Piso por Lote")}
             onClick={e => e.stopPropagation()}
             style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 520, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24 }}
           >
@@ -1574,6 +1675,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
         >
           <div
+            role="dialog" aria-modal="true" aria-label={t("Set Responsible Company", "Asignar Empresa Responsable")}
             onClick={e => e.stopPropagation()}
             style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 520, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24 }}
           >
@@ -1623,6 +1725,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           <div
             onClick={e => e.stopPropagation()}
             style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 460, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24 }}
+            role="dialog" aria-modal="true" aria-label={t("Viewpoint revision action","Acción de revisión de vista")}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
               <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827", display: "flex", alignItems: "center", gap: 8 }}>
@@ -1775,6 +1878,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: isExportModalNarrow ? 8 : 16, overflowY: "auto", boxSizing: "border-box" }}
         >
           <div
+            role="dialog" aria-modal="true" aria-label={t("Lens PDF report", "Reporte PDF Lens")}
             onClick={e => e.stopPropagation()}
             style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 560, minWidth: 0, boxSizing: "border-box", boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: isExportModalNarrow ? 14 : 24, margin: isExportModalNarrow ? "8px 0" : "24px 0" }}
           >
@@ -1966,6 +2070,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
                 style={{ fontSize: 13, padding: "8px 16px" }}>
                 {t("Cancel", "Cancelar")}
               </button>
+              {reportError && <div role="alert" style={{color:"#B91C1C"}}>{reportError}</div>}
               <button className="btn btn-sm btn-primary" disabled={generating} onClick={exportPdf}
                 style={{ fontSize: 13, padding: "8px 16px", display: "flex", alignItems: "center", gap: 6 }}>
                 <FileDown size={14} />

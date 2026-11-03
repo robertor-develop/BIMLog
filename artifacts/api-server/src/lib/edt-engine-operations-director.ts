@@ -82,5 +82,9 @@ export async function changeEdtOperationsDirectorGrant(input: {
       "INSERT INTO edt_operations_director_revocations(grant_id,revoked_by_id,reason) VALUES($1,$2,$3)",
       [active.id, input.actorUserId, reason]);
     return { grantId: active.id, active: false, idempotent: false };
-  }, host);
+  }, host).catch(error => {
+    if (["40001", "40P01", "23505"].includes(String((error as {code?:string})?.code)))
+      throw new EdtEngineConflict("EDT_DIRECTOR_CONCURRENT_CHANGE", "Director authority changed concurrently. Reopen assignments and retry the same action.");
+    throw error;
+  });
 }

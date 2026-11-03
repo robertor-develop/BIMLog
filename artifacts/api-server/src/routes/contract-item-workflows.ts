@@ -7,7 +7,7 @@ const router = Router();
 router.use("/projects/:projectId/financial/contracts/:contractId/items/:stableLineId/workflow", authMiddleware);
 
 const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any, res: any) => {
-  try { await handler(req, res); }
+  try { res.set("Cache-Control","private, no-store"); const json=res.json.bind(res); res.json=(body:any)=>json({...body,projectId:Number(req.params.projectId),contractId:req.params.contractId,stableLineId:req.params.stableLineId}); await handler(req, res); }
   catch (error) {
     if (error instanceof FinancialControlError) { res.status(error.status).json({ code: error.code, error: { en: error.message, es: error.message } }); return; }
     console.error("[contract-item-workflow] request failed");

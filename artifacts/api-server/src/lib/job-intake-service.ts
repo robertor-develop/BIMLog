@@ -983,6 +983,8 @@ export async function removeJobIntakeDocument(input: {
         "JOB_INTAKE_STALE",
         "Reload the intake before removing this document.",
       );
+    if (intake.status === "activated")
+      throw new FinancialControlError(409,"JOB_INTAKE_ACTIVATED","An activated intake is immutable.");
     const document = (
       await client.query(
         `UPDATE job_intake_documents SET removed_at=now(),removed_by_id=$3 WHERE id=$1 AND intake_id=$2 AND removed_at IS NULL RETURNING id,file_id,source_hash`,

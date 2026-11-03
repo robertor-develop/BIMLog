@@ -9,6 +9,7 @@ import { decideGovernedEdtChange, requestGovernedEdtChange } from "../lib/edt-en
 import { decideWorkItemQc, previewResultImport, submitWorkItemIssuance } from "../lib/edt-engine-qc-import-service";
 import { previewActivatedEdtPlan } from "../lib/edt-engine-plan-projection";
 import { previewEdtActivationCandidate } from "../lib/edt-engine-activation-candidate";
+import { requestResolvedEdtActivation, approveResolvedEdtActivation } from "../lib/edt-engine-resolved-activation";
 import { changeEdtOperationsDirectorGrant, listEdtOperationsDirectorAssignments } from "../lib/edt-engine-operations-director";
 
 const router: IRouter = Router();
@@ -35,7 +36,62 @@ router.get("/projects/:projectId/edt-engine/capabilities", authMiddleware, async
   try {
     const projectId = edtProjectId(req);
     const actor = await resolveEdtRouteActor(req, projectId);
-    res.json({ projectId, eligibleRole: actor.eligibleRole, grants: actor.grants });
+    let changeReview,importReview,issuanceReview;
+    if(req.query.include==="issuance-review"){
+      if(!actor.grants.includes("QC_DECIDE")&&!actor.grants.includes("ISSUANCE_SUBMIT"))
+        throw new EdtEngineConflict("PERMISSION_REQUIRED","Issuance or QC authority is required to read submitted work packages.");
+      const issuances=(await pool.query(`SELECT s.id,s.work_item_id AS "workItemId",w.name AS "workItemName",s.revision_number AS revision,
+        s.issuance_version AS version,s.issuance_kind AS kind,s.state,s.package_snapshot AS "packageSnapshot",s.source_evidence AS "sourceEvidence",
+        s.evidence_file_id AS "evidenceFileId",s.issuance_fingerprint AS fingerprint,s.prepared_by_id AS "preparedById",
+        (s.prepared_by_id<>$3 AND NOT EXISTS(SELECT 1 FROM job_activation_resource_assignments a WHERE a.work_item_id=s.work_item_id AND a.user_id=$3)
+          AND NOT EXISTS(SELECT 1 FROM job_activation_tasks t WHERE t.work_item_id=s.work_item_id AND t.assignee_user_id=$3)) AS independent,
+        COALESCE((SELECT jsonb_agg(jsonb_build_object('id',d.id,'kind',d.decision_kind,'outcome',d.outcome,'reviewerId',d.reviewer_user_id,
+          'reason',d.reason,'evidence',d.evidence,'issuanceFingerprint',d.issuance_fingerprint) ORDER BY d.created_at,d.id)
+          FROM job_activation_qc_decisions d WHERE d.issuance_id=s.id AND d.company_id=s.company_id AND d.project_id=s.project_id),'[]'::jsonb) AS decisions
+        FROM job_activation_work_item_issuances s JOIN job_activation_work_items w ON w.id=s.work_item_id AND w.project_id=s.project_id
+        JOIN job_intakes i ON i.id=w.intake_id AND i.project_id=w.project_id AND i.company_id=s.company_id
+        WHERE s.project_id=$1 AND s.company_id=$2 ORDER BY s.created_at,s.id`,[projectId,actor.actorCompanyId,actor.actorUserId])).rows;
+      const workItems=(await pool.query(`SELECT w.id,w.name,w.display_code AS "displayCode",w.revision_number AS revision,w.issuance_version AS version,w.status
+        FROM job_activation_work_items w JOIN job_intakes i ON i.id=w.intake_id AND i.project_id=w.project_id
+        WHERE w.project_id=$1 AND i.company_id=$2 ORDER BY w.id`,[projectId,actor.actorCompanyId])).rows;
+      const evidenceFiles=(await pool.query(`SELECT id,file_name AS "fileName",version,status,is_superseded AS "isSuperseded"
+        FROM files WHERE project_id=$1 ORDER BY file_name,version DESC,id`,[projectId])).rows;
+      issuanceReview={actorUserId:actor.actorUserId,canSubmit:actor.grants.includes("ISSUANCE_SUBMIT"),workItems,evidenceFiles,issuances:issuances.map(row=>({...row,canDecide:actor.grants.includes("QC_DECIDE")&&row.independent&&row.state==="submitted"}))};
+    }
+    if(req.query.include==="intake-imports"){
+      if(!actor.grants.includes("IMPORT_MANAGE"))throw new EdtEngineConflict("PERMISSION_REQUIRED","Import-management authority is required to read retained import previews.");
+      const intakeId=typeof req.query.intakeId==="string"?req.query.intakeId.trim():"";
+      if(!intakeId)throw new EdtEngineConflict("REQUEST_BODY_INVALID","A saved Intake ID is required.");
+      const intake=(await pool.query("SELECT id,revision,status FROM job_intakes WHERE id=$1 AND project_id=$2 AND company_id=$3",[intakeId,projectId,actor.actorCompanyId])).rows[0];
+      if(!intake)throw new EdtEngineConflict("INTAKE_NOT_FOUND","The saved Intake is outside this project and company.");
+      const documents=(await pool.query(`SELECT d.file_id AS "fileId",d.source_hash AS "sourceHash",f.file_name AS "fileName"
+        FROM job_intake_documents d JOIN files f ON f.id=d.file_id AND f.project_id=d.project_id
+        WHERE d.intake_id=$1 AND d.project_id=$2 AND d.removed_at IS NULL ORDER BY d.file_id`,[intakeId,projectId])).rows;
+      const batches=(await pool.query(`SELECT b.id,b.intake_revision AS "intakeRevision",b.file_id AS "fileId",b.file_sha256 AS "fileSha256",
+        b.parser_version AS "parserVersion",b.structural_range AS "structuralRange",b.preview_fingerprint AS "previewFingerprint",b.status,
+        COALESCE((SELECT jsonb_agg(jsonb_build_object('rowNumber',r.row_number,'rawFields',r.raw_fields,'normalizedFields',r.normalized_fields,
+          'validationState',r.validation_state,'validationErrors',r.validation_errors,'mappedIdentities',r.mapped_identities) ORDER BY r.row_number)
+          FROM job_intake_import_rows r WHERE r.batch_id=b.id),'[]'::jsonb) AS rows
+        FROM job_intake_import_batches b WHERE b.intake_id=$1 AND b.project_id=$2 AND b.company_id=$3 ORDER BY b.created_at,b.id`,
+        [intakeId,projectId,actor.actorCompanyId])).rows;
+      importReview={intakeId:intake.id,intakeRevision:intake.revision,status:intake.status,documents,batches};
+    }
+    if(req.query.include==="change-review"){
+      if(!actor.grants.includes("GOVERNED_CHANGE_REQUEST")&&!actor.grants.includes("GOVERNED_CHANGE_APPROVE"))
+        throw new EdtEngineConflict("PERMISSION_REQUIRED","Governed-change authority is required to read change evidence.");
+      const requests=(await pool.query(`SELECT r.id,r.work_item_id AS "workItemId",r.action_type AS "actionType",
+        r.target_version AS "targetVersion",r.before_state AS "beforeState",r.after_state AS "afterState",
+        r.request_fingerprint AS fingerprint,r.state,r.requested_by_id AS "requestedById",r.reason,r.evidence,
+        d.id AS "decisionId",d.outcome,d.decided_by_id AS "decidedById",d.reason AS "decisionReason"
+        FROM job_governed_change_requests r LEFT JOIN job_governed_change_decisions d ON d.request_id=r.id
+          AND d.company_id=r.company_id AND d.project_id=r.project_id
+        WHERE r.company_id=$1 AND r.project_id=$2 ORDER BY r.created_at,r.id`,[actor.actorCompanyId,projectId])).rows;
+      const workItems=(await pool.query(`SELECT w.id,w.name,w.display_code AS "displayCode",w.revision_number AS "revisionNumber",w.status
+        FROM job_activation_work_items w JOIN job_intakes i ON i.id=w.intake_id
+        WHERE w.project_id=$1 AND i.project_id=$1 AND i.company_id=$2 ORDER BY w.id`,[projectId,actor.actorCompanyId])).rows;
+      changeReview={requests,workItems,actorUserId:actor.actorUserId};
+    }
+    res.set("Cache-Control","private, no-store").json({ projectId, eligibleRole: actor.eligibleRole, grants: actor.grants,...(changeReview?{changeReview}:{}),...(importReview?{importReview}:{}),...(issuanceReview?{issuanceReview}:{}) });
   } catch (error) {
     sendEdtRouteError(res, error);
   }
@@ -49,7 +105,11 @@ router.get("/projects/:projectId/edt-engine/operations-director-grants", authMid
       actorUserId: actor.actorUserId, actorCompanyId: actor.actorCompanyId, projectId,
       isGlobalSuperAdmin: actor.isGlobalSuperAdmin,
     });
-    res.json({ projectId, assignments });
+    const history=(await pool.query(`SELECT g.id AS "grantId",g.user_id AS "userId",g.granted_by_id AS "grantedById",g.reason,g.created_at AS "createdAt",
+      r.revoked_by_id AS "revokedById",r.reason AS "revocationReason",r.created_at AS "revokedAt"
+      FROM edt_operations_director_grants g LEFT JOIN edt_operations_director_revocations r ON r.grant_id=g.id
+      WHERE g.company_id=$1 AND g.project_id=$2 ORDER BY g.created_at,g.id`,[actor.actorCompanyId,projectId])).rows;
+    res.set("Cache-Control","private, no-store").json({ projectId, assignments, history });
   } catch (error) { sendEdtRouteError(res, error); }
 });
 
@@ -66,7 +126,7 @@ router.post("/projects/:projectId/edt-engine/operations-director-grants", authMi
       targetUserId: requiredInteger(body, "targetUserId"), action,
       reason: requiredText(body, "reason"), isGlobalSuperAdmin: actor.isGlobalSuperAdmin,
     });
-    res.status(result.idempotent ? 200 : action === "grant" ? 201 : 200).json(result);
+    res.set("Cache-Control","private, no-store").status(result.idempotent ? 200 : action === "grant" ? 201 : 200).json({projectId,targetUserId:Number(body.targetUserId),action,...result});
   } catch (error) { sendEdtRouteError(res, error); }
 });
 
@@ -77,7 +137,7 @@ router.get("/projects/:projectId/edt-engine/intakes/:intakeId/plan-preview", aut
     const intakeId = String(req.params.intakeId ?? "").trim();
     if (!intakeId) throw new EdtEngineConflict("REQUEST_BODY_INVALID", "An Intake ID is required.");
     const plan = await previewActivatedEdtPlan({ companyId: actor.actorCompanyId, projectId, intakeId });
-    res.json({ projectId, intakeId, ...plan });
+    res.set("Cache-Control","private, no-store").json({ projectId, intakeId, ...plan });
   } catch (error) { sendEdtRouteError(res, error); }
 });
 
@@ -88,23 +148,40 @@ router.get("/projects/:projectId/edt-engine/intakes/:intakeId/activation-candida
     const intakeId = String(req.params.intakeId ?? "").trim();
     if (!intakeId) throw new EdtEngineConflict("REQUEST_BODY_INVALID", "An Intake ID is required.");
     const candidate = await previewEdtActivationCandidate({ companyId: actor.actorCompanyId, projectId, intakeId });
-    res.json({ projectId, ...candidate });
+    const requests = (await pool.query(`SELECT r.id,r.request_fingerprint AS fingerprint,r.state,
+      r.requested_by_id AS "requestedById",r.reason,r.created_at AS "createdAt",
+      d.id AS "decisionId",d.decided_by_id AS "decidedById",d.reason AS "decisionReason"
+      FROM job_activation_requests r LEFT JOIN job_activation_decisions d ON d.request_id=r.id
+        AND d.company_id=r.company_id AND d.project_id=r.project_id
+      WHERE r.company_id=$1 AND r.project_id=$2 AND r.intake_id=$3 ORDER BY r.created_at,r.id`,
+      [actor.actorCompanyId,projectId,intakeId])).rows;
+    res.set("Cache-Control","private, no-store").json({ projectId, ...candidate, requests,
+      actorUserId:actor.actorUserId,canRequest:actor.grants.includes("JOB_ACTIVATION_REQUEST"),
+      canApprove:actor.grants.includes("JOB_ACTIVATION_APPROVE") });
   } catch (error) { sendEdtRouteError(res, error); }
 });
 
 router.post("/projects/:projectId/edt-engine/activation-requests", authMiddleware, async (req, res): Promise<void> => {
   try {
     const projectId = edtProjectId(req);
-    await resolveEdtRouteActor(req, projectId);
-    throw new EdtEngineConflict("ACTIVATION_PLAN_NOT_SERVER_RESOLVED", "Governed EDT activation cannot start until versions and the EDT plan are resolved from saved server records. Use the existing Intake activation for now.");
+    const actor = await resolveEdtRouteActor(req, projectId);
+    const body = bodyRecord(req.body);
+    const result = await requestResolvedEdtActivation({actor,companyId:actor.actorCompanyId,projectId,
+      intakeId:requiredText(body,"intakeId"),expectedFingerprint:requiredText(body,"expectedFingerprint"),
+      reason:requiredText(body,"reason"),idempotencyKey:requiredText(body,"idempotencyKey")});
+    res.set("Cache-Control","private, no-store").status(result.idempotent?200:201).json({projectId,...result});
   } catch (error) { sendEdtRouteError(res,error); }
 });
 
 router.post("/projects/:projectId/edt-engine/activation-requests/:requestId/approve", authMiddleware, async (req, res): Promise<void> => {
   try {
     const projectId = edtProjectId(req);
-    await resolveEdtRouteActor(req, projectId);
-    throw new EdtEngineConflict("ACTIVATION_PLAN_NOT_SERVER_RESOLVED", "Governed EDT activation cannot approve a client-supplied plan. Complete the existing Intake activation while server-side plan resolution is integrated.");
+    const actor = await resolveEdtRouteActor(req, projectId);
+    const body = bodyRecord(req.body);
+    const result = await approveResolvedEdtActivation({actor,companyId:actor.actorCompanyId,projectId,
+      requestId:String(req.params.requestId),expectedFingerprint:requiredText(body,"expectedFingerprint"),
+      reason:requiredText(body,"reason")});
+    res.set("Cache-Control","private, no-store").json({projectId,requestId:String(req.params.requestId),...result});
   } catch (error) { sendEdtRouteError(res,error); }
 });
 
@@ -118,7 +195,7 @@ router.post("/projects/:projectId/edt-engine/change-requests", authMiddleware, a
       actionType:actionType as Parameters<typeof requestGovernedEdtChange>[0]["actionType"],
       targetVersion:requiredInteger(body,"targetVersion"),beforeState:recordField(body,"beforeState"),afterState:recordField(body,"afterState"),
       reason:requiredText(body,"reason"),evidence:recordField(body,"evidence"),idempotencyKey:requiredText(body,"idempotencyKey") });
-    res.status(result.idempotent?200:201).json(result);
+    res.set("Cache-Control","private, no-store").status(result.idempotent?200:201).json({projectId,...result});
   } catch(error){sendEdtRouteError(res,error);}
 });
 
@@ -128,7 +205,7 @@ router.post("/projects/:projectId/edt-engine/change-requests/:requestId/decision
     const outcome=requiredText(body,"outcome");if(outcome!=="approved"&&outcome!=="rejected")throw new EdtEngineConflict("REQUEST_BODY_INVALID","outcome must be approved or rejected.");
     const result=await decideGovernedEdtChange({actor,companyId:actor.actorCompanyId,projectId,requestId:String(req.params.requestId),
       expectedFingerprint:requiredText(body,"expectedFingerprint"),outcome,reason:requiredText(body,"reason"),evidence:recordField(body,"evidence")});
-    res.json(result);
+    res.set("Cache-Control","private, no-store").json({projectId,requestId:String(req.params.requestId),...result});
   }catch(error){sendEdtRouteError(res,error);}
 });
 
@@ -143,7 +220,7 @@ router.post("/projects/:projectId/edt-engine/economic-plans",authMiddleware,asyn
       throw new EdtEngineConflict("REQUEST_BODY_INVALID","Current contract and workflow fingerprints are required.");
     const result=await prepareApprovedWorkItemEconomicPlan({actor,projectId,workItemId:requiredText(body,"workItemId"),
       expectedContractFingerprint,expectedWorkflowFingerprint});
-    res.status(result.idempotent?200:201).json(result);
+    res.set("Cache-Control","private, no-store").status(result.idempotent?200:201).json({projectId,...result});
   }catch(error){sendEdtRouteError(res,error);}
 });
 
@@ -158,7 +235,7 @@ router.get("/projects/:projectId/edt-engine/time-review",authMiddleware,async(re
       WHERE e.project_id=$1 AND i.company_id=$2 AND ($3::boolean OR e.user_id=$4)
         AND e.superseded_by_entry_id IS NULL AND e.status NOT IN ('corrected','superseded')
       ORDER BY e.work_date DESC,e.created_at DESC,e.id DESC LIMIT 500`,[projectId,actor.actorCompanyId,review,actor.actorUserId])).rows;
-    res.json({entries:entries.map(row=>({id:row.id,status:row.status,version:row.version,workDate:row.workDate,hours:row.hours,note:row.note,decisionReason:row.decisionReason,userName:row.userName,taskName:row.taskName,taskNameEs:row.taskNameEs,
+    res.set("Cache-Control","private, no-store").json({projectId,entries:entries.map(row=>({id:row.id,status:row.status,version:row.version,workDate:row.workDate,hours:row.hours,note:row.note,decisionReason:row.decisionReason,userName:row.userName,taskName:row.taskName,taskNameEs:row.taskNameEs,
       canSubmit:actor.grants.includes("TIME_SUBMIT")&&row.user_id===actor.actorUserId&&["legacy_recorded","draft","rejected"].includes(row.status),
       canDecide:review&&row.status==="submitted"&&![row.user_id,row.created_by_id,row.submitted_by_id].includes(actor.actorUserId)})),limit:500});
   }catch(error){sendEdtRouteError(res,error);}
@@ -172,7 +249,7 @@ router.post("/projects/:projectId/edt-engine/time-entries/:entryId/transition",a
     const decision=requiredText(body,"decision");
     if(!["submit","approve","reject"].includes(decision))throw new EdtEngineConflict("TIME_DECISION_INVALID","Unsupported time decision.");
     const result=await transitionStoredTimeEntry({actor,companyId:actor.actorCompanyId,projectId,entryId:String(req.params.entryId),expectedVersion:requiredInteger(body,"expectedVersion"),decision:decision as "submit"|"approve"|"reject",reason:requiredText(body,"reason")});
-    res.json(result);
+    res.set("Cache-Control","private, no-store").json({projectId,...result});
   }catch(error){sendEdtRouteError(res,error);}
 });
 
@@ -181,9 +258,10 @@ router.post("/projects/:projectId/edt-engine/work-items/:workItemId/issuances",a
     const projectId=edtProjectId(req);const actor=await resolveEdtRouteActor(req,projectId);const body=bodyRecord(req.body);const kind=requiredText(body,"kind");
     if(!["initial","internal_issuance","external_revision","corrected_resubmittal","reopen"].includes(kind))throw new EdtEngineConflict("REQUEST_BODY_INVALID","kind is not supported.");
     const evidenceFileId=body.evidenceFileId===undefined?undefined:requiredInteger(body,"evidenceFileId");
+    if(body.idempotencyKey!==undefined&&typeof body.idempotencyKey!=="string")throw new EdtEngineConflict("REQUEST_BODY_INVALID","A submission key must be text.");
     const result=await submitWorkItemIssuance({actor,companyId:actor.actorCompanyId,projectId,workItemId:String(req.params.workItemId),
-      kind:kind as Parameters<typeof submitWorkItemIssuance>[0]["kind"],packageSnapshot:recordField(body,"packageSnapshot"),evidenceFileId,sourceEvidence:recordField(body,"sourceEvidence")});
-    res.status(result.idempotent?200:201).json(result);
+      kind:kind as Parameters<typeof submitWorkItemIssuance>[0]["kind"],packageSnapshot:recordField(body,"packageSnapshot"),evidenceFileId,sourceEvidence:recordField(body,"sourceEvidence"),idempotencyKey:body.idempotencyKey as string|undefined});
+    res.set("Cache-Control","private, no-store").status(result.idempotent?200:201).json({projectId,workItemId:String(req.params.workItemId),...result});
   }catch(error){sendEdtRouteError(res,error);}
 });
 
@@ -195,7 +273,7 @@ router.post("/projects/:projectId/edt-engine/issuances/:issuanceId/qc-decisions"
     if ("conflictUserIds" in body) throw new EdtEngineConflict("REQUEST_BODY_INVALID", "QC conflicts are resolved from stored assignments, not request input.");
     const result=await decideWorkItemQc({actor,companyId:actor.actorCompanyId,projectId,issuanceId:String(req.params.issuanceId),
       decisionKind:decisionKind as Parameters<typeof decideWorkItemQc>[0]["decisionKind"],outcome:outcome as "approved"|"rejected",reason:requiredText(body,"reason"),evidence:recordField(body,"evidence")});
-    res.status(201).json(result);
+    res.set("Cache-Control","private, no-store").status(201).json({projectId,issuanceId:String(req.params.issuanceId),...result});
   }catch(error){sendEdtRouteError(res,error);}
 });
 
@@ -205,7 +283,7 @@ router.post("/projects/:projectId/edt-engine/intakes/:intakeId/result-imports/pr
     if(!Array.isArray(body.rows))throw new EdtEngineConflict("REQUEST_BODY_INVALID","rows must be an array.");
     const result=await previewResultImport({actor,companyId:actor.actorCompanyId,projectId,intakeId:String(req.params.intakeId),intakeRevision:requiredInteger(body,"intakeRevision"),
       fileId:requiredInteger(body,"fileId"),fileSha256:requiredText(body,"fileSha256"),parserVersion:requiredText(body,"parserVersion"),structuralRange:requiredText(body,"structuralRange"),rows:body.rows as Parameters<typeof previewResultImport>[0]["rows"]});
-    res.status(result.idempotent?200:201).json(result);
+    res.set("Cache-Control","private, no-store").status(result.idempotent?200:201).json({projectId,intakeId:String(req.params.intakeId),...result});
   }catch(error){sendEdtRouteError(res,error);}
 });
 

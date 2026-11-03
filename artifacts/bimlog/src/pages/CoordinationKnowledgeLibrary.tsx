@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import "./CoordinationKnowledgeLibrary.css";
 import { ConflictTypeWorkspace, RuleMethodWorkspace, type KnowledgeRecord } from "./CoordinationKnowledgeAuthoring";
+import { LessonPromotionControls } from "./LessonPromotionControls";
 
 type WorkspaceSection = "conflict-types" | "rules" | "methods" | "lessons";
 type KnowledgeStatus = "draft" | "under_review" | "approved" | "retired";
@@ -63,6 +64,19 @@ export function CoordinationKnowledgeLibrary() {
   const [ruleReloadKey, setRuleReloadKey] = useState(0);
   const [ruleHistory, setRuleHistory] = useState<Record<string, RuleRecord[] | "loading" | "error">>({});
   const [selectedRule, setSelectedRule] = useState<RuleRecord | null>(null);
+  const [openingRule,setOpeningRule]=useState<string|null>(null);
+  const ruleDetailRequest=useRef<AbortController|null>(null);
+  useEffect(()=>{return()=>ruleDetailRequest.current?.abort();},[token]);
+  const openRule=async(item:RuleRecord)=>{
+    ruleDetailRequest.current?.abort();const controller=new AbortController();ruleDetailRequest.current=controller;setOpeningRule(item.rule_id);setRuleError("");
+    try{
+      const response=await fetch(`${API_BASE}/api/v1/coordination-knowledge/rules/${encodeURIComponent(item.rule_id)}`,{headers:{Authorization:`Bearer ${token}`},signal:controller.signal});
+      const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.code||String(response.status));
+      if(!body.item||body.item.rule_id!==item.rule_id||!Number.isSafeInteger(body.item.revision))throw new Error(t("The rule response does not match the selected record.","La respuesta no corresponde a la regla seleccionada."));
+      if(!controller.signal.aborted)setSelectedRule(body.item);
+    }catch(caught){if(!controller.signal.aborted){setRuleError(String(caught instanceof Error?caught.message:caught));setRuleState("error");}}
+    finally{if(!controller.signal.aborted)setOpeningRule(null);}
+  };
   const [methods, setMethods] = useState<ResolutionMethodRecord[]>([]);
   const [methodFilters, setMethodFilters] = useState<MethodFilters>(emptyMethodFilters);
   const [methodState, setMethodState] = useState<"idle" | "loading" | "ready" | "error">("idle");
@@ -309,7 +323,7 @@ export function CoordinationKnowledgeLibrary() {
               <button className="knowledge-history-button" type="button" onClick={() => void loadRuleHistory(item)} disabled={history === "loading"}>{history === "loading" ? t("Loading history…", "Cargando historial…") : t("View revision history", "Ver historial de revisiones")}</button>
               {history === "error" && <p className="knowledge-inline-error" role="alert">{t("History is unavailable. Try again.", "El historial no está disponible. Intente nuevamente.")}</p>}
               {Array.isArray(history) && <ol className="knowledge-history">{history.map(version => <li key={version.id}>v{version.revision} · {statusText(version.status)}</li>)}</ol>}
-              <button type="button" onClick={()=>setSelectedRule(item)}>{t("Open detail / edit","Abrir detalle / editar")}</button>
+              <button type="button" disabled={openingRule!==null} onClick={()=>void openRule(item)}>{openingRule===item.rule_id?t("Loading rule…","Cargando regla…"):t("Open detail / edit","Abrir detalle / editar")}</button>
             </article>; })}
           </div></>}
         </div> : active === "methods" ? <div className="knowledge-catalog" aria-busy={methodState === "loading"}>
@@ -356,6 +370,7 @@ export function CoordinationKnowledgeLibrary() {
             {lessonState==="ready"&&!lessons.length&&<div className="knowledge-placeholder" role="status"><Lightbulb aria-hidden /><strong>{t("No lessons in this queue", "No hay lecciones en esta cola")}</strong><span>{t("A proposal appears here only after it is created from a source issue with supporting evidence. No automatic approval is performed.", "Una propuesta aparece aquí solo después de crearse desde un incidente fuente con evidencia de respaldo. No se realiza ninguna aprobación automática.")}</span></div>}
             {lessonState==="ready"&&lessons.map(item=><article className="knowledge-card" key={item.id}><div className="knowledge-card-top"><span className="knowledge-code">#{item.lens_viewpoint_id}</span><span className={`knowledge-status knowledge-status-${item.status}`}>{item.status.replace("_"," ")}</span></div><h3>{item.proposal.lesson}</h3><p>{item.proposal.organizationalApplicability}</p><div className="knowledge-card-footer"><span>{new Date(item.proposed_at).toLocaleString()}</span><span>{item.promoted_entity_id?t("Draft knowledge linked","Borrador vinculado"):t("Source retained","Fuente conservada")}</span></div>{canReviewLessons&&<div className="knowledge-lesson-actions">{item.status==="proposed"&&<button type="button" onClick={()=>void transitionLesson(item,"submit-review")}>{t("Start review","Iniciar revisión")}</button>}{item.status==="under_review"&&<><button type="button" onClick={()=>void transitionLesson(item,"return-proposed")}>{t("Return","Devolver")}</button><button type="button" onClick={()=>void transitionLesson(item,"approve")}>{t("Approve","Aprobar")}</button><button type="button" onClick={()=>void transitionLesson(item,"reject")}>{t("Reject","Rechazar")}</button></>}</div>}</article>)}
           </section>
+          {lessonState==="ready"&&token&&lessons.filter(item=>(canPromoteLessons&&item.status==="approved"&&!item.promoted_entity_id)||(canReviewLessons&&["under_review","approved"].includes(item.status))).map(item=><LessonPromotionControls key={item.id} item={item} token={token} spanish={es} canPromote={canPromoteLessons} canMerge={canReviewLessons} options={conflictTypes.map(conflict=>({id:conflict.conflict_type_id||conflict.id,name:conflict.name,kind:"conflict_type" as const}))} onChanged={()=>setLessonReloadKey(value=>value+1)}/>)}
           <div className="knowledge-lesson-contract" aria-label={t("Lesson proposal evidence contract", "Contrato de evidencia de propuesta")}>
             <div><strong>{t("Source issue", "Incidente fuente")}</strong><span>{t("Required immutable link", "Vínculo inmutable requerido")}</span></div>
             <div><strong>{t("Supporting evidence", "Evidencia de respaldo")}</strong><span>{t("Required before review", "Requerida antes de revisión")}</span></div>

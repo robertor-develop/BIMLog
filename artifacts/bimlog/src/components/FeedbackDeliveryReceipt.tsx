@@ -1,0 +1,6 @@
+import React from 'react';
+export type DeliveryReceipt={receiptId:string;caseRevision:number;settledAt:string};
+export function FeedbackDeliveryReceipt({receipt,currentRevision,es}:{receipt:DeliveryReceipt|null|undefined;currentRevision:number;es:boolean}){
+  if(!receipt)return <p style={{fontSize:11}}>{es?'Todavía no hay comprobante de entrega completada del agente. El estado del comentario es independiente de su entrega.':'No completed agent-delivery receipt is available yet. Feedback disposition is separate from delivery.'}</p>;
+  return <details><summary>{es?'Comprobante de entrega del comentario':'Feedback delivery receipt'} · v{receipt.caseRevision}</summary><p style={{overflowWrap:'anywhere'}}>{receipt.receiptId}</p><p>{receipt.settledAt}</p><p>{receipt.caseRevision===currentRevision?(es?'Esta entrega corresponde a la revisión actual.':'This delivery corresponds to the current revision.'):(es?'Este comprobante corresponde a una revisión anterior. La revisión actual necesita su propia entrega.':'This receipt covers an earlier revision. The current revision needs its own delivery.')}</p><p>{es?'La entrega no significa que el problema esté corregido o verificado.':'Delivery does not mean the issue is fixed or verified.'}</p></details>;
+}

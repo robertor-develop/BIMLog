@@ -38,7 +38,7 @@ const insertIndex = route.indexOf(".insert(meetingMinutesTable)", lockIndex);
 assert.ok(lockIndex > 0 && insertIndex > lockIndex, "idempotency lock must precede meeting insertion");
 assert.match(
   route,
-  /date_trunc\('milliseconds', \$\{meetingMinutesTable\.updatedAt\}\) = \$\{existingUpdatedAt\}/,
+  /date_trunc\('milliseconds', \$\{meetingMinutesTable\.updatedAt\}\) = \$\{existingUpdatedAt\.toISOString\(\)\}::timestamp/,
 );
 assert.match(route, /nextMeetingVersionTimestamp\(existingUpdatedAt\)/);
 assert.match(route, /if \(!row\) throw new MeetingClashLinkError\(409, "meeting_stale_update"\)/);

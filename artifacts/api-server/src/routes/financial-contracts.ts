@@ -45,6 +45,7 @@ const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any,
   }
 };
 const project = (req: any) => positiveId(req.params.projectId, "projectId");
+router.use("/projects/:projectId/financial/contracts/:contractId/versions/:versionId",(_req,res,next)=>{res.set("Cache-Control","private, no-store");next();});
 router.get("/projects/:projectId/financial/contracts/:contractId/versions/:versionId/economic-pools",run(async(req,res)=>{
   await ensureEdtEngineSchema();
   const result=await withEdtTransaction(async client=>{
@@ -70,11 +71,11 @@ router.get("/projects/:projectId/financial/contracts/:contractId/versions/:versi
       if(item.version_id){try{allocation=approvedItemPhaseAllocation(source,item.stable_scope_item_id,item);}
         catch(error){if(!(error instanceof EdtEngineConflict)&&!(error instanceof FinancialControlError))throw error;}}
       return {id:item.id,name:item.name,workflowFingerprint:item.fingerprint,eligible:allocation!==null,
-        prepared:!!item.plan_fingerprint,allocation:item.plan_fingerprint?item.resolved_allocation:allocation};
+        prepared:!!item.plan_fingerprint,planFingerprint:item.plan_fingerprint??null,allocation:item.plan_fingerprint?item.resolved_allocation:allocation};
     });
-    return {id:stored?.id??null,canPrepare,canPrepareItems,workItems,projectId:source.projectId,currency:source.currency,paymentAuthorized:false};
+    return {id:stored?.id??null,canPrepare,canPrepareItems,workItems,projectId:source.projectId,contractId:source.contractId,contractVersionId:source.contractVersionId,contractFingerprint:source.contractFingerprint,sourceFingerprint:source.sourceFingerprint,contractPools:source.contractPools,approval:source.approval,budget:source.budget,apu:{versionId:source.apu.versionId,fingerprint:source.apu.fingerprint},currency:source.currency,paymentAuthorized:false};
   });
-  res.json(result);
+  res.set("Cache-Control","private, no-store").json(result);
 }));
 router.post("/projects/:projectId/financial/contracts/:contractId/versions/:versionId/economic-pools",run(async(req,res)=>{
   if(!req.body||Object.keys(req.body).some(key=>key!=="confirmationFingerprint")||
@@ -84,7 +85,7 @@ router.post("/projects/:projectId/financial/contracts/:contractId/versions/:vers
   try{
     const result=await withEdtTransaction(client=>freezeApprovedContractPools(client,{actorUserId:req.user.userId,projectId:project(req),
       contractVersionId:req.params.versionId,expectedContractId:req.params.contractId,expectedContractFingerprint:req.body.confirmationFingerprint}));
-    res.json({id:result.id,idempotent:result.idempotent,paymentAuthorized:false});
+    res.set("Cache-Control","private, no-store").json({id:result.id,idempotent:result.idempotent,projectId:result.source.projectId,contractId:result.source.contractId,contractVersionId:result.source.contractVersionId,contractFingerprint:result.source.contractFingerprint,sourceFingerprint:result.source.sourceFingerprint,paymentAuthorized:false});
   }catch(error){
     if(error&&typeof error==="object"&&"code" in error&&["40001","40P01","23505"].includes(String(error.code)))
       throw new FinancialControlError(409,"CONTRACT_POOLS_CONCURRENT_CHANGE","Another request changed this contract. Reopen it and retry.");
@@ -213,9 +214,10 @@ router.post("/projects/:projectId/financial/contracts/:contractId/amendments/:am
 router.post("/projects/:projectId/financial/contracts/:contractId/amendments/:amendmentId/versions/:versionId/approve", run(async (req, res) => res.json(await approveAmendment({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, amendmentId: req.params.amendmentId, versionId: req.params.versionId, expectedRevision: req.body.expectedRevision, confirmationFingerprint: req.body.confirmationFingerprint, overBudgetReason: req.body.overBudgetReason }))));
 router.post("/projects/:projectId/financial/contracts/:contractId/amendments/:amendmentId/versions/:versionId/execute", run(async (req, res) => res.json(await executeAmendment({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, amendmentId: req.params.amendmentId, versionId: req.params.versionId, expectedRevision: req.body.expectedRevision, confirmationFingerprint: req.body.confirmationFingerprint, signedFileId: req.body.signedFileId }))));
 
-router.get("/projects/:projectId/financial/contracts/:contractId/grants", run(async (req, res) => res.json(await getContractRecordAccess({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId }))));
-router.post("/projects/:projectId/financial/contracts/:contractId/grants", run(async (req, res) => res.status(201).json(await setContractRecordGrant({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, userId: req.body.userId, permission: req.body.permission, state: req.body.state, reason: req.body.reason }))));
+router.get("/projects/:projectId/financial/contracts/:contractId/grants", run(async (req, res) => res.set("Cache-Control","private, no-store").json(await getContractRecordAccess({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId }))));
+router.post("/projects/:projectId/financial/contracts/:contractId/grants", run(async (req, res) => res.set("Cache-Control","private, no-store").status(201).json(await setContractRecordGrant({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, userId: req.body.userId, permission: req.body.permission, state: req.body.state, reason: req.body.reason }))));
 
+router.use("/projects/:projectId/financial/contracts/:contractId/payments",(_req,res,next)=>{res.set("Cache-Control","private, no-store");next();});
 router.get("/projects/:projectId/financial/contracts/:contractId/payments", run(async (req, res) => res.json(await getContractPaymentApplications({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId }))));
 router.get("/projects/:projectId/financial/contracts/:contractId/payments/:paymentApplicationId", run(async (req, res) => res.json(await getContractPaymentApplications({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, paymentApplicationId: req.params.paymentApplicationId }))));
 router.post("/projects/:projectId/financial/contracts/:contractId/payments", run(async (req, res) => res.status(201).json(await createContractPaymentApplication({ ...req.body, actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId }))));
@@ -223,16 +225,26 @@ router.post("/projects/:projectId/financial/contracts/:contractId/payments/:paym
 router.post("/projects/:projectId/financial/contracts/:contractId/payments/:paymentApplicationId/actions", run(async (req, res) => res.json(await transitionContractPaymentApplication({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, paymentApplicationId: req.params.paymentApplicationId, action: req.body.action, reason: req.body.reason, expectedRevision: req.body.expectedRevision }))));
 router.post("/projects/:projectId/financial/contracts/:contractId/payments/:paymentApplicationId/approve", run(async (req, res) => res.json(await approveContractPaymentApplication({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, paymentApplicationId: req.params.paymentApplicationId, expectedRevision: req.body.expectedRevision, confirmationFingerprint: req.body.confirmationFingerprint }))));
 
+router.use("/projects/:projectId/financial/contracts/imports",(_req,res,next)=>{res.set("Cache-Control","private, no-store");next();});
 router.post("/projects/:projectId/financial/contracts/imports/preview", upload, run(async (req, res) => {
   if (!req.file) throw new FinancialControlError(400, "CONTRACT_IMPORT_FILE_REQUIRED", "A CSV or XLSX file is required.");
   res.status(201).json(await previewContractImport({ actorUserId: req.user.userId, projectId: project(req), sourceFileId: req.body.sourceFileId, fileName: req.file.originalname, bytes: req.file.buffer, currency: req.body.currency, budgetSnapshotId: req.body.budgetSnapshotId, idempotencyKey: req.body.idempotencyKey }));
 }));
 router.post("/projects/:projectId/financial/contracts/imports/:sessionId/confirm", run(async (req, res) => res.json(await confirmContractImport({ actorUserId: req.user.userId, projectId: project(req), sessionId: req.params.sessionId, fileHash: req.body.fileHash, parsedFingerprint: req.body.parsedFingerprint, total: req.body.total, currency: req.body.currency, legalNumber: req.body.legalNumber, perspective: req.body.perspective, contractType: req.body.contractType, counterpartyName: req.body.counterpartyName, title: req.body.title, effectiveDate: req.body.effectiveDate, completionDate: req.body.completionDate, paymentTerms: req.body.paymentTerms, commercialMetadata: req.body.commercialMetadata, initialGrants: req.body.initialGrants }))));
 
-async function recordExport(actorUserId: number, projectId: number, data: ContractExport, format: "pdf" | "xlsx") {
-  await pool.query(`INSERT INTO financial_contract_history(id,company_id,project_id,contract_id,contract_version_id,actor_user_id,event_type,reason_code,evidence) SELECT $1,c.company_id,c.project_id,c.id,$2,$3,$4,'CONTRACT_EXPORT_ALLOWED',$5::jsonb FROM financial_contracts c WHERE c.id=$6 AND c.project_id=$7`, [crypto.randomUUID(), data.contract.versionId, actorUserId, `contract_${format}_exported`, JSON.stringify({ format, contentFingerprint: data.contract.contentFingerprint }), data.contract.id, projectId]);
+async function recordExport(actorUserId: number, projectId: number, data: ContractExport, format: "pdf" | "xlsx",artifactSha256?:string) {
+  await pool.query(`INSERT INTO financial_contract_history(id,company_id,project_id,contract_id,contract_version_id,actor_user_id,event_type,reason_code,evidence) SELECT $1,c.company_id,c.project_id,c.id,$2,$3,$4,'CONTRACT_EXPORT_ALLOWED',$5::jsonb FROM financial_contracts c WHERE c.id=$6 AND c.project_id=$7`, [crypto.randomUUID(), data.contract.versionId, actorUserId, `contract_${format}_exported`, JSON.stringify({ format, contentFingerprint: data.contract.contentFingerprint,...(artifactSha256?{artifactSha256}: {}) }), data.contract.id, projectId]);
 }
-router.get("/projects/:projectId/financial/contracts/:contractId/export.pdf", run(async (req, res) => { const projectId = project(req), data = await contractExportData({ actorUserId: req.user.userId, projectId, contractId: req.params.contractId }), output = await buildContractPdf(data); await recordExport(req.user.userId, projectId, data, "pdf"); res.type("application/pdf").setHeader("Content-Disposition", `attachment; filename=contract-${boundedText(data.contract.legalNumber, "legalNumber", 1, 100).replace(/[^A-Za-z0-9._-]/g, "-")}.pdf`); res.send(output); }));
-router.get("/projects/:projectId/financial/contracts/:contractId/export.xlsx", run(async (req, res) => { const projectId = project(req), data = await contractExportData({ actorUserId: req.user.userId, projectId, contractId: req.params.contractId }), output = buildContractXlsx(data); await recordExport(req.user.userId, projectId, data, "xlsx"); res.type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").setHeader("Content-Disposition", `attachment; filename=contract-${boundedText(data.contract.legalNumber, "legalNumber", 1, 100).replace(/[^A-Za-z0-9._-]/g, "-")}.xlsx`); res.send(output); }));
+router.get("/projects/:projectId/financial/contracts/:contractId/export.pdf", run(async (req, res) => {
+  if(req.query.lang!==undefined&&req.query.lang!=="en"&&req.query.lang!=="es")throw new FinancialControlError(400,"CONTRACT_PDF_LANGUAGE_INVALID","Choose English or Spanish for this report.");
+  const projectId=project(req),data=await contractExportData({actorUserId:req.user.userId,projectId,contractId:req.params.contractId}),output=await buildContractPdf(data,req.query.lang==="es"?"es":"en"),sha256=crypto.createHash("sha256").update(output).digest("hex");
+  await recordExport(req.user.userId,projectId,data,"pdf",sha256);
+  res.type("application/pdf").set({"Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff","X-BIMLog-Project-Id":String(projectId),"X-BIMLog-Contract-Id":data.contract.id,"X-BIMLog-Contract-Version-Id":data.contract.versionId,"X-BIMLog-Contract-Fingerprint":data.contract.contentFingerprint,"X-BIMLog-PDF-SHA256":sha256,"Content-Disposition":`attachment; filename=contract-${boundedText(data.contract.legalNumber,"legalNumber",1,100).replace(/[^A-Za-z0-9._-]/g,"-")}.pdf`}).send(output);
+}));
+router.get("/projects/:projectId/financial/contracts/:contractId/export.xlsx", run(async (req, res) => {
+  const projectId=project(req),data=await contractExportData({actorUserId:req.user.userId,projectId,contractId:req.params.contractId}),output=buildContractXlsx(data),sha256=crypto.createHash("sha256").update(output).digest("hex");
+  await recordExport(req.user.userId,projectId,data,"xlsx",sha256);
+  res.type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").set({"Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff","X-BIMLog-Project-Id":String(projectId),"X-BIMLog-Contract-Id":data.contract.id,"X-BIMLog-Contract-Version-Id":data.contract.versionId,"X-BIMLog-Contract-Fingerprint":data.contract.contentFingerprint,"X-BIMLog-XLSX-SHA256":sha256,"Content-Disposition":`attachment; filename=contract-${boundedText(data.contract.legalNumber,"legalNumber",1,100).replace(/[^A-Za-z0-9._-]/g,"-")}.xlsx`}).send(output);
+}));
 
 export default router;

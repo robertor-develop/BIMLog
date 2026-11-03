@@ -78,4 +78,11 @@ assert.equal(leasedToken.every((byte) => byte === 0), true);
 const invalidLease = new FixedGraphProtectedProviderProbeExecutor({ withBearerToken: async (_input, operation) => operation(new Uint8Array([1, 2, 3])) }, transport);
 await assert.rejects(() => invalidLease.execute(request), ConnectorValidationUnavailableError);
 
-console.log("protected SharePoint provider probe executor behavior: PASS");
+const selectedUrl="https://graph.microsoft.com/v1.0/sites/tenant.example%2Csite-id%2Cweb-id?$select=id";
+leasedToken=Buffer.from("selected-site-fixture-token");
+const selectedExecutor=new FixedGraphProtectedProviderProbeExecutor(resolver,transport,new Set([selectedUrl]));
+assert.deepEqual(await selectedExecutor.execute({...request,request:{...request.request,url:selectedUrl}}),{status:200,providerRequestId:"request-1"});
+assert.equal(leasedToken.every(byte=>byte===0),true);
+await assert.rejects(()=>selectedExecutor.execute(request),ConnectorValidationUnavailableError);
+await assert.rejects(()=>selectedExecutor.execute({...request,request:{...request.request,url:selectedUrl.replace("site-id","other-site")}}),ConnectorValidationUnavailableError);
+console.log("protected SharePoint provider probe executor behavior: PASS including explicit selected-site allowlist and refusal of root/other sites");

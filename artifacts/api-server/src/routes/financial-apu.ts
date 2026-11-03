@@ -30,15 +30,15 @@ const bonusBody = (body: unknown, keys: string[]) => {
     throw new CostValuePlanError(400, "BONUS_INPUT_INVALID", "Unsupported bonus request fields.");
 };
 router.get("/projects/:projectId/financial/apu/bonus-proposals", run(async (req, res) => {
-  res.json(await getManualBonuses(req.user.userId, projectId(req.params.projectId), req.query.before));
+  const id=projectId(req.params.projectId);res.set("Cache-Control","private, no-store").json({projectId:id,...await getManualBonuses(req.user.userId,id,req.query.before)});
 }));
 router.post("/projects/:projectId/financial/apu/bonus-proposals", run(async (req, res) => {
   bonusBody(req.body, ["fundingId", "idempotencyKey", "reason", "entries"]);
-  res.json(await proposeManualBonus(req.user.userId, projectId(req.params.projectId), req.body));
+  const id=projectId(req.params.projectId);res.set("Cache-Control","private, no-store").json({projectId:id,...await proposeManualBonus(req.user.userId,id,req.body)});
 }));
 router.post("/projects/:projectId/financial/apu/bonus-proposals/:proposalId/decision", run(async (req, res) => {
   bonusBody(req.body, ["outcome", "expectedFingerprint", "reason"]);
-  res.json(await decideManualBonus(req.user.userId, projectId(req.params.projectId), req.params.proposalId, req.body));
+  const id=projectId(req.params.projectId);res.set("Cache-Control","private, no-store").json({projectId:id,...await decideManualBonus(req.user.userId,id,req.params.proposalId,req.body)});
 }));
 
 router.get("/projects/:projectId/financial/apu", run(async (req, res) => {
@@ -51,7 +51,8 @@ router.post("/projects/:projectId/financial/apu/library-applications", run(async
   res.status(201).json({ data: await applyLibraryApu(req.user.userId,projectId(req.params.projectId),req.body) });
 }));
 router.get("/projects/:projectId/financial/apu/library-applications", run(async (req, res) => {
-  res.json({ data: await getProjectLibraryApplications(req.user.userId,projectId(req.params.projectId)) });
+  const receiptIds=req.query.receiptIds===undefined?[]:String(req.query.receiptIds).split(",");
+  res.set("Cache-Control","private, no-store").json({ data: await getProjectLibraryApplications(req.user.userId,projectId(req.params.projectId),{budgetControl:req.query.budgetControl==="1",receiptIds,projectApuVersionId:req.query.projectApuVersionId===undefined?undefined:String(req.query.projectApuVersionId)}) });
 }));
 router.get("/projects/:projectId/financial/apu/performance", run(async (req, res) => {
   res.json(await getCostValuePerformance(req.user.userId, projectId(req.params.projectId)));

@@ -22,7 +22,8 @@ export async function checkImportIntelligence(
   userId: number,
   projectId: number,
   records: any[],
-  entityType: string
+  entityType: string,
+  requireVerified=false
 ): Promise<IntelligenceResult> {
   try {
     const anthropic = await getAnthropicClientForUser({
@@ -73,12 +74,16 @@ Return ONLY valid JSON, no markdown:
 
     const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
     const result = JSON.parse(text.replace(/```json\n?|```/g, "").trim());
+    if (requireVerified && (!result || !Array.isArray(result.safeIndices) || !Array.isArray(result.warnings) || !Array.isArray(result.crossLinks))) {
+      throw new Error("Import duplicate review returned an invalid result; no records were imported.");
+    }
     return {
       safeIndices: result.safeIndices ?? records.map((_: any, i: number) => i),
       warnings: result.warnings ?? [],
       crossLinks: result.crossLinks ?? [],
     };
   } catch (err) {
+    if(requireVerified)throw err;
     console.error("[import-intelligence] failed:", err);
     return {
       safeIndices: records.map((_: any, i: number) => i),

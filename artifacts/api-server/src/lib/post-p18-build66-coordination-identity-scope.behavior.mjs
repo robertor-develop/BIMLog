@@ -12,7 +12,7 @@ const checks = [
   ["revision registration requires write permission", /coordination-hub\/revisions", authMiddleware, requirePermission\("admin", "write"\)/s, hubRoute],
   ["job enqueue requires write permission", /coordination-hub\/jobs", authMiddleware, requirePermission\("admin", "write"\)/s, hubRoute],
   ["intake upload requires write permission", /coordination\/intake",\s*authMiddleware,\s*requirePermission\("admin", "write"\)/s, intakeRoute],
-  ["intake confirmation requires write permission", /coordination\/confirm",\s*authMiddleware,\s*requirePermission\("admin", "write"\)/s, intakeRoute],
+  ["intake confirmation requires write permission", /coordination\/confirm",\s*authMiddleware,\s*requirePermission\("admin",\s*"write"\)/s, intakeRoute],
   ["caller scope is replaced with authenticated route identity", /scope:\s*\{\s*projectId: Number\(req\.params\.projectId\),\s*companyId: req\.user!\.companyId,\s*actorUserId: req\.user!\.userId/s, hubRoute],
   ["service proves project and company authority before reads and writes", /await transaction\.assertProjectCompanyAuthority\(command\.scope\)/s, service],
   ["store binds authority to actor company and project membership", /u\.id=\$1[\s\S]*u\.company_id=\$2[\s\S]*pm\.project_id=\$3 AND pm\.user_id=\$1/s, store],

@@ -22,7 +22,8 @@ const proposal = await callProcoreIntakeTool(actor, "bimlog_propose_intake_plan"
 }, deps);
 assert.equal(proposal.canonicalMutation, false);
 assert.equal(proposal.confirmationRequired, true);
-assert.equal(proposal.importAvailable, false);
+assert.equal(proposal.importAvailable, true);
+assert.equal(proposal.confirmationTransport,"explicit_document_review_ui");
 assert.equal(proposal.versionPinned, true);
 assert.equal((proposal.sources as Array<{ ref: string; versionId: string }>)[0].versionId, "ver-7");
 assert.equal((proposal.sources as Array<{ versionLabel: string }>)[0].versionLabel, "7");

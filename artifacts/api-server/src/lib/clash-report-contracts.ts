@@ -125,7 +125,7 @@ export function mapClashSpreadsheetRows(rows: unknown[][], mapping: ClashColumnM
     level: get(row, mapping.level),
     assignedToName: get(row, mapping.assignedTo),
     resolutionNotes: get(row, mapping.resolutionNotes) || null,
-    status: "open" as const,
+    status: ["complete","resolved"].includes(get(row,mapping.status).toLowerCase()) ? "resolved" as const : "open" as const,
     dueDate: getDate(row, mapping.deadline),
   })).filter(row => row.description || row.clashIdOriginal);
 }

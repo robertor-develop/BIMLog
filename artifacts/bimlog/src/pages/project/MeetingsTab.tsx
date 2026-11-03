@@ -1,3 +1,7 @@
+import { MeetingDocumentImport } from "./meetings/MeetingDocumentImport";
+import { sameMeetingDraftPayload } from "./meetings/meeting-draft-contract";
+import { MeetingCurrentViewExports } from "./meetings/MeetingCurrentViewExports";
+import { MeetingActionCreate } from "./meetings/MeetingActionCreate";
 import { useProjectCompanyChoices } from "@/hooks/use-project-company-choices";
 import { useState, useEffect, useRef, Fragment } from "react";
 import { useI18n } from "@/lib/i18n";
@@ -314,6 +318,10 @@ export function MeetingsTab({
   const { getOptions, getLabel } = useConfig();
   const { token } = useAuthStore();
   const t = (en: string, es: string) => (lang === "es" ? es : en);
+  const configuredStateLabel = (category: string, value: string) => {
+    const configured = getLabel(category, value);
+    return configured === value ? humanLabel(value) : configured;
+  };
   const statusLabel = (status: string) => {
     const labels: Record<string, string> = {
       open: t("Open", "Abierta"),
@@ -628,12 +636,13 @@ export function MeetingsTab({
     label: string;
   } | null>(null);
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
+  const [actionSaving, setActionSaving] = useState(false);
+  const actionSaveLock = useRef(false);
+  const summaryRequestLock = useRef(false);
+  const summaryRequestEpoch = useRef(0);
+  const meetingScope = useRef(0);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [currentViewExportMode, setCurrentViewExportMode] = useState<
-    "current" | "summary"
-  >("current");
-  const [currentViewExporting, setCurrentViewExporting] = useState(false);
   const createIdempotencyKeyRef = useRef(`meeting-${crypto.randomUUID()}`);
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
@@ -729,6 +738,13 @@ export function MeetingsTab({
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
   const [draftDirty, setDraftDirty] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
+  const [draftReadError,setDraftReadError]=useState(false);
+  const draftContext=useRef("");draftContext.current=JSON.stringify([projectId,token]);
+  const draftReadSequence=useRef(0),draftOperationEpoch=useRef(0),draftPayloadRevision=useRef(0),draftDiscardLock=useRef(false);
+  const canonicalSaveLock=useRef(false);
+  const draftSaveChain=useRef<Promise<any>>(Promise.resolve(null));
+  const draftBaseline=useRef<Record<string,unknown>|null>(null);
+  const draftComparable=(payload:Record<string,unknown>)=>{const {updatedAt:_updatedAt,...fields}=payload;return fields;};
   const draftRestoreRef = useRef(false);
   const autoDraftRestoreAttemptedRef = useRef(false);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
@@ -796,45 +812,9 @@ export function MeetingsTab({
   const [audioUploading, setAudioUploading] = useState(false);
   const [showNoKeyModal, setShowNoKeyModal] = useState(false);
   const [audioProgress, setAudioProgress] = useState("");
-  const [importing, setImporting] = useState(false);
-  const [importMsg, setImportMsg] = useState("");
-
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImporting(true);
-    setImportMsg(t("Reading document with AI...", "Leyendo documento con IA..."));
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch(`${API}/projects/${projectId}/meetings/import`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        setImportMsg(d.message || t("Import failed", "No se pudo importar"));
-        return;
-      }
-      const data = await res.json();
-      setImportMsg(
-        t(
-          `Meeting imported successfully - ${data.title || "untitled"}`,
-          `Acta importada correctamente - ${data.title || "sin título"}`,
-        ),
-      );
-      setTimeout(() => window.location.reload(), 1500);
-    } catch (err) {
-      setImportMsg(t("Import failed - please try again", "No se pudo importar; inténtelo de nuevo"));
-    } finally {
-      setImporting(false);
-      e.target.value = "";
-    }
-  };
-
-  // import message display handled inline
   const loadMeetings = async () => {
+    const scope = ++meetingScope.current;
+    setError("");
     setLoading(true);
     try {
       if (!token) return;
@@ -842,20 +822,26 @@ export function MeetingsTab({
         projectId,
         token,
       });
+      if (scope !== meetingScope.current) return;
       if (workspace.meetings) setMeetings(workspace.meetings);
       if (workspace.actionItems) setActionItems(workspace.actionItems);
+    } catch (error) {
+      if (scope === meetingScope.current) { setMeetings([]); setActionItems([]); setError(t("Meetings and action items could not be verified. Reload before retrying.", "No se pudieron verificar reuniones y acciones. Recargue antes de reintentar.")); }
     } finally {
-      setLoading(false);
+      if (scope === meetingScope.current) setLoading(false);
     }
   };
 
   useEffect(() => {
+    setMeetings([]);
+    setActionItems([]);
     loadMeetings();
     void loadDirectoryEntries().catch(() => {
       reportMeetingWorkflowFailure("MEETING_DIRECTORY_LOAD_FAILED");
       setError(t("The project directory could not be loaded.", "No se pudo cargar el directorio del proyecto."));
     });
-  }, [projectId]);
+    return () => { meetingScope.current += 1; };
+  }, [projectId, token]);
 
   useEffect(() => {
     if (loading || actionItems.length === 0) return;
@@ -1002,7 +988,14 @@ export function MeetingsTab({
             error: "parse_failed",
             message: "Could not read server response",
           }));
-        if (d.error === "no_openai_key") {
+        if (d.code === "LEGACY_AI_AUDIO_RETIRED") {
+          setError(
+            t(
+              "Audio transcription is temporarily unavailable until a governed audio provider is activated. Continue with manual meeting entry.",
+              "La transcripción de audio no está disponible temporalmente hasta que se active un proveedor de audio gobernado. Continúe con la entrada manual de la reunión.",
+            ),
+          );
+        } else if (d.error === "no_openai_key") {
           setShowNoKeyModal(true);
         } else {
           setError(
@@ -1036,6 +1029,7 @@ export function MeetingsTab({
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
 
   const resetForm = () => {
+    draftReadSequence.current++;draftOperationEpoch.current++;draftBaseline.current=null;setDraftReadError(false);
     const nextNum = String(meetings.length + 1).padStart(2, "0");
     setMeetingNumber(nextNum);
     setTitle("");
@@ -1150,73 +1144,81 @@ export function MeetingsTab({
   const draftQuery = (meetingId?: number | null) =>
     meetingId ? `?meeting_id=${meetingId}` : "";
 
-  const loadMeetingDraft = async (meetingId?: number | null) => {
+  const validDraftReceipt = (draft: any, meetingId: number | null) => {
+    const userId = useAuthStore.getState().user?.id;
+    if (!draft || draft.projectId !== projectId || draft.userId !== userId ||
+        (draft.meetingId ?? null) !== meetingId || draft.draftKey !== (meetingId ? `edit:${meetingId}` : "new") ||
+        !draft.payload || typeof draft.payload !== "object" || Array.isArray(draft.payload) ||
+        !Number.isFinite(Date.parse(draft.updatedAt)) || !Number.isFinite(Date.parse(draft.expiresAt))) {
+      throw new Error("draft_receipt_invalid");
+    }
+    return draft;
+  };
+  const loadMeetingDraft = async (meetingId?: number | null, expectedCanonicalUpdatedAt?: string) => {
     if (!token) return false;
-    const response = await fetch(
-      `${API}/projects/${projectId}/meetings/draft${draftQuery(meetingId)}`,
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-    if (!response.ok) return false;
-    const draft = await response.json();
-    if (!draft?.payload) return false;
-    applyDraftPayload(draft.payload);
-    setDraftStatus("saved");
-    setDraftSavedAt(draft.updatedAt || null);
-    setDraftDirty(false);
-    return true;
+    const scope = draftContext.current, sequence = ++draftReadSequence.current;
+    draftBaseline.current=null;setDraftLoaded(false); setDraftReadError(false);
+    try {
+      const response = await fetch(`${API}/projects/${projectId}/meetings/draft${draftQuery(meetingId)}`, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+      if (!response.ok) throw new Error("draft_restore_failed");
+      const draft = await response.json();
+      if (scope !== draftContext.current || sequence !== draftReadSequence.current) return false;
+      if (draft !== null) {
+        validDraftReceipt(draft, meetingId ?? null);
+        const canonicalVersion=expectedCanonicalUpdatedAt??editingMeeting?.updatedAt;
+        if(meetingId&&canonicalVersion&&Date.parse(draft.canonicalUpdatedAt)!==Date.parse(canonicalVersion))throw new Error("draft_canonical_version_changed");
+        applyDraftPayload(draft.payload);
+        setDraftStatus("saved"); setDraftSavedAt(draft.updatedAt); setDraftDirty(false);
+      }
+      if(draft===null){draftRestoreRef.current=true;window.setTimeout(()=>{draftRestoreRef.current=false;},0);}
+      setDraftLoaded(true); return draft !== null;
+    } catch (failure) {
+      if (scope === draftContext.current && sequence === draftReadSequence.current) { setDraftReadError(true); setDraftLoaded(false); if(failure instanceof Error&&failure.message==="draft_canonical_version_changed")setError(t("This draft uses an older meeting version. Discard the draft to continue from saved minutes.","Este borrador usa una versión anterior. Descarte el borrador para continuar desde las actas guardadas.")); }
+      return false;
+    }
+  };
+  const storeDraftPayload = (meetingId: number | null, payload: Record<string, unknown>) => {
+    const scope = draftContext.current, epoch = draftOperationEpoch.current, readSequence=draftReadSequence.current;
+    const save = async () => {
+      if (scope !== draftContext.current || epoch !== draftOperationEpoch.current || readSequence!==draftReadSequence.current) throw new Error("draft_scope_changed");
+      const response = await fetch(`${API}/projects/${projectId}/meetings/draft`, {method:"PUT",headers,body:JSON.stringify({meeting_id:meetingId,canonical_updated_at:editingMeeting?.updatedAt??null,payload})});
+      if (!response.ok) throw new Error("draft_save_failed");
+      const draft = validDraftReceipt(await response.json(),meetingId);
+      if (!sameMeetingDraftPayload(draft.payload,payload)) throw new Error("draft_payload_receipt_mismatch");
+      const reopened=await fetch(`${API}/projects/${projectId}/meetings/draft${draftQuery(meetingId)}`,{headers,cache:"no-store"});
+      if (!reopened.ok) throw new Error("draft_reopen_failed");
+      const saved=validDraftReceipt(await reopened.json(),meetingId);
+      if (!sameMeetingDraftPayload(saved.payload,payload)) throw new Error("draft_persistence_mismatch");
+      if(scope!==draftContext.current||epoch!==draftOperationEpoch.current||readSequence!==draftReadSequence.current)throw new Error("draft_scope_changed");
+      return saved;
+    };
+    const pending=draftSaveChain.current.then(save,save);
+    draftSaveChain.current=pending;
+    return pending;
   };
 
   useEffect(() => {
-    if (view !== "new" || !draftLoaded || draftRestoreRef.current) return;
+    if(view!=="new"||!draftLoaded)return;
+    const payload=currentDraftPayload(),comparable=draftComparable(payload);
+    if(draftBaseline.current===null){draftBaseline.current=comparable;setDraftDirty(false);return;}
+    if(sameMeetingDraftPayload(draftBaseline.current,comparable))return;
     setDraftDirty(true);
-    const timer = window.setTimeout(async () => {
-      const meetingId = editingMeeting?.id ?? null;
+    const revision=++draftPayloadRevision.current,scope=draftContext.current,readSequence=draftReadSequence.current;
+    const timer=window.setTimeout(async()=>{
       setDraftStatus("saving");
-      try {
-        const response = await fetch(
-          `${API}/projects/${projectId}/meetings/draft`,
-          {
-            method: "PUT",
-            headers,
-            body: JSON.stringify({
-              meeting_id: meetingId,
-              payload: currentDraftPayload(),
-            }),
-          },
-        );
-        if (!response.ok) throw new Error("draft_save_failed");
-        const draft = await response.json();
-        setDraftStatus("saved");
-        setDraftSavedAt(draft.updatedAt || new Date().toISOString());
-        setDraftDirty(false);
-      } catch {
-        setDraftStatus("failed");
-        setDraftDirty(true);
-      }
-    }, 900);
-    return () => window.clearTimeout(timer);
+      try{
+        const draft=await storeDraftPayload(editingMeeting?.id??null,payload);
+        if(scope!==draftContext.current||revision!==draftPayloadRevision.current||readSequence!==draftReadSequence.current)return;
+        draftBaseline.current=comparable;setDraftStatus("saved");setDraftSavedAt(draft.updatedAt);setDraftDirty(false);
+      }catch{if(scope===draftContext.current&&readSequence===draftReadSequence.current){setDraftStatus("failed");setDraftDirty(true);}}
+    },900);
+    return()=>window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    view,
-    draftLoaded,
-    title,
-    meetingDate,
-    meetingTime,
-    location,
-    agendaItems,
-    attendees,
-    rfis,
-    selectedRfis,
-    selectedSubmittals,
-    selectedLensViewpoints,
-    deliverables,
-    viewpoints,
-    aiSummaryText,
-  ]);
+  },[projectId,token,editingMeeting?.id,view,draftLoaded,title,meetingDate,meetingTime,location,agendaItems,attendees,rfis,selectedRfis,selectedSubmittals,selectedLensViewpoints,deliverables,viewpoints,aiSummaryText]);
 
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (view !== "new" || !draftDirty || draftStatus !== "failed") return;
+      if (view !== "new" || !draftDirty) return;
       event.preventDefault();
       event.returnValue = "";
     };
@@ -1225,33 +1227,19 @@ export function MeetingsTab({
   }, [view, draftDirty, draftStatus]);
 
   const persistMeetingDraftNow = async () => {
-    if (view !== "new" || !draftLoaded || !token) return true;
-    const meetingId = editingMeeting?.id ?? null;
+    if(view!=="new"||!token)return true;
+    if(!draftLoaded||draftDiscardLock.current)return false;
+    const revision=draftPayloadRevision.current,scope=draftContext.current,readSequence=draftReadSequence.current,payload=currentDraftPayload();
     setDraftStatus("saving");
-    try {
-      const response = await fetch(`${API}/projects/${projectId}/meetings/draft`, {
-        method: "PUT",
-        headers,
-        body: JSON.stringify({
-          meeting_id: meetingId,
-          payload: currentDraftPayload(),
-        }),
-      });
-      if (!response.ok) throw new Error("draft_save_failed");
-      const draft = await response.json();
-      setDraftStatus("saved");
-      setDraftSavedAt(draft.updatedAt || new Date().toISOString());
-      setDraftDirty(false);
-      return true;
-    } catch {
-      setDraftStatus("failed");
-      setDraftDirty(true);
-      return false;
-    }
+    try{
+      const draft=await storeDraftPayload(editingMeeting?.id??null,payload);
+      if(scope!==draftContext.current||revision!==draftPayloadRevision.current||readSequence!==draftReadSequence.current)return false;
+      draftBaseline.current=draftComparable(payload);setDraftStatus("saved");setDraftSavedAt(draft.updatedAt);setDraftDirty(false);return true;
+    }catch{if(scope===draftContext.current&&readSequence===draftReadSequence.current){setDraftStatus("failed");setDraftDirty(true);}return false;}
   };
 
   const confirmUnsafeNavigation = () =>
-    draftStatus !== "failed" ||
+    !draftDirty ||
     window.confirm(
       t(
         "The Meeting draft could not be safely saved. Leave anyway and risk losing the latest changes?",
@@ -1260,25 +1248,22 @@ export function MeetingsTab({
     );
 
   const discardMeetingDraft = async () => {
-    const meetingId = editingMeeting?.id ?? null;
-    if (
-      !window.confirm(
-        t(
-          "Discard this saved Meeting draft?",
-          "¿Descartar este borrador guardado de la Reunión?",
-        ),
-      )
-    )
-      return;
-    await fetch(
-      `${API}/projects/${projectId}/meetings/draft${draftQuery(meetingId)}`,
-      { method: "DELETE", headers },
-    );
-    setDraftStatus("idle");
-    setDraftSavedAt(null);
-    setDraftDirty(false);
-    if (editingMeeting) await openEditMeeting(editingMeeting);
-    else resetForm();
+    if(draftDiscardLock.current||(!draftLoaded&&!draftReadError))return;
+    if(!window.confirm(t("Discard this saved Meeting draft?","¿Descartar este borrador guardado de la Reunión?")))return;
+    draftDiscardLock.current=true;draftOperationEpoch.current++;setDraftLoaded(false);
+    const scope=draftContext.current,meetingId=editingMeeting?.id??null;
+    try{
+      try{await draftSaveChain.current;}catch{setDraftStatus("failed");}
+      const response=await fetch(`${API}/projects/${projectId}/meetings/draft${draftQuery(meetingId)}`,{method:"DELETE",headers});
+      if(!response.ok)throw new Error("draft_discard_failed");
+      const reopened=await fetch(`${API}/projects/${projectId}/meetings/draft${draftQuery(meetingId)}`,{headers,cache:"no-store"});
+      if(!reopened.ok||(await reopened.json())!==null)throw new Error("draft_discard_not_verified");
+      if(scope!==draftContext.current)return;
+      setDraftStatus("idle");setDraftSavedAt(null);setDraftDirty(false);setDraftReadError(false);setError("");
+      if(editingMeeting)await openEditMeeting(editingMeeting);else{resetForm();setView("list");}
+    }catch{
+      if(scope===draftContext.current){setDraftLoaded(true);setError(t("Draft discard could not be verified. Your form is preserved; retry discarding.","No se pudo verificar el descarte. Se conserva el formulario; reintente descartar."));}
+    }finally{draftDiscardLock.current=false;}
   };
 
   const openNew = async () => {
@@ -1385,7 +1370,7 @@ export function MeetingsTab({
     setFieldErrors({});
     setView("new");
     setDraftLoaded(true);
-    void loadMeetingDraft(meeting.id);
+    void loadMeetingDraft(meeting.id,detail.updatedAt);
   };
 
   const meetingPdfUrl = (meetingId: number) =>
@@ -1398,41 +1383,6 @@ export function MeetingsTab({
       setError(t("Could not prepare the Meeting Minutes PDF.", "No se pudo preparar el PDF del Acta de Reunión."));
     }
   };
-  const currentViewPdfUrl = () => {
-    const exportView = view === "actions" ? "actions" : "meetings";
-    const sections =
-      currentViewExportMode === "summary"
-        ? "summary"
-        : exportView === "actions"
-          ? "summary,actions"
-          : "summary,meetings,linked_records";
-    const params = new URLSearchParams({
-      lang,
-      view: exportView,
-      sections,
-    });
-    return `${API}/projects/${projectId}/meetings/current-view/pdf?${params.toString()}`;
-  };
-  const exportCurrentViewPdf = async () => {
-    if (!token) return;
-    setCurrentViewExporting(true);
-    setError("");
-    try {
-      await downloadAuthenticatedPdf(
-        currentViewPdfUrl(),
-        token,
-        `meetings-current-view-${projectId}.pdf`,
-      );
-    } catch {
-      setError(t("Could not prepare the current Meetings view PDF.", "No se pudo preparar el PDF de la vista actual de Reuniones."));
-    } finally {
-      setCurrentViewExporting(false);
-    }
-  };
-  const currentViewExportHelp = t(
-    "Exports the current Meetings screen as a project-scoped PDF using the active tab, visible result counts, selected sections, and saved meeting data.",
-    "Exporta la vista actual de Actas como PDF del proyecto usando la pestaña activa, conteos visibles, secciones seleccionadas y datos guardados.",
-  );
   const meetingReportScopeLabel = (meeting: Meeting) =>
     `${meeting.title || t("Selected meeting", "Reunión seleccionada")} · ${new Date(
       meeting.meetingDate,
@@ -1443,7 +1393,7 @@ export function MeetingsTab({
   );
   const openOriginalLensViewpoint = (lensViewpointId: number) =>
     window.location.assign(
-      `/projects/${projectId}/clash-reports?tab=lens&viewpoint=${lensViewpointId}`,
+      `/projects/${projectId}/clash-reports?view=lens&viewpoint=${lensViewpointId}`,
     );
 
   const loadRfiCandidates = async () => {
@@ -1882,7 +1832,7 @@ export function MeetingsTab({
                         }}
                       >
                         <span>
-                          {t("Status", "Estado")}: {rfi.status}
+                          {t("Status", "Estado")}: {configuredStateLabel("rfi_status", rfi.status)}
                         </span>
                         <span>
                           {t("Responsible", "Responsable")}:{" "}
@@ -2874,7 +2824,7 @@ export function MeetingsTab({
                         </span>
                         <span>
                           {t("Status", "Estado")}:{" "}
-                          {humanLabel(submittal.status)}
+                          {configuredStateLabel("submittal_status", submittal.status)}
                         </span>
                         <span>
                           {t("Responsible", "Responsable")}:{" "}
@@ -3028,16 +2978,20 @@ export function MeetingsTab({
   };
 
   const saveMeeting = async () => {
+    if(canonicalSaveLock.current||draftDiscardLock.current||!draftLoaded)return;
     const nextErrors = validateMeetingForm();
     if (Object.keys(nextErrors).length) {
       showValidationErrors(nextErrors);
       return;
     }
+    canonicalSaveLock.current=true;draftOperationEpoch.current++;setDraftLoaded(false);
+    const scope=draftContext.current;
     setSaving(true);
     setError("");
     setValidationSummary([]);
     setFieldErrors({});
     try {
+      try{await draftSaveChain.current;}catch{setDraftStatus("failed");}
       const dateTime = `${meetingDate}T${meetingTime}:00`;
       const notes = buildNotes();
       const body = {
@@ -3090,52 +3044,67 @@ export function MeetingsTab({
         showValidationErrors({ server: message });
         return;
       }
+      if(scope!==draftContext.current)return;
+      draftReadSequence.current++;
       await loadMeetings();
       if (!editingMeeting)
         createIdempotencyKeyRef.current = `meeting-${crypto.randomUUID()}`;
       setView("list");
+    } catch {
+      if(scope===draftContext.current)setError(t("Meeting save could not be confirmed. Your form is preserved; retry saving.","No se pudo confirmar el guardado. Se conserva el formulario; reintente guardar."));
     } finally {
-      setSaving(false);
+      canonicalSaveLock.current=false;setSaving(false);setDraftLoaded(true);
     }
   };
 
+  useEffect(() => {
+    summaryRequestEpoch.current++;
+    summaryRequestLock.current = false;
+    setAiLoading(false);
+    return () => { summaryRequestEpoch.current++; };
+  }, [projectId, token, editingMeeting?.id]);
   const generateAISummary = async () => {
-    if (!title || !meetingDate) {
-      setError("Enter title and date before generating summary");
+    if (!token || !canWrite || summaryRequestLock.current) return;
+    if (!editingMeeting) {
+      setError(t("Save this meeting, then reopen it to generate a summary from its saved notes.", "Guarde esta reunión y vuelva a abrirla para generar un resumen de sus notas guardadas."));
       return;
     }
+    const scope = ++summaryRequestEpoch.current;
+    const meetingId = editingMeeting.id;
+    summaryRequestLock.current = true;
     setAiLoading(true);
+    setError("");
     try {
-      const notes = buildNotes();
-      const tempSave = await fetch(`${API}/projects/${projectId}/meetings`, {
-        method: "POST",
-        headers: { ...headers, "Idempotency-Key": `meeting-ai-${crypto.randomUUID()}` },
-        body: JSON.stringify({
-          title: title || "Draft",
-          meeting_date: `${meetingDate}T${meetingTime}:00`,
-          notes,
-        }),
-      });
-      if (!tempSave.ok) return;
-      const meeting = await tempSave.json();
-      const r = await fetch(
-        `${API}/projects/${projectId}/meetings/${meeting.id}/ai-summary`,
-        { method: "POST", headers },
+      const response = await fetch(
+        `${API}/projects/${projectId}/meetings/${meetingId}/ai-summary`,
+        { method: "POST", headers, body: JSON.stringify({expected_updated_at:editingMeeting.updatedAt}) },
       );
-      if (r.ok) {
-        const d = await r.json();
-        setAiSummaryText(d.summary || "");
-      }
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(typeof body.error === "string" ? body.error : t("The summary provider is unavailable. Your saved meeting was not duplicated.", "El proveedor de resúmenes no está disponible. No se duplicó su reunión guardada."));
+      if (typeof body.summary !== "string") throw new Error(t("The summary response could not be verified. Reopen the saved meeting.", "No se pudo verificar el resumen. Vuelva a abrir la reunión guardada."));
+      if (scope !== summaryRequestEpoch.current) return;
+      if(body.meeting?.id!==meetingId||body.meeting?.projectId!==projectId||typeof body.meeting?.updatedAt!=="string"||!Number.isFinite(Date.parse(body.meeting.updatedAt)))throw new Error(t("The saved summary version could not be verified. Reopen this meeting before saving.","No se verificó la versión guardada del resumen. Reabra la reunión antes de guardar."));
+      setEditingMeeting(current => current?.id===meetingId?{...current,updatedAt:body.meeting.updatedAt}:current);
+      setAiSummaryText(body.summary);
       await loadMeetings();
+    } catch (error) {
+      if (scope === summaryRequestEpoch.current) setError(error instanceof Error ? error.message : t("Summary could not be generated. Retry after checking the provider.", "No se pudo generar el resumen. Revise el proveedor y reintente."));
     } finally {
-      setAiLoading(false);
+      if (scope === summaryRequestEpoch.current) { summaryRequestLock.current = false; setAiLoading(false); }
     }
   };
 
   const updateActionItem = async (id: number, status: string) => {
-    if (!token) return;
-    await updateMeetingActionItem({ projectId, token }, id, status);
-    await loadMeetings();
+    if (!token || !canWrite || actionSaveLock.current) return;
+    const scope = meetingScope.current;
+    actionSaveLock.current = true;
+    setActionSaving(true);
+    try {
+      await updateMeetingActionItem({ projectId, token }, id, status);
+      if (scope === meetingScope.current) await loadMeetings();
+    } catch (error) {
+      if (scope === meetingScope.current) setError(t("Action update could not be confirmed. Reload the saved action before retrying.", "No se pudo confirmar la actualización. Recargue la acción guardada antes de reintentar."));
+    } finally { actionSaveLock.current = false; setActionSaving(false); }
   };
 
   const openActions = actionItems.filter(
@@ -3190,6 +3159,8 @@ export function MeetingsTab({
           style={{
             display: "flex",
             justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 12,
             alignItems: "center",
             marginBottom: 20,
           }}
@@ -3206,58 +3177,8 @@ export function MeetingsTab({
             </p>
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <PrintPdfButton
-              lang={lang}
-              onClick={() => void exportCurrentViewPdf()}
-              loading={currentViewExporting}
-              disabledReason={currentViewExportHelp}
-              currentViewSummary={[
-                `${t("View", "Vista")}: ${view === "actions" ? t("Actions", "Acciones") : t("Meetings", "Reuniones")}`,
-              ]}
-              options={
-                <label style={{ display: "grid", gap: 6, fontSize: 12, color: "#475569" }}>
-                  <span>{t("Included sections", "Secciones incluidas")}</span>
-                  <select
-                    value={currentViewExportMode}
-                    onChange={(event) => setCurrentViewExportMode(event.target.value === "summary" ? "summary" : "current")}
-                    aria-label={t("Current view PDF sections", "Secciones del PDF de vista actual")}
-                    style={{ minHeight: 36, border: "1px solid #CBD5E1", borderRadius: 8, padding: "0 8px", background: "white", maxWidth: "100%" }}
-                  >
-                    <option value="current">
-                      {view === "actions"
-                        ? t("Summary + Actions", "Resumen + acciones")
-                        : t("Summary + Meeting Register", "Resumen + registro de reuniones")}
-                    </option>
-                    <option value="summary">{t("Summary only", "Solo resumen")}</option>
-                  </select>
-                </label>
-              }
-            />
-            {canWrite && (
-              <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
-                <input
-                  type="file"
-                  onChange={handleImport}
-                  disabled={importing}
-                  style={{ display: "none" }}
-                />
-                <div
-                  className="btn btn-outline"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    opacity: importing ? 0.6 : 1,
-                    pointerEvents: importing ? "none" : "auto",
-                  }}
-                >
-                  <Download size={14} />{" "}
-                  {importing
-                    ? t("Importing...", "Importando...")
-                    : t("Import Minutes", "Importar Acta")}
-                </div>
-              </label>
-            )}
+            <MeetingCurrentViewExports projectId={projectId} token={token} lang={lang} view={view==="actions"?"actions":"meetings"} />
+            <MeetingDocumentImport projectId={projectId} token={token} lang={lang} canWrite={canWrite} onImported={loadMeetings} />
             {canWrite && (
               <button
                 className="btn btn-primary"
@@ -3549,6 +3470,7 @@ export function MeetingsTab({
                       </button>
                     )}
                   </div>
+                  {canWrite && <MeetingActionCreate projectId={projectId} meetingId={m.id} members={memberList} onSaved={loadMeetings} />}
                   {!!m.linkedRfis?.length && (
                     <div style={{ flexBasis: "100%", display: "grid", gap: 8 }}>
                       {m.linkedRfis.map((rfi) => (
@@ -4404,10 +4326,12 @@ export function MeetingsTab({
           />
         )}
 
+        {actionSaving && <p role="status">{t("Saving action and reloading saved state…", "Guardando acción y recargando estado guardado…")}</p>}
+        {error && <div role="alert"><p>{error}</p><button disabled={loading || actionSaving} onClick={() => void loadMeetings()}>{t("Reload saved meetings and actions", "Recargar reuniones y acciones guardadas")}</button></div>}
         {!loading && view === "actions" && (
           <MeetingActionItemsTable
             items={actionItems}
-            canWrite={canWrite}
+            canWrite={canWrite && !actionSaving}
             statusLabel={statusLabel}
             t={t}
             onComplete={(id) => void updateActionItem(id, "completed")}
@@ -4426,11 +4350,13 @@ export function MeetingsTab({
         style={{
           display: "flex",
           justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 12,
           alignItems: "center",
           marginBottom: 20,
         }}
       >
-        <div>
+        <div style={{flex:"1 1 220px",minWidth:0,overflowWrap:"anywhere"}}>
           <div
             style={{
               fontSize: 11,
@@ -4514,6 +4440,10 @@ export function MeetingsTab({
           >
             {t("Cancel", "Cancelar")}
           </button>
+          <button type="button" className="btn btn-outline" disabled={!draftLoaded || draftStatus==="saving"} onClick={()=>void persistMeetingDraftNow()} style={{minHeight:44}}>
+            {t("Save draft now","Guardar borrador ahora")}
+          </button>
+
           <button
             className="btn btn-outline"
             onClick={() => void discardMeetingDraft()}
@@ -4523,7 +4453,7 @@ export function MeetingsTab({
           <button
             className="btn btn-primary"
             onClick={saveMeeting}
-            disabled={saving}
+            disabled={saving || !draftLoaded}
           >
             {saving
               ? t("Saving?", "Guardando?")
@@ -4534,6 +4464,10 @@ export function MeetingsTab({
         </div>
       </div>
 
+      {draftReadError && <div role="alert" style={{padding:12,border:"1px solid #fca5a5",borderRadius:8,marginBottom:12}}>
+        {t("Could not restore draft. Saving is paused to protect your saved work.","No se pudo restaurar el borrador. Se pausó el guardado para proteger su trabajo.")}
+        <button type="button" className="btn btn-outline" onClick={()=>void loadMeetingDraft(editingMeeting?.id??null,editingMeeting?.updatedAt)} style={{minHeight:44,margin:8}}>{t("Retry draft restore","Reintentar restauración")}</button>
+      </div>}
       <div
         role={draftStatus === "failed" ? "alert" : "status"}
         aria-live="polite"
@@ -4571,21 +4505,6 @@ export function MeetingsTab({
           }}
         >
           {error}
-        </div>
-      )}
-      {importMsg && (
-        <div
-          style={{
-            background: "#EFF6FF",
-            border: "1px solid #BFDBFE",
-            borderRadius: 8,
-            padding: "10px 14px",
-            color: "#1D4ED8",
-            fontSize: 13,
-            marginBottom: 14,
-          }}
-        >
-          {importMsg}
         </div>
       )}
 
@@ -4872,7 +4791,7 @@ export function MeetingsTab({
               <thead>
                 <tr>
                   {[
-                    t("Trade", "Trade"),
+                    t("Trade", "Oficio"),
                     t("Company", "Empresa"),
                     t("Name", "Nombre"),
                     t("Role", "Rol"),
@@ -4913,7 +4832,7 @@ export function MeetingsTab({
                     <Fragment key={i}>
                       <tr style={{ borderBottom: "1px solid #F3F4F6" }}>
                         <MeetingParticipantField
-                          label={t("Trade", "Trade")}
+                          label={t("Trade", "Oficio")}
                           value={a.trade}
                           onChange={(value) => {
                             const arr = [...attendees];
@@ -5826,12 +5745,12 @@ export function MeetingsTab({
                     {[
                       t("Floor/Area", "Piso/Área"),
                       t("Description", "Descripción"),
-                      "PLUMBING",
-                      "HVAC",
-                      "FIRE PROT.",
-                      "ELECTRICAL",
-                      "OTHER",
-                      "COORDINATOR",
+                      t("Plumbing", "Plomería"),
+                      t("HVAC", "Climatización"),
+                      t("Fire protection", "Protección contra incendios"),
+                      t("Electrical", "Electricidad"),
+                      t("Other", "Otro"),
+                      t("Coordinator", "Coordinador"),
                       t("Deadline", "Fecha Límite"),
                       "",
                     ].map((h) => (
@@ -6260,6 +6179,10 @@ export function MeetingsTab({
         >
           {t("Cancel", "Cancelar")}
         </button>
+          <button type="button" className="btn btn-outline" disabled={!draftLoaded || draftStatus==="saving"} onClick={()=>void persistMeetingDraftNow()} style={{minHeight:44}}>
+            {t("Save draft now","Guardar borrador ahora")}
+          </button>
+
         <button
           className="btn btn-outline"
           onClick={() => void discardMeetingDraft()}
@@ -6269,7 +6192,7 @@ export function MeetingsTab({
         <button
           className="btn btn-primary"
           onClick={saveMeeting}
-          disabled={saving}
+          disabled={saving || !draftLoaded}
         >
           {saving
             ? t("Saving?", "Guardando?")
@@ -6279,6 +6202,10 @@ export function MeetingsTab({
         </button>
       </div>
 
+      {draftReadError && <div role="alert" style={{padding:12,border:"1px solid #fca5a5",borderRadius:8,marginBottom:12}}>
+        {t("Could not restore draft. Saving is paused to protect your saved work.","No se pudo restaurar el borrador. Se pausó el guardado para proteger su trabajo.")}
+        <button type="button" className="btn btn-outline" onClick={()=>void loadMeetingDraft(editingMeeting?.id??null,editingMeeting?.updatedAt)} style={{minHeight:44,margin:8}}>{t("Retry draft restore","Reintentar restauración")}</button>
+      </div>}
       <div
         role={draftStatus === "failed" ? "alert" : "status"}
         aria-live="polite"

@@ -24,6 +24,8 @@ const Register = namedPage(() => import("@/pages/Register"), "Register");
 const VerifyEmail = namedPage(() => import("@/pages/VerifyEmail"), "VerifyEmail");
 const Dashboard = namedPage(() => import("@/pages/Dashboard"), "Dashboard");
 const PendingItems = namedPage(() => import("@/pages/PendingItems"), "PendingItems");
+const MeetingRfiSources = namedPage(() => import("@/pages/MeetingRfiSources"), "MeetingRfiSources");
+const MeetingLensSources = namedPage(() => import("@/pages/MeetingLensSources"), "MeetingLensSources");
 const AllTools = namedPage(() => import("@/pages/AllTools"), "AllTools");
 const ProjectDetail = namedPage(() => import("@/pages/ProjectDetail"), "ProjectDetail");
 const HelpCenter = namedPage(() => import("@/pages/HelpCenter"), "HelpCenter");
@@ -51,8 +53,83 @@ const CompanyDeliveryWorkflows = namedPage(() => import("@/pages/CompanyDelivery
 const CompanyWorkflowGovernance = namedPage(() => import("@/pages/CompanyWorkflowGovernance"), "CompanyWorkflowGovernance");
 const CompanyPricingTemplates = namedPage(() => import("@/pages/CompanyPricingTemplates"), "CompanyPricingTemplates");
 const CoordinationKnowledgeLibrary = namedPage(() => import("@/pages/CoordinationKnowledgeLibrary"), "CoordinationKnowledgeLibrary");
+const KnowledgeSearch = namedPage(() => import("@/pages/KnowledgeSearch"), "KnowledgeSearch");
+const KnowledgeStarterLibrary = namedPage(() => import("@/pages/KnowledgeStarterLibrary"), "KnowledgeStarterLibrary");
+const KnowledgeTaxonomy = namedPage(() => import("@/pages/KnowledgeTaxonomy"), "KnowledgeTaxonomy");
+const PendingWork = namedPage(() => import("@/pages/PendingWork"), "PendingWork");
+const MacSyncAvailability = namedPage(() => import("@/pages/MacSyncAvailability"), "MacSyncAvailability");
+const FeatureAccessInspector = namedPage(() => import("@/pages/FeatureAccessInspector"), "FeatureAccessInspector");
+const FeatureCatalog = namedPage(() => import("@/pages/FeatureCatalog"), "FeatureCatalog");
+const FeaturePolicyWorkspace = namedPage(() => import("@/pages/FeaturePolicyWorkspace"), "FeaturePolicyWorkspace");
+const FeaturePreferences = namedPage(() => import("@/pages/FeaturePreferences"), "FeaturePreferences");
+const TelegramOperations = namedPage(() => import("@/pages/TelegramOperations"), "TelegramOperations");
+const MasterCatalogBrowser = namedPage(() => import("@/pages/MasterCatalogBrowser"), "MasterCatalogBrowser");
+const MyAiUsage = namedPage(() => import("@/pages/MyAiUsage"), "MyAiUsage");
+const MyConnectionFiles = namedPage(() => import("@/pages/MyConnectionFiles"), "MyConnectionFiles");
+const MySetup = namedPage(() => import("@/pages/MySetup"), "MySetup");
+const ProjectAgentReview = namedPage(() => import("@/pages/ProjectAgentReview"), "ProjectAgentReview");
+const ProjectInsightsReview = namedPage(() => import("@/pages/ProjectInsightsReview"), "ProjectInsightsReview");
+const IntakeAgentPreview = namedPage(() => import("@/pages/IntakeAgentPreview"), "IntakeAgentPreview");
+const FolderWizardWorkspace = namedPage(() => import("@/pages/FolderWizardWorkspace"), "FolderWizardWorkspace");
+const ProjectLinksWorkspace = namedPage(() => import("@/pages/ProjectLinksWorkspace"), "ProjectLinksWorkspace");
+const PluginProjectDirectory = namedPage(() => import("@/pages/PluginProjectDirectory"), "PluginProjectDirectory");
+const ProjectUserAssignment = namedPage(() => import("@/pages/ProjectUserAssignment"), "ProjectUserAssignment");
+const ProjectBriefingReview = namedPage(() => import("@/pages/ProjectBriefingReview"), "ProjectBriefingReview");
+const LensImportPlan = namedPage(() => import("@/pages/LensImportPlan"), "LensImportPlan");
+const LensImportContext = namedPage(() => import("@/pages/LensImportContext"), "LensImportContext");
+const LensSequenceStatus = namedPage(() => import("@/pages/LensSequenceStatus"), "LensSequenceStatus");
+const LensSyncReview = namedPage(() => import("@/pages/LensSyncReview"), "LensSyncReview");
+const PluginPullReview = namedPage(() => import("@/pages/PluginPullReview"), "PluginPullReview");
+const FindOriginalClash = namedPage(() => import("@/pages/FindOriginalClash"), "FindOriginalClash");
+const ProcoreConnectionStatus = namedPage(() => import("@/pages/ProcoreConnectionStatus"), "ProcoreConnectionStatus");
+const CoordinationOperations = namedPage(() => import("@/pages/CoordinationOperations"), "CoordinationOperations");
+const MeetingLinkActions = namedPage(() => import("@/pages/MeetingLinkActions"), "MeetingLinkActions");
+const ProjectDocumentSearch = namedPage(() => import("@/pages/ProjectDocumentSearch"), "ProjectDocumentSearch");
+const EdtActivation = namedPage(() => import("@/pages/EdtActivation"), "EdtActivation");
+const EdtCapabilities = namedPage(() => import("@/pages/EdtCapabilities"), "EdtCapabilities");
+const EdtChanges = namedPage(() => import("@/pages/EdtChanges"), "EdtChanges");
+const EdtIntakePreviews = namedPage(() => import("@/pages/EdtIntakePreviews"), "EdtIntakePreviews");
+const EdtQcReview = namedPage(() => import("@/pages/EdtQcReview"), "EdtQcReview");
+const EdtDirectorAuthority = namedPage(() => import("@/pages/EdtDirectorAuthority"), "EdtDirectorAuthority");
+const EdtTimeReview = namedPage(() => import("@/pages/EdtTimeReview"), "EdtTimeReview");
+const EdtIssuances = namedPage(() => import("@/pages/EdtIssuances"), "EdtIssuances");
+const FileCustodyReview = namedPage(() => import("@/pages/FileCustodyReview"), "FileCustodyReview");
+const ManualBonusReview = namedPage(() => import("@/pages/ManualBonusReview"), "ManualBonusReview");
+const BudgetDecisionReview = namedPage(() => import("@/pages/BudgetDecisionReview"), "BudgetDecisionReview");
+const ApuBudgetReview = namedPage(() => import("@/pages/ApuBudgetReview"), "ApuBudgetReview");
+const PluginSyncReview = namedPage(() => import("@/pages/PluginSyncReview"), "PluginSyncReview");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
+const FixSpecificLink = namedPage(() => import("@/pages/parity/admin-fix-specific-link"), "FixSpecificLink");
+const LaunchConfiguration = namedPage(() => import("@/pages/parity/admin-launch-configuration"), "LaunchConfiguration");
+const AdminMasterCatalogs = namedPage(() => import("@/pages/parity/admin-master-catalogs"), "AdminMasterCatalogs");
+const AdminOverview = namedPage(() => import("@/pages/parity/admin-overview"), "AdminOverview");
+const AdminPlatformCapabilities = namedPage(() => import("@/pages/parity/admin-platform-capabilities"), "AdminPlatformCapabilities");
+const AdminPlatformStats = namedPage(() => import("@/pages/parity/admin-platform-stats"), "AdminPlatformStats");
+const AdminProjectsList = namedPage(() => import("@/pages/parity/admin-projects-list"), "AdminProjectsList");
+const AdminSupport = namedPage(() => import("@/pages/parity/admin-support"), "AdminSupport");
+const AiControlBudgets = namedPage(() => import("@/pages/parity/ai-control-budgets"), "AiControlBudgets");
+const AiControlCompanies = namedPage(() => import("@/pages/parity/ai-control-companies"), "AiControlCompanies");
+const AiControlCompanyAdministrators = namedPage(() => import("@/pages/parity/ai-control-company-ai-administrators"), "AiControlCompanyAdministrators");
+const AiControlCompanyUsers = namedPage(() => import("@/pages/parity/ai-control-company-users"), "AiControlCompanyUsers");
+const AiControlEntitlements = namedPage(() => import("@/pages/parity/ai-control-entitlements"), "AiControlEntitlements");
+const AiControlEstimates = namedPage(() => import("@/pages/parity/ai-control-estimates"), "AiControlEstimates");
+const AiControlPrices = namedPage(() => import("@/pages/parity/ai-control-prices"), "AiControlPrices");
+const AiControlProviderConnections = namedPage(() => import("@/pages/parity/ai-control-provider-connections"), "AiControlProviderConnections");
+const AiControlRuns = namedPage(() => import("@/pages/parity/ai-control-runs"), "AiControlRuns");
+const AiControlStatus = namedPage(() => import("@/pages/parity/ai-control-status"), "AiControlStatus");
+const AiControlUsage = namedPage(() => import("@/pages/parity/ai-control-usage"), "AiControlUsage");
+const AuthLaunchStepUp = namedPage(() => import("@/pages/parity/auth-launch-step-up"), "AuthLaunchStepUp");
+const AuthLogin = namedPage(() => import("@/pages/parity/auth-login"), "AuthLogin");
+const AuthOpenAiKey = namedPage(() => import("@/pages/parity/auth-openai-key"), "AuthOpenAiKey");
+const AutodeskHubs = namedPage(() => import("@/pages/parity/autodesk-hubs"), "AutodeskHubs");
+const AutodeskLogin = namedPage(() => import("@/pages/parity/autodesk-login"), "AutodeskLogin");
+const AutodeskProjects = namedPage(() => import("@/pages/parity/autodesk-projects"), "AutodeskProjects");
+const AutodeskToken = namedPage(() => import("@/pages/parity/autodesk-token"), "AutodeskToken");
+const CommercialBillingIdentity = namedPage(() => import("@/pages/parity/commercial-billing-identity"), "CommercialBillingIdentity");
+const CommercialBillingPortal = namedPage(() => import("@/pages/parity/commercial-billing-portal"), "CommercialBillingPortal");
+const CommercialCheckout = namedPage(() => import("@/pages/parity/commercial-checkout"), "CommercialCheckout");
+const CommercialProviders = namedPage(() => import("@/pages/parity/commercial-providers"), "CommercialProviders");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
 const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
 const About = namedPage(() => import("@/pages/About"), "About");
@@ -212,6 +289,34 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/login" component={Login} />
+      <Route path="/auth/login" component={AuthLogin} />
+      <Route path="/auth/openai-key">
+        {() => <ProtectedRoute component={AuthOpenAiKey} />}
+      </Route>
+      <Route path="/autodesk/hubs">
+        {() => <ProtectedRoute component={AutodeskHubs} />}
+      </Route>
+      <Route path="/autodesk/login">
+        {() => <ProtectedRoute component={AutodeskLogin} />}
+      </Route>
+      <Route path="/autodesk/projects/:hubId">
+        {() => <ProtectedRoute component={AutodeskProjects} />}
+      </Route>
+      <Route path="/autodesk/token">
+        {() => <ProtectedRoute component={AutodeskToken} />}
+      </Route>
+      <Route path="/commercial/billing-identity">
+        {() => <ProtectedRoute component={CommercialBillingIdentity} />}
+      </Route>
+      <Route path="/commercial/billing-portal">
+        {() => <ProtectedRoute component={CommercialBillingPortal} />}
+      </Route>
+      <Route path="/commercial/checkout">
+        {() => <ProtectedRoute component={CommercialCheckout} />}
+      </Route>
+      <Route path="/commercial/providers">
+        {() => <ProtectedRoute component={CommercialProviders} />}
+      </Route>
       <Route path="/register" component={Register} />
       <Route path="/verify-email" component={VerifyEmail} />
       <Route path="/reset-password" component={ResetPasswordPage} />
@@ -232,6 +337,12 @@ function Router() {
       </Route>
       <Route path="/all-tools">
         {() => <ProtectedRoute component={AllTools} />}
+      </Route>
+      <Route path="/meeting-rfi-sources">
+        {() => <ProtectedRoute component={MeetingRfiSources} />}
+      </Route>
+      <Route path="/meeting-lens-sources">
+        {() => <ProtectedRoute component={MeetingLensSources} />}
       </Route>
       <Route path="/lens-next">
         {() => <ProtectedRoute component={LensNextWorkspace} />}
@@ -314,6 +425,141 @@ function Router() {
       <Route path="/knowledge">
         {() => <ProtectedRoute component={CoordinationKnowledgeLibrary} />}
       </Route>
+      <Route path="/knowledge/search">
+        {() => <ProtectedRoute component={KnowledgeSearch} />}
+      </Route>
+      <Route path="/knowledge/starter-library">
+        {() => <ProtectedRoute component={KnowledgeStarterLibrary} />}
+      </Route>
+      <Route path="/knowledge/taxonomy">
+        {() => <ProtectedRoute component={KnowledgeTaxonomy} />}
+      </Route>
+      <Route path="/pending-work">
+        {() => <ProtectedRoute component={PendingWork} />}
+      </Route>
+      <Route path="/sync-agent/mac">
+        {() => <ProtectedRoute component={MacSyncAvailability} />}
+      </Route>
+      <Route path="/feature-access">
+        {() => <ProtectedRoute component={FeatureAccessInspector} />}
+      </Route>
+      <Route path="/feature-catalog">
+        {() => <ProtectedRoute component={FeatureCatalog} />}
+      </Route>
+      <Route path="/feature-policies">
+        {() => <ProtectedRoute component={FeaturePolicyWorkspace} />}
+      </Route>
+      <Route path="/feature-preferences">
+        {() => <ProtectedRoute component={FeaturePreferences} />}
+      </Route>
+      <Route path="/telegram-operations">
+        {() => <ProtectedRoute component={TelegramOperations} />}
+      </Route>
+      <Route path="/master-catalogs">
+        {() => <ProtectedRoute component={MasterCatalogBrowser} />}
+      </Route>
+      <Route path="/my-ai-usage">
+        {() => <ProtectedRoute component={MyAiUsage} />}
+      </Route>
+      <Route path="/my-connected-files">
+        {() => <ProtectedRoute component={MyConnectionFiles} />}
+      </Route>
+      <Route path="/my-setup">
+        {() => <ProtectedRoute component={MySetup} />}
+      </Route>
+      <Route path="/project-agent-review">
+        {() => <ProtectedRoute component={ProjectAgentReview} />}
+      </Route>
+      <Route path="/project-insights-review">
+        {() => <ProtectedRoute component={ProjectInsightsReview} />}
+      </Route>
+      <Route path="/intake-agent-preview">
+        {() => <ProtectedRoute component={IntakeAgentPreview} />}
+      </Route>
+      <Route path="/folder-wizard-workspace">
+        {() => <ProtectedRoute component={FolderWizardWorkspace} />}
+      </Route>
+      <Route path="/project-links">
+        {() => <ProtectedRoute component={ProjectLinksWorkspace} />}
+      </Route>
+      <Route path="/plugin-project-directory">
+        {() => <ProtectedRoute component={PluginProjectDirectory} />}
+      </Route>
+      <Route path="/project-user-assignment">
+        {() => <ProtectedRoute component={ProjectUserAssignment} />}
+      </Route>
+      <Route path="/project-briefing-review">
+        {() => <ProtectedRoute component={ProjectBriefingReview} />}
+      </Route>
+      <Route path="/lens-import-plan">
+        {() => <ProtectedRoute component={LensImportPlan} />}
+      </Route>
+      <Route path="/lens-import-context">
+        {() => <ProtectedRoute component={LensImportContext} />}
+      </Route>
+      <Route path="/lens-sequence-status">
+        {() => <ProtectedRoute component={LensSequenceStatus} />}
+      </Route>
+      <Route path="/lens-next-snapshot-replay">
+        {() => <ProtectedRoute component={LensSyncReview} />}
+      </Route>
+      <Route path="/plugin-pull-review">
+        {() => <ProtectedRoute component={PluginPullReview} />}
+      </Route>
+      <Route path="/find-original-clash">
+        {() => <ProtectedRoute component={FindOriginalClash} />}
+      </Route>
+      <Route path="/procore-connection-status">
+        {() => <ProtectedRoute component={ProcoreConnectionStatus} />}
+      </Route>
+      <Route path="/coordination-operations">
+        {() => <ProtectedRoute component={CoordinationOperations} />}
+      </Route>
+      <Route path="/meeting-link-actions">
+        {() => <ProtectedRoute component={MeetingLinkActions} />}
+      </Route>
+      <Route path="/project-document-search">
+        {() => <ProtectedRoute component={ProjectDocumentSearch} />}
+      </Route>
+      <Route path="/edt-activation">
+        {() => <ProtectedRoute component={EdtActivation} />}
+      </Route>
+      <Route path="/edt-permissions">
+        {() => <ProtectedRoute component={EdtCapabilities} />}
+      </Route>
+      <Route path="/edt-changes">
+        {() => <ProtectedRoute component={EdtChanges} />}
+      </Route>
+      <Route path="/edt-intake-previews">
+        {() => <ProtectedRoute component={EdtIntakePreviews} />}
+      </Route>
+      <Route path="/edt-qc-review">
+        {() => <ProtectedRoute component={EdtQcReview} />}
+      </Route>
+      <Route path="/edt-director-authority">
+        {() => <ProtectedRoute component={EdtDirectorAuthority} />}
+      </Route>
+      <Route path="/edt-time-review">
+        {() => <ProtectedRoute component={EdtTimeReview} />}
+      </Route>
+      <Route path="/edt-issuances">
+        {() => <ProtectedRoute component={EdtIssuances} />}
+      </Route>
+      <Route path="/file-custody-review">
+        {() => <ProtectedRoute component={FileCustodyReview} />}
+      </Route>
+      <Route path="/manual-bonus-review">
+        {() => <ProtectedRoute component={ManualBonusReview} />}
+      </Route>
+      <Route path="/budget-decision-review">
+        {() => <ProtectedRoute component={BudgetDecisionReview} />}
+      </Route>
+      <Route path="/apu-budget-review">
+        {() => <ProtectedRoute component={ApuBudgetReview} />}
+      </Route>
+      <Route path="/plugin-sync-review">
+        {() => <ProtectedRoute component={PluginSyncReview} />}
+      </Route>
       <Route path="/admin">
         {() => <AccessRoute component={AdminPanel} surface="project_administration" />}
       </Route>
@@ -325,6 +571,66 @@ function Router() {
       </Route>
       <Route path="/admin/project-company-bindings">
         {() => <AccessRoute component={ProjectCompanyBindings} surface="total_control" />}
+      </Route>
+      <Route path="/admin/fix-specific-link">
+        {() => <AccessRoute component={FixSpecificLink} surface="total_control" />}
+      </Route>
+      <Route path="/admin/launch-configuration">
+        {() => <AccessRoute component={LaunchConfiguration} surface="total_control" />}
+      </Route>
+      <Route path="/admin/master-catalogs">
+        {() => <AccessRoute component={AdminMasterCatalogs} surface="total_control" />}
+      </Route>
+      <Route path="/admin/overview">
+        {() => <AccessRoute component={AdminOverview} surface="project_administration" />}
+      </Route>
+      <Route path="/admin/platform-capabilities">
+        {() => <AccessRoute component={AdminPlatformCapabilities} surface="total_control" />}
+      </Route>
+      <Route path="/admin/platform-stats">
+        {() => <AccessRoute component={AdminPlatformStats} surface="total_control" />}
+      </Route>
+      <Route path="/admin/projects-list">
+        {() => <AccessRoute component={AdminProjectsList} surface="project_administration" />}
+      </Route>
+      <Route path="/admin/support-operations">
+        {() => <AccessRoute component={AdminSupport} surface="total_control" />}
+      </Route>
+      <Route path="/ai-control/budgets">
+        {() => <ProtectedRoute component={AiControlBudgets} />}
+      </Route>
+      <Route path="/ai-control/companies">
+        {() => <AccessRoute component={AiControlCompanies} surface="total_control" />}
+      </Route>
+      <Route path="/ai-control/company-ai-administrators">
+        {() => <AccessRoute component={AiControlCompanyAdministrators} surface="total_control" />}
+      </Route>
+      <Route path="/ai-control/company-users">
+        {() => <ProtectedRoute component={AiControlCompanyUsers} />}
+      </Route>
+      <Route path="/ai-control/entitlements">
+        {() => <ProtectedRoute component={AiControlEntitlements} />}
+      </Route>
+      <Route path="/ai-control/estimates">
+        {() => <ProtectedRoute component={AiControlEstimates} />}
+      </Route>
+      <Route path="/ai-control/prices">
+        {() => <AccessRoute component={AiControlPrices} surface="total_control" />}
+      </Route>
+      <Route path="/ai-control/provider-connections">
+        {() => <ProtectedRoute component={AiControlProviderConnections} />}
+      </Route>
+      <Route path="/ai-control/runs">
+        {() => <ProtectedRoute component={AiControlRuns} />}
+      </Route>
+      <Route path="/ai-control/status">
+        {() => <ProtectedRoute component={AiControlStatus} />}
+      </Route>
+      <Route path="/ai-control/usage">
+        {() => <ProtectedRoute component={AiControlUsage} />}
+      </Route>
+      <Route path="/auth/launch-step-up">
+        {() => <AccessRoute component={AuthLaunchStepUp} surface="total_control" />}
       </Route>
       <Route path="/living-brief">
         {() => <AccessRoute component={LivingBrief} surface="living_brief" />}

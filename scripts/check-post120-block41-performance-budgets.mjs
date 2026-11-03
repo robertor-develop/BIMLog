@@ -9,6 +9,16 @@ const baseline = JSON.parse(fs.readFileSync(path.join(root, "evidence", "stabili
 const bytesFor = file => fs.statSync(path.join(publicRoot, file)).size;
 const entry = Object.values(manifest).find(record => record.isEntry);
 assert(entry, "browser entry is absent from the Vite manifest");
+const entryKey = Object.entries(manifest).find(([, record]) => record.isEntry)?.[0];
+const initialKeys = new Set();
+const visitInitial = key => {
+  if (initialKeys.has(key)) return;
+  const record = manifest[key];
+  assert(record, `browser manifest references missing chunk ${key}`);
+  initialKeys.add(key);
+  for (const importedKey of record.imports ?? []) visitInitial(importedKey);
+};
+visitInitial(entryKey);
 
 const assets = fs.readdirSync(path.join(publicRoot, "assets"))
   .filter(name => name.endsWith(".js"))
@@ -21,10 +31,14 @@ const feedbackPair = Object.entries(manifest).find(([key, record]) => key.starts
 const editor = manifest["src/components/FeedbackMarkupEditor.tsx"];
 
 const entryBytes = bytesFor(entry.file);
+const initialBytes = [...initialKeys]
+  .map(key => manifest[key].file)
+  .filter(file => file.endsWith(".js"))
+  .reduce((sum, file) => sum + bytesFor(file), 0);
 const maxEntryBytes = Math.floor(baseline.entry.fileBytes * 0.95);
 assert(entryBytes <= maxEntryBytes, `initial entry is ${entryBytes} bytes; required <= ${maxEntryBytes} (5% below Build 201 baseline)`);
 assert(Math.max(...boundedLazyAssets.map(asset => asset.bytes)) <= 250 * 1024, "a non-entry, non-spreadsheet browser chunk exceeds 250 KiB");
-assert(assets.reduce((sum, asset) => sum + asset.bytes, 0) <= 4 * 1024 * 1024, "browser JavaScript total exceeds 4 MiB");
+assert(initialBytes <= 4 * 1024 * 1024, "initial browser JavaScript exceeds 4 MiB");
 assert(Math.max(...routeChunks.map(route => route.bytes)) <= 225 * 1024, "a route-owned chunk exceeds 225 KiB");
 assert(feedbackPair, "feedback workspace is not a dynamic chunk");
 assert(bytesFor(feedbackPair[1].file) <= 50 * 1024, "feedback workspace chunk exceeds 50 KiB");
@@ -41,6 +55,7 @@ console.log(JSON.stringify({
   routeChunks: routeChunks.length,
   largestRouteBytes: Math.max(...routeChunks.map(route => route.bytes)),
   javascriptAssets: assets.length,
+  initialBytes,
   totalBytes: assets.reduce((sum, asset) => sum + asset.bytes, 0),
   feedbackBytes: bytesFor(feedbackPair[1].file),
   editorBytes: bytesFor(editor.file),

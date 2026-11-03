@@ -1,6 +1,12 @@
 import { formatOptionalInstantDate } from "@workspace/api-zod";
+import { FinancialApprovalPolicyRecords } from "@/components/FinancialApprovalPolicyRecords";
+import { FinancialAuthorityJournal } from "@/components/FinancialAuthorityJournal";
+import { FinancialContextRecords } from "@/components/FinancialContextRecords";
+import { SyntheticFinancialAuthorization } from "@/components/SyntheticFinancialAuthorization";
+import { FinancialGrantDetails } from "@/components/FinancialGrantDetails";
+import { FinancialSuspensionHistory } from "@/components/FinancialSuspensionHistory";
 import { financialAuthorityDate } from "@/lib/financial-authority-presentation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import {
   ChevronLeft,
@@ -27,7 +33,7 @@ const authorities = [
 type OwnState = {
   scope: { companyId: number; projectId: number | null; scopeType: string };
   status: string;
-  commercial: { decision: string; code: string; state: string };
+  commercial: { decision: string; code: string; state: string; authorizesExecution?:boolean };
   context: null | {
     baseCurrency: string;
     reportingCurrency: string;
@@ -114,6 +120,12 @@ export function FinancialControlsSettings() {
     reason: "",
   });
   const [suspensionReason, setSuspensionReason] = useState("");
+  const [loadError,setLoadError]=useState("");
+  const [checkedAt,setCheckedAt]=useState<string|null>(null);
+  const [bootstrapReceipt,setBootstrapReceipt]=useState<{contextId:string;grantId:string;companyId:number;projectId:number|null;administratorUserId:number}|null>(null);
+  const [projectScopes,setProjectScopes]=useState<OwnState["projectScopes"]>([]);
+  const loadRequest=useRef<AbortController|null>(null);
+  useEffect(()=>{setProjectScopes([]);setProjectId("");},[token]);
   const [bootstrap, setBootstrap] = useState({
     administratorUserId: "",
     baseCurrency: "USD",
@@ -121,6 +133,13 @@ export function FinancialControlsSettings() {
     permittedCurrencies: "USD",
     reason: "",
   });
+  useEffect(()=>{
+    setBootstrapReceipt(null);
+    setContext({baseCurrency:"USD",reportingCurrency:"USD",permittedCurrencies:"USD",effectiveFrom:"",effectiveTo:"",reason:""});
+    setGrant({userId:"",authority:"financial_viewer",effectiveFrom:"",effectiveTo:"",reason:""});
+    setPolicy({transactionCategory:"",currency:"USD",maxAmount:"",effectiveFrom:"",effectiveTo:"",reason:""});
+    setSuspensionReason("");setBootstrap({administratorUserId:"",baseCurrency:"USD",reportingCurrency:"USD",permittedCurrencies:"USD",reason:""});
+  },[projectId,token]);
   const headers = useMemo(
     () => ({
       "Content-Type": "application/json",
@@ -170,30 +189,27 @@ export function FinancialControlsSettings() {
     return body;
   }
   async function load() {
+    loadRequest.current?.abort();
+    const controller=new AbortController();loadRequest.current=controller;
     setLoading(true);
+    setLoadError("");setCheckedAt(null);setState(null);setAdmin(null);setAuditJournal([]);
     try {
       const own = (await request(
         `/financial-controls/state${query}`,
+        {signal:controller.signal},
       )) as OwnState;
-      setState(own);
-      setAdmin(
-        own.canManage
-          ? ((await request(`/financial-controls/admin${query}`)) as AdminState)
-          : null,
-      );
-      setAuditJournal(
-        own.canAudit && !own.canManage
-          ? (
-              (await request(`/financial-controls/audit${query}`)) as {
-                journal: any[];
-              }
-            ).journal
-          : [],
-      );
+      if(own.scope?.projectId!==(projectId?Number(projectId):null))throw new Error(tt("Financial scope response did not match the selected scope.","La respuesta financiera no corresponde al alcance seleccionado."));
+      const nextAdmin=own.canManage?await request(`/financial-controls/admin${query}`,{signal:controller.signal}) as AdminState:null;
+      const nextAudit=own.canAudit&&!own.canManage?(await request(`/financial-controls/audit${query}`,{signal:controller.signal}) as {journal:any[]}).journal:[];
+      if(!Array.isArray(own.authorities)||!Array.isArray(own.projectScopes)||!Array.isArray(own.approvalLimits)||(own.context&&!Array.isArray(own.context.permittedTransactionCurrencies))||!Array.isArray(nextAudit)||(nextAdmin&&(!['contexts','grants','policies','journal'].every(key=>Array.isArray(nextAdmin[key as keyof AdminState]))||nextAdmin.contexts.some(item=>!Array.isArray(item.permitted_transaction_currencies)))))throw new Error(tt("Invalid financial administration response. Reload the selected scope.","Respuesta de administración financiera inválida. Recargue el alcance seleccionado."));
+      if(controller.signal.aborted)return;
+      setState(own);setAdmin(nextAdmin);setAuditJournal(nextAudit);setProjectScopes(own.projectScopes);setCheckedAt(new Date().toISOString());
     } catch (error) {
+      if(controller.signal.aborted)return;
       setState(null);
       setAdmin(null);
       setAuditJournal([]);
+      setLoadError(error instanceof Error?error.message:tt("Financial controls unavailable","Controles financieros no disponibles"));
       toast({
         title: tt(
           "Financial controls unavailable",
@@ -203,16 +219,21 @@ export function FinancialControlsSettings() {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      if(!controller.signal.aborted)setLoading(false);
     }
   }
   useEffect(() => {
     void load();
-  }, [projectId]);
+    return()=>loadRequest.current?.abort();
+  }, [projectId,token]);
   async function mutate(path: string, body: Record<string, unknown>) {
     setBusy(true);
     try {
-      await request(path, { method: "POST", body: JSON.stringify(body) });
+      const result=await request(path, { method: "POST", body: JSON.stringify(body) });
+      if(path==="/financial-controls/bootstrap"){
+        if(typeof result.contextId!=="string"||typeof result.grantId!=="string"||result.scope?.companyId!==state?.scope.companyId||result.scope?.projectId!==(projectId?Number(projectId):null))throw new Error(tt("Bootstrap response could not be verified. Reload the selected scope before retrying.","No se pudo verificar la respuesta de inicio. Recargue el alcance seleccionado antes de reintentar."));
+        setBootstrapReceipt({contextId:result.contextId,grantId:result.grantId,companyId:result.scope.companyId,projectId:result.scope.projectId,administratorUserId:Number(body.administratorUserId)});
+      }
       toast({
         title: tt("Control recorded", "Control registrado"),
         description: tt(
@@ -286,13 +307,14 @@ export function FinancialControlsSettings() {
               {tt("Scope", "Alcance")}
               <select
                 value={projectId}
+                disabled={busy||loading}
                 onChange={(e) => setProjectId(e.target.value)}
                 style={{ ...inputStyle, marginTop: 5 }}
               >
                 <option value="">
                   {tt("Current company", "Empresa actual")}
                 </option>
-                {state?.projectScopes.map((p) => (
+                {projectScopes.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
                   </option>
@@ -300,6 +322,8 @@ export function FinancialControlsSettings() {
               </select>
             </label>
           </section>
+          {bootstrapReceipt&&<section role="status" style={card}><h2>{tt("Initial financial controls recorded","Controles financieros iniciales registrados")}</h2><p>{tt("Company / project","Empresa / proyecto")}: {bootstrapReceipt.companyId} / {bootstrapReceipt.projectId??tt("Company scope","Alcance de empresa")}</p><p>{tt("Financial Administrator user","Usuario Administrador Financiero")}: {bootstrapReceipt.administratorUserId}</p><p style={{overflowWrap:"anywhere"}}>{tt("Initial context ID","ID de contexto inicial")}: {bootstrapReceipt.contextId}</p><p style={{overflowWrap:"anywhere"}}>{tt("Administrator grant ID","ID de concesión de administrador")}: {bootstrapReceipt.grantId}</p><p>{tt("Use normal financial administration after this initial setup. No transaction was approved or created.","Use la administración financiera normal después de este inicio. No se aprobó ni creó ninguna transacción.")}</p></section>}
+          {loadError&&<div role="alert"><p>{loadError}</p><Button disabled={loading||busy} onClick={()=>void load()}>{tt("Retry selected financial scope","Reintentar alcance financiero seleccionado")}</Button></div>}
           {loading ? (
             <p>
               {tt(
@@ -310,6 +334,11 @@ export function FinancialControlsSettings() {
           ) : (
             state && (
               <>
+                <section style={{...card,marginBottom:12}} aria-label={tt("Current financial state evidence","Evidencia del estado financiero actual")}>
+                  <p>{tt("Current scope: company / project","Alcance actual: empresa / proyecto")}: {state.scope.companyId} / {state.scope.projectId??tt("Company scope","Alcance de empresa")}</p>
+                  <p>{tt("Last loaded","Última consulta")}: {checkedAt??'—'}</p><Button disabled={busy||loading} onClick={()=>void load()}>{tt("Refresh current financial scope","Actualizar alcance financiero actual")}</Button>
+                  <details><summary>{tt("Inspect decision and authority sources","Inspeccionar decisión y fuentes de autoridad")}</summary><p>{tt("Commercial decision / code / state","Decisión comercial / código / estado")}: {state.commercial.decision} / {state.commercial.code} / {state.commercial.state}</p><p>{tt("This snapshot does not approve a transaction. Scope, role, currency, limits and suspension checks still apply at the requested operation.","Esta consulta no aprueba una transacción. Los controles de alcance, rol, moneda, límites y suspensión siguen aplicándose a cada operación.")}</p><ul>{state.authorities.map(authority=><li key={authority.grantId} style={{overflowWrap:"anywhere"}}>{authorityLabel(authority.authority)} · {authority.scopeType} · {authority.grantId} · {authority.effectiveFrom} / {authority.effectiveTo??'—'}</li>)}</ul>{state.authorities.length===0&&<p>{tt("No effective authority sources returned.","No se devolvieron fuentes de autoridad vigentes.")}</p>}</details>
+                </section>
                 <div
                   className="financial-grid"
                   style={{
@@ -427,6 +456,7 @@ export function FinancialControlsSettings() {
                     </div>
                   )}
                 </section>
+                <SyntheticFinancialAuthorization token={token} projectId={state.scope.projectId} es={lang==='es'}/>
                 {state.canAudit && !state.canManage && (
                   <section style={{ ...card, marginBottom: 12 }}>
                     <h2 style={{ fontSize: 15, margin: "0 0 8px" }}>
@@ -441,23 +471,7 @@ export function FinancialControlsSettings() {
                         "Las lecturas de auditoría permanecen disponibles durante la suspensión. Esta vista contiene decisiones de autoridad, no registros financieros.",
                       )}
                     </p>
-                    {auditJournal.slice(0, 20).map((entry, index) => (
-                      <div
-                        key={`${entry.entity_id}-${index}`}
-                        style={{
-                          fontSize: 11,
-                          borderTop: "1px solid hsl(var(--border))",
-                          paddingTop: 6,
-                        }}
-                      >
-                        <b>{eventLabel(entry.event_type)}</b> ·{" "}
-                        {entry.reason_code} ·{" "}
-                        {new Date(entry.occurred_at).toLocaleString()}
-                        <div style={{ color: "#64748B" }}>
-                          {tt(entry.explanation_en, entry.explanation_es)}
-                        </div>
-                      </div>
-                    ))}
+                    <FinancialAuthorityJournal key={`audit:${projectId}:${token}`} entries={auditJournal} es={lang==='es'} serverLimit={500} onReload={()=>void load()} disabled={busy}/>
                   </section>
                 )}
                 {state.canBootstrapControlPlane && !state.canManage && (
@@ -491,6 +505,8 @@ export function FinancialControlsSettings() {
                           "Administrator user ID",
                           "ID de usuario administrador",
                         )}
+                        aria-label={tt("Initial Financial Administrator user ID","ID de usuario Administrador Financiero inicial")}
+                        type="number" min={1} step={1}
                         value={bootstrap.administratorUserId}
                         onChange={(e) =>
                           setBootstrap({
@@ -550,8 +566,8 @@ export function FinancialControlsSettings() {
                     <Button
                       disabled={
                         busy ||
-                        !bootstrap.reason ||
-                        !bootstrap.administratorUserId
+                        bootstrap.reason.trim().length<3 ||
+                        !Number.isSafeInteger(Number(bootstrap.administratorUserId))||Number(bootstrap.administratorUserId)<=0
                       }
                       style={{ marginTop: 8 }}
                       onClick={() =>
@@ -708,25 +724,7 @@ export function FinancialControlsSettings() {
                           "Agregar versión de contexto",
                         )}
                       </Button>
-                      <div
-                        style={{
-                          fontSize: 11,
-                          marginTop: 10,
-                          color: "#64748B",
-                        }}
-                      >
-                        {admin.contexts.map((item) => (
-                          <div key={item.id}>
-                            v{item.version} · {item.base_currency}/
-                            {item.reporting_currency} ·{" "}
-                            {new Date(item.effective_from).toLocaleDateString()}
-                            {item.effective_to
-                              ? ` – ${new Date(item.effective_to).toLocaleDateString()}`
-                              : ""}{" "}
-                            · {item.reason}
-                          </div>
-                        ))}
-                      </div>
+                      <FinancialContextRecords contexts={admin.contexts} es={lang==='es'}/>
                     </section>
                     <section style={card}>
                       <h2 style={{ fontSize: 15, margin: "0 0 10px" }}>
@@ -742,6 +740,7 @@ export function FinancialControlsSettings() {
                       >
                         <select
                           style={inputStyle}
+                          aria-label={tt("Financial authority recipient","Destinatario de autoridad financiera")}
                           value={grant.userId}
                           onChange={(e) =>
                             setGrant({ ...grant, userId: e.target.value })
@@ -758,6 +757,7 @@ export function FinancialControlsSettings() {
                         </select>
                         <select
                           style={inputStyle}
+                          aria-label={tt("Financial authority to grant","Autoridad financiera a conceder")}
                           value={grant.authority}
                           onChange={(e) =>
                             setGrant({ ...grant, authority: e.target.value })
@@ -829,14 +829,7 @@ export function FinancialControlsSettings() {
                               gap: 8,
                             }}
                           >
-                            <span>
-                              {g.full_name} ·{" "}
-                              {authorityLabel(String(g.authority))} · v
-                              {g.version}
-                              {g.revoked_at
-                                ? ` · ${tt("revoked", "revocada")}`
-                                : ""}
-                            </span>
+                            <FinancialGrantDetails grant={g} es={lang==='es'} label={authorityLabel(String(g.authority))}/>
                             {!g.revoked_at && (
                               <Button
                                 size="sm"
@@ -845,11 +838,11 @@ export function FinancialControlsSettings() {
                                 onClick={() => {
                                   const reason = window.prompt(
                                     tt(
-                                      "Reason for immediate revocation",
-                                      "Motivo de la revocación inmediata",
+                                      `Reason to revoke ${g.full_name} · ${authorityLabel(String(g.authority))} · ${g.scope_type} ${g.project_id??""} · grant ${g.id}`,
+                                      `Motivo para revocar ${g.full_name} · ${authorityLabel(String(g.authority))} · ${g.scope_type} ${g.project_id??""} · concesión ${g.id}`,
                                     ),
                                   );
-                                  if (reason)
+                                  if (reason?.trim())
                                     void mutate(
                                       `/financial-controls/grants/${g.id}/revoke`,
                                       { reason },
@@ -880,6 +873,7 @@ export function FinancialControlsSettings() {
                       >
                         <select
                           style={inputStyle}
+                          aria-label={tt("Approval policy transaction category","Categoría de transacción de política de aprobación")}
                           value={policy.transactionCategory}
                           onChange={(e) =>
                             setPolicy({
@@ -896,6 +890,7 @@ export function FinancialControlsSettings() {
                         </select>
                         <input
                           style={inputStyle}
+                          aria-label={tt("Approval policy currency","Moneda de política de aprobación")}
                           value={policy.currency}
                           onChange={(e) =>
                             setPolicy({
@@ -907,6 +902,7 @@ export function FinancialControlsSettings() {
                         <input
                           style={inputStyle}
                           inputMode="decimal"
+                          aria-label={tt("Exact approval limit","Límite exacto de aprobación")}
                           placeholder={tt(
                             "Exact decimal limit",
                             "Límite decimal exacto",
@@ -994,20 +990,7 @@ export function FinancialControlsSettings() {
                           "Agregar versión de política",
                         )}
                       </Button>
-                      <div
-                        style={{ fontSize: 11, marginTop: 8, color: "#64748B" }}
-                      >
-                        {admin.policies
-                          .map(
-                            (p) =>
-                              `${p.transaction_category} · ${p.max_amount} ${p.currency} · v${p.version} · ${new Date(p.effective_from).toLocaleDateString()}${p.effective_to ? ` – ${new Date(p.effective_to).toLocaleDateString()}` : ""}`,
-                          )
-                          .join(" | ") ||
-                          tt(
-                            "No approval policies",
-                            "Sin políticas de aprobación",
-                          )}
-                      </div>
+                      <FinancialApprovalPolicyRecords policies={admin.policies} es={lang==='es'}/>
                     </section>
                     <section
                       style={{
@@ -1029,6 +1012,8 @@ export function FinancialControlsSettings() {
                       </p>
                       <textarea
                         style={inputStyle}
+                        aria-label={tt("Reason for selected-scope suspension action","Motivo de la acción de suspensión del alcance seleccionado")}
+                        maxLength={1000}
                         placeholder={tt(
                           "Required reason",
                           "Motivo obligatorio",
@@ -1037,31 +1022,21 @@ export function FinancialControlsSettings() {
                         onChange={(e) => setSuspensionReason(e.target.value)}
                       />
                       <Button
-                        disabled={busy || !suspensionReason}
-                        variant={
-                          state.status === "suspended"
-                            ? "default"
-                            : "destructive"
-                        }
+                        disabled={busy || suspensionReason.trim().length<3}
+                        variant="destructive"
                         style={{ marginTop: 8 }}
                         onClick={() =>
                           mutate("/financial-controls/suspension", {
                             ...scopeBody,
-                            action:
-                              state.status === "suspended"
-                                ? "release"
-                                : "activate",
+                            action: "activate",
                             reason: suspensionReason,
                           })
                         }
                       >
-                        {state.status === "suspended"
-                          ? tt("Release suspension", "Liberar suspensión")
-                          : tt(
-                              "Suspend financial operations",
-                              "Suspender operaciones financieras",
-                            )}
+                        {tt("Suspend selected scope","Suspender alcance seleccionado")}
                       </Button>
+                      <Button disabled={busy||suspensionReason.trim().length<3} variant="outline" style={{marginTop:8,marginLeft:8}} onClick={()=>void mutate("/financial-controls/suspension",{...scopeBody,action:"release",reason:suspensionReason})}>{tt("Record release for selected scope","Registrar liberación del alcance seleccionado")}</Button>
+                      <FinancialSuspensionHistory events={admin.suspensions} es={lang==='es'}/>
                     </section>
                     <section style={card}>
                       <h2 style={{ fontSize: 15, margin: "0 0 8px" }}>
@@ -1071,22 +1046,7 @@ export function FinancialControlsSettings() {
                         )}
                       </h2>
                       <div style={{ display: "grid", gap: 6 }}>
-                        {admin.journal.slice(0, 20).map((j, i) => (
-                          <div
-                            key={`${j.entity_id}-${i}`}
-                            style={{
-                              fontSize: 11,
-                              borderTop: "1px solid hsl(var(--border))",
-                              paddingTop: 6,
-                            }}
-                          >
-                            <b>{eventLabel(j.event_type)}</b> · {j.reason_code}{" "}
-                            · {new Date(j.occurred_at).toLocaleString()}
-                            <div style={{ color: "#64748B" }}>
-                              {tt(j.explanation_en, j.explanation_es)}
-                            </div>
-                          </div>
-                        ))}
+                        <FinancialAuthorityJournal key={`admin:${projectId}:${token}`} entries={admin.journal} es={lang==='es'} serverLimit={200} onReload={()=>void load()} disabled={busy}/>
                       </div>
                     </section>
                   </div>

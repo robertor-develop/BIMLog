@@ -24,6 +24,8 @@ const router: IRouter = Router();
 // In-memory buffer cache. Key = UUID returned to client from /intake.
 // Entry expires after 30 minutes to bound memory growth.
 type CachedFile = {
+  projectId:number; userId:number; conventionId:number; conventionSnapshot:unknown; analysis:Record<string,unknown>;
+  inFlight?:boolean; confirmed?:{fingerprint:string;eventId:number};
   buffer: Buffer;
   originalFilename: string;
   fileType: string;
@@ -107,7 +109,7 @@ router.get(
         .orderBy(desc(coordinationIntakeEventsTable.createdAt))
         .limit(50);
 
-      res.json(events.map(e => ({
+      res.set("Cache-Control","private, no-store").set("X-BIMLog-Project-Id",String(projectId)).json(events.map(e => ({
         ...e,
         createdAt: e.createdAt.toISOString(),
       })));
@@ -163,13 +165,7 @@ router.post(
 
       // Cache the file buffer
       const cacheKey = randomUUID();
-      fileCache.set(cacheKey, {
-        buffer: file.buffer,
-        originalFilename: file.originalname,
-        fileType,
-        fileSize: file.size,
-        expiresAt: Date.now() + CACHE_TTL_MS,
-      });
+
 
       // Build prompt
       const fieldsBlock = fields.map(f =>
@@ -244,6 +240,9 @@ Return ONLY this JSON shape (no markdown, no code block):
         return;
       }
 
+      if(!Array.isArray(parsed.proposedFields)||typeof parsed.proposedFilename!=="string"){res.status(422).json({error:"AI analysis is incomplete; retry intake"});return;}
+      const snapshot={separator:convention.separator,fields:fields.map(f=>({label:f.label,fieldOrder:f.fieldOrder,allowedValues:f.allowedValues}))};
+      fileCache.set(cacheKey,{projectId,userId:req.user!.userId,conventionId:convention.id,conventionSnapshot:snapshot,analysis:parsed,buffer:file.buffer,originalFilename:file.originalname,fileType,fileSize:file.size,expiresAt:Date.now()+CACHE_TTL_MS});
       res.json({
         cacheKey,
         originalFilename: file.originalname,
@@ -264,191 +263,45 @@ Return ONLY this JSON shape (no markdown, no code block):
 );
 
 // ── POST /projects/:projectId/coordination/confirm ───────────────────────────
-router.post(
-  "/projects/:projectId/coordination/confirm",
-  authMiddleware,
-  requirePermission("admin", "write"),
-  async (req, res) => {
-    try {
-      pruneCache();
-      const projectId = parseInt(String(req.params.projectId), 10);
-      if (isNaN(projectId)) { res.status(400).json({ error: "Invalid projectId" }); return; }
-
-      const {
-        cacheKey,
-        userAction,
-        finalFilename,
-        manualFieldsChanged,
-        destinationAction,
-        proposedFilename,
-        analysis,
-        conventionId,
-        conventionSnapshot,
-        warningAcknowledged,
-      } = req.body as {
-        cacheKey: string;
-        userAction: "accepted" | "manually_corrected" | "rejected";
-        finalFilename: string;
-        manualFieldsChanged?: Record<string, string>;
-        destinationAction: "downloaded" | "queued_sync" | "pending";
-        proposedFilename?: string;
-        analysis?: Record<string, unknown>;
-        conventionId?: number;
-        conventionSnapshot?: unknown;
-        warningAcknowledged?: boolean;
-      };
-
-      if (!cacheKey) { res.status(400).json({ error: "cacheKey is required" }); return; }
-      if (!userAction || !["accepted", "manually_corrected", "rejected"].includes(userAction)) {
-        res.status(400).json({ error: "userAction must be accepted, manually_corrected, or rejected" });
-        return;
-      }
-      if (userAction !== "rejected" && (destinationAction !== "downloaded" && destinationAction !== "queued_sync" ||
-          typeof finalFilename !== "string" || !finalFilename.trim())) {
-        res.status(400).json({ error: "A confirmed file needs a valid filename and destination action" });
-        return;
-      }
-
-      const cached = fileCache.get(cacheKey);
-      if (!cached) { res.status(410).json({ error: "Upload session expired — please re-upload the file" }); return; }
-
-      // The legacy queued_sync branch never retained bytes or created a delivery job.
-      // Refuse it before any event or file row is written; keep the cache for Download.
-      if (userAction !== "rejected" && destinationAction === "queued_sync") {
-        res.status(409).json({ error: "COORDINATION_SYNC_NOT_CONFIGURED",
-          message: "SharePoint delivery is not configured. Confirm and download the file instead." });
-        return;
-      }
-
-      // Lookup uploader's company
-      const userRows = await db.select({ id: usersTable.id, companyId: usersTable.companyId })
-        .from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
-      let uploaderCompany: string | null = null;
-      if (userRows[0]?.companyId) {
-        const companyRows = await db.select({ name: companiesTable.name })
-          .from(companiesTable).where(eq(companiesTable.id, userRows[0].companyId)).limit(1);
-        uploaderCompany = companyRows[0]?.name ?? null;
-      }
-
-      const sev = analysis && typeof analysis.severe === "boolean" ? analysis.severe : false;
-      const conf = analysis && typeof analysis.overallConfidence === "string" ? analysis.overallConfidence : null;
-      const sevReason = analysis && typeof analysis.severeReason === "string" ? analysis.severeReason : null;
-      const detected = analysis as Record<string, unknown> | undefined;
-
-      const warningDetailParts: string[] = [];
-      if (sev && sevReason) warningDetailParts.push(`severe: ${sevReason}`);
-      if (warningAcknowledged) warningDetailParts.push("user_acknowledged_severe_warning");
-
-      let inserted: { id: number }[];
-      try {
-        inserted = await db.insert(coordinationIntakeEventsTable).values({
-        projectId,
-        uploaderId: req.user!.userId,
-        uploaderCompany,
-        originalFilename: cached.originalFilename,
-        proposedFilename: proposedFilename ?? null,
-        finalFilename: userAction === "rejected" ? null : finalFilename,
-        fileType: cached.fileType,
-        fileSizeBytes: cached.fileSize,
-        detectedDiscipline: detected?.detectedDiscipline as string | null ?? null,
-        detectedDocType: detected?.detectedDocType as string | null ?? null,
-        detectedLevel: detected?.detectedLevel as string | null ?? null,
-        detectedOriginator: detected?.detectedOriginator as string | null ?? null,
-        aiConfidence: conf,
-        aiSummary: detected?.aiSummary as string | null ?? null,
-        aiExtractedKeywords: detected?.keywords ? JSON.stringify(detected.keywords) : null,
-        warningsTriggered: sev,
-        warningDetail: warningDetailParts.length ? warningDetailParts.join(" | ") : null,
-        userAction,
-        manualFieldsChanged: manualFieldsChanged ? JSON.stringify(manualFieldsChanged) : null,
-        destinationAction: userAction === "rejected" ? "pending" : destinationAction,
-        conventionId: conventionId ?? null,
-        conventionSnapshot: conventionSnapshot ? JSON.stringify(conventionSnapshot) : null,
-        }).returning({ id: coordinationIntakeEventsTable.id });
-      } catch (insertErr) {
-        console.error("[coordination/confirm] insert into coordination_intake_events FAILED", {
-          projectId, userId: req.user!.userId, originalFilename: cached.originalFilename,
-          error: insertErr instanceof Error ? insertErr.message : String(insertErr),
-          stack: insertErr instanceof Error ? insertErr.stack : undefined,
-        });
-        res.status(500).json({ error: `Failed to log intake event: ${insertErr instanceof Error ? insertErr.message : "unknown"}` });
-        return;
-      }
-
-      const eventId = inserted[0].id;
-
-      // ── Activity log (Issue 8) ───────────────────────────────────────────
-      try {
-        const actionLabel = userAction === "rejected"
-          ? "coordination_rejected"
-          : userAction === "manually_corrected"
-            ? "coordination_corrected"
-            : "coordination_accepted";
-        const detailsParts = [
-          `Coordination Hub: ${userAction}`,
-          finalFilename ? `→ ${finalFilename}` : "",
-          destinationAction === "downloaded" ? "(downloaded)" : destinationAction === "queued_sync" ? "(queued for sync)" : "",
-          sev ? `[severe warning${warningAcknowledged ? " acknowledged" : ""}]` : "",
-        ].filter(Boolean).join(" ");
-        await db.insert(activityLogTable).values({
-          projectId,
-          userId: req.user!.userId,
-          userFullName: req.user!.fullName,
-          userCompanyName: req.user!.companyName,
-          actionType: actionLabel,
-          entityType: "coordination_intake",
-          entityId: eventId,
-          fileNameBefore: cached.originalFilename,
-          fileNameAfter: userAction === "rejected" ? null : finalFilename || null,
-          details: detailsParts,
-        });
-      } catch (logErr) {
-        console.error("[coordination/confirm] activity_log insert FAILED", logErr);
-      }
-
-      // ── Files table write (Fix 5): always insert on accepted/manually_corrected ──
-      if (userAction !== "rejected" && finalFilename) {
-        try {
-          const hash = createHash("sha256").update(cached.buffer).digest("hex");
-          await db.insert(filesTable).values({
-            projectId,
-            fileName: finalFilename,
-            fileSize: cached.fileSize,
-            fileType: cached.fileType,
-            status: "compliant",
-            uploadedById: req.user!.userId,
-            fileHash: hash,
-            fileSizeBytes: cached.fileSize,
-            documentRelationship: "created",
-            documentRelationshipDeclaredAt: new Date(),
-            source: "coordination_hub",
-            isCompliant: true,
-            conventionVersion: conventionId ? String(conventionId) : null,
-          });
-        } catch (fileErr) {
-          console.error("[coordination/confirm] files insert FAILED", fileErr);
-        }
-      }
-
-      // Download path: serve the file inline
-      if (userAction !== "rejected" && destinationAction === "downloaded" && finalFilename) {
-        const buf = cached.buffer;
-        // Free the cache slot now that download is being served
-        fileCache.delete(cacheKey);
-        res.setHeader("Content-Type", "application/octet-stream");
-        res.setHeader("Content-Disposition", `attachment; filename="${finalFilename.replace(/"/g, "")}"`);
-        res.setHeader("X-Coordination-Event-Id", String(eventId));
-        res.send(buf);
-        return;
-      }
-
-      // Otherwise just confirm the log was written
-      fileCache.delete(cacheKey);
-      res.json({ ok: true, eventId });
-    } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Confirm failed" });
-    }
+router.post("/projects/:projectId/coordination/confirm",authMiddleware,requirePermission("admin","write"),async(req,res)=>{
+ pruneCache();const projectId=Number(req.params.projectId),actor=req.user!;
+ const {cacheKey,userAction,finalFilename,manualFieldsChanged,destinationAction,warningAcknowledged}=req.body??{};
+ if(typeof cacheKey!=="string"||!["accepted","manually_corrected","rejected"].includes(userAction)){res.status(400).json({error:"A valid upload session and action are required"});return;}
+ const cached=fileCache.get(cacheKey);
+ if(!cached||cached.projectId!==projectId||cached.userId!==actor.userId){res.status(410).json({error:"Upload session expired or unavailable — re-upload in this project"});return;}
+ if(userAction!=="rejected"&&(typeof finalFilename!=="string"||!finalFilename.trim()||/[\\/\\\\\x00-\x1f]/.test(finalFilename)||finalFilename.length>240||!["downloaded","queued_sync"].includes(destinationAction))){res.status(400).json({error:"A confirmed file needs a safe filename and destination action"});return;}
+ if(userAction!=="rejected"&&destinationAction==="queued_sync"){res.status(409).json({error:"COORDINATION_SYNC_NOT_CONFIGURED",message:"SharePoint delivery is not configured. Confirm and download the file instead."});return;}
+ const fingerprint=createHash("sha256").update(JSON.stringify({userAction,finalFilename:userAction==="rejected"?"":finalFilename,manualFieldsChanged:manualFieldsChanged??null,destinationAction:userAction==="rejected"?"pending":destinationAction,warningAcknowledged:warningAcknowledged===true})).digest("hex");
+ if(cached.confirmed&&cached.confirmed.fingerprint!==fingerprint){res.status(409).json({error:"Upload session was already confirmed differently; reopen recent events"});return;}
+ if(cached.inFlight){res.status(409).json({error:"Confirmation is already in progress; reopen recent events before retrying"});return;}
+ cached.inFlight=true;
+ try{
+  let eventId=cached.confirmed?.eventId;
+  if(!eventId){
+   const analysis=cached.analysis,sev=analysis.severe===true;
+   eventId=await db.transaction(async tx=>{
+    const [company]=await tx.select({name:companiesTable.name}).from(companiesTable).where(eq(companiesTable.id,actor.companyId)).limit(1);
+    const [event]=await tx.insert(coordinationIntakeEventsTable).values({
+     projectId,uploaderId:actor.userId,uploaderCompany:company?.name??null,originalFilename:cached.originalFilename,
+     proposedFilename:typeof analysis.proposedFilename==="string"?analysis.proposedFilename:null,finalFilename:userAction==="rejected"?null:finalFilename,
+     fileType:cached.fileType,fileSizeBytes:cached.fileSize,detectedDiscipline:typeof analysis.detectedDiscipline==="string"?analysis.detectedDiscipline:null,
+     detectedDocType:typeof analysis.detectedDocType==="string"?analysis.detectedDocType:null,detectedLevel:typeof analysis.detectedLevel==="string"?analysis.detectedLevel:null,
+     detectedOriginator:typeof analysis.detectedOriginator==="string"?analysis.detectedOriginator:null,aiConfidence:typeof analysis.overallConfidence==="string"?analysis.overallConfidence:null,
+     aiSummary:typeof analysis.aiSummary==="string"?analysis.aiSummary:null,aiExtractedKeywords:Array.isArray(analysis.keywords)?JSON.stringify(analysis.keywords):null,
+     warningsTriggered:sev,warningDetail:[sev&&typeof analysis.severeReason==="string"?analysis.severeReason:"",warningAcknowledged===true?"user_acknowledged_severe_warning":""].filter(Boolean).join(" | ")||null,
+     userAction,manualFieldsChanged:manualFieldsChanged?JSON.stringify(manualFieldsChanged):null,destinationAction:userAction==="rejected"?"pending":destinationAction,
+     conventionId:cached.conventionId,conventionSnapshot:JSON.stringify(cached.conventionSnapshot)
+    }).returning({id:coordinationIntakeEventsTable.id});
+    await tx.insert(activityLogTable).values({projectId,userId:actor.userId,userFullName:actor.fullName,userCompanyName:actor.companyName,actionType:userAction==="rejected"?"coordination_rejected":userAction==="manually_corrected"?"coordination_corrected":"coordination_accepted",entityType:"coordination_intake",entityId:event.id,fileNameBefore:cached.originalFilename,fileNameAfter:userAction==="rejected"?null:finalFilename,details:`Coordination Hub: ${userAction} (download preparation; browser delivery must be verified)`});
+    if(userAction!=="rejected")await tx.insert(filesTable).values({projectId,fileName:finalFilename,fileSize:cached.fileSize,fileType:cached.fileType,status:"compliant",uploadedById:actor.userId,fileHash:createHash("sha256").update(cached.buffer).digest("hex"),fileSizeBytes:cached.fileSize,documentRelationship:"created",documentRelationshipDeclaredAt:new Date(),source:"coordination_hub",isCompliant:true,conventionVersion:String(cached.conventionId)});
+    return event.id;
+   });
+   cached.confirmed={fingerprint,eventId};
   }
-);
-
+  res.set("Cache-Control","private, no-store").set("X-BIMLog-Project-Id",String(projectId)).set("X-Coordination-Event-Id",String(eventId));
+  if(userAction!=="rejected"){res.type("application/octet-stream").set("Content-Disposition",`attachment; filename="coordination-file"; filename*=UTF-8''${encodeURIComponent(finalFilename)}`).send(cached.buffer);return;}
+  res.json({ok:true,eventId});
+ }catch{res.status(500).json({error:"Confirmation was not saved. Retry the same upload session."});}
+ finally{cached.inFlight=false;}
+});
 export default router;

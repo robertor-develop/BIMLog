@@ -1,5 +1,6 @@
 import { isDirectoryRecipientEmail } from "@workspace/api-zod";
 import { loadProjectCompanyChoices } from "../lib/project-company-choices";
+import {createHash} from "node:crypto";
 import { Router } from "express";
 import { db, pool } from "@workspace/db";
 import { ensureCompanyMasterCatalogSchema } from "../lib/company-master-catalog-migration";
@@ -267,7 +268,7 @@ async function buildDirectoryRows(
       .from(projectMembersTable)
       .innerJoin(usersTable, eq(usersTable.id, projectMembersTable.userId))
       .leftJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
-      .where(eq(projectMembersTable.projectId, projectId))
+      .where(and(eq(projectMembersTable.projectId, projectId),eq(projectMembersTable.status,"active")))
       .orderBy(asc(usersTable.fullName)),
     db
       .select()
@@ -513,6 +514,7 @@ router.get(
         bufferPages: true,
         autoFirstPage: true,
       });
+      res.set("Cache-Control","private, no-store");
       applyPdfDownloadHeaders(res, { fileName });
       res.setHeader("X-Report-Filename", fileName);
       doc.pipe(res);
@@ -1192,7 +1194,7 @@ router.delete(
 router.post(
   "/projects/:projectId/directory/:entryId/invite",
   authMiddleware,
-  requirePermission("admin", "write"),
+  requirePermission("admin"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     const entryId = Number(req.params.entryId);
@@ -1315,7 +1317,7 @@ router.post(
         ));
       }
       res.json({
-        ok: true,
+        ok: true, projectId, entryId,
         deliveryStatus: result.kind === "invited" ? deliveryStatus : undefined,
         status:
           result.kind === "existing"
@@ -1392,9 +1394,7 @@ router.post(
             records.length,
             "records",
           );
-        } catch (e) {
-          console.error("[directory-import] PDF direct extraction failed:", e);
-        }
+        } catch { throw new Error("Directory PDF extraction failed; no contacts were saved"); }
       } else {
         for (const chunk of chunks) {
           try {
@@ -1420,41 +1420,22 @@ ${chunk}`,
               extractText.replace(/```json\n?|```/g, "").trim(),
             ) as any[];
             records = [...records, ...chunkRecords];
-          } catch (e) {
-            console.error("[directory-import] chunk extraction failed:", e);
-          }
+          } catch { throw new Error("Directory chunk extraction failed; no contacts were saved"); }
         }
       } // end else (non-PDF)
 
-      let imported = 0;
-      for (const r of records) {
-        if (!r.fullName) continue;
-        await db.insert(projectDirectoryTable).values({
-          projectId,
-          fullName: r.fullName,
-          email: r.email || "imported@bimlog.io",
-          companyName: r.companyName || null,
-          role: r.role || "External Contact",
-          notes: r.notes || null,
-          addedById: req.user!.userId,
-          bimlogStatus: "none",
-        });
-        imported++;
-      }
-      await db.insert(activityLogTable).values({
-        projectId,
-        userId: req.user!.userId,
-        userFullName: req.user!.fullName ?? "",
-        userCompanyName: req.user!.companyName ?? "",
-        actionType: "import",
-        entityType: "directory",
-        entityId: projectId,
-        details: `Imported ${imported} contacts from ${req.file.originalname}`,
+      if(!Array.isArray(records)||records.some(r=>!r||typeof r!=="object"||typeof r.fullName!=="string"||!r.fullName.trim()||(r.email!=null&&r.email!==""&&(typeof r.email!=="string"||!isDirectoryRecipientEmail(r.email))))){res.status(422).json({error:"Directory extraction contains incomplete or invalid contacts; no records saved"});return;}
+      if(records.length===0){res.status(422).json({error:"No contacts were extracted; no records saved"});return;}
+      const originalFilename=req.file.originalname;
+      const savedIds=await db.transaction(async tx=>{
+        const ids:number[]=[];
+        for(const r of records){
+          const placeholder=`contact-${projectId}-${createHash("sha256").update(JSON.stringify([r.fullName,r.companyName??""])).digest("hex").slice(0,20)}@project-directory.local`;
+          const [saved]=await tx.insert(projectDirectoryTable).values({projectId,fullName:r.fullName.trim(),email:r.email?String(r.email).trim().toLowerCase():placeholder,companyName:typeof r.companyName==="string"?r.companyName:null,role:typeof r.role==="string"&&r.role.trim()?r.role:"External Contact",notes:typeof r.notes==="string"?r.notes:null,addedById:req.user!.userId,bimlogStatus:"none"}).returning({id:projectDirectoryTable.id});ids.push(saved.id);
+        }
+        await tx.insert(activityLogTable).values({projectId,userId:req.user!.userId,userFullName:req.user!.fullName??"",userCompanyName:req.user!.companyName??"",actionType:"import",entityType:"directory",entityId:projectId,details:`Imported ${ids.length} contacts from ${originalFilename}`});return ids;
       });
-      res.json({
-        imported,
-        message: `${imported} contacts imported successfully`,
-      });
+      res.json({projectId,imported:savedIds.length,entryIds:savedIds,message:`${savedIds.length} contacts saved; reopen exact IDs to verify`});
     } catch (err) {
       if (sendAiUsageError(res, err)) return;
       console.error("[directory-import]", err);

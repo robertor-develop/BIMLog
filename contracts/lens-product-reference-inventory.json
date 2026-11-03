@@ -12,6 +12,7 @@
       "artifacts/api-server/src/routes/clash_reports.ts",
       "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
       "artifacts/bimlog/src/features/lens-next/lens-next-model.ts",
+      "artifacts/bimlog/src/pages/LensSyncReview.tsx",
       "artifacts/bimlog/src/pages/project/LensViewpointsView.tsx",
       "lib/db/src/schema/lens-viewpoint-sequence-counters.ts",
       "plugins/BIMLogLensNext/Install-BIMLogLensNext.ps1",

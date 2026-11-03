@@ -679,6 +679,21 @@ export function CompanyDeliveryWorkflowsTab({
                   <p>{t("Reopen authority", "Autoridad para reabrir")}: {row.definition.reopen.role === "approve" ? t("Approver", "Aprobador") : t("Reviewer", "Revisor")} · {t("Reason required", "Motivo obligatorio")}</p>
                   <p style={{overflowWrap:"anywhere"}}>{t("Linked APU version", "Versión APU vinculada")}: {row.definition.economicAllocation?.sourceVersionId || t("No economic allocation", "Sin asignación económica")}</p>
                   {row.definition.economicAllocation && <p>{t("Saved allocation method", "Método de asignación guardado")}: {row.definition.economicAllocation.proposal.method === "apu_default" ? t("Use APU defaults", "Usar valores del APU") : row.definition.economicAllocation.proposal.method === "proportional" ? t("Redistribute proportionally", "Redistribuir proporcionalmente") : row.definition.economicAllocation.proposal.method === "deduct_specific" ? t("Deduct from selected phases", "Deducir de fases específicas") : t("Custom allocation (Finance approval)", "Asignación personalizada (aprobación financiera)")}</p>}
+                  {row.definition.economicAllocation && (() => {
+                    const proposal = row.definition.economicAllocation.proposal;
+                    const allocations = proposal.method === "custom" ? proposal.phases
+                      : "additions" in proposal ? proposal.additions : [];
+                    return <section aria-label={t("Saved economic allocation", "Asignación económica guardada")}>
+                      {allocations.length > 0 && <table>
+                        <caption>{proposal.method === "custom" ? t("Saved phase percentages", "Porcentajes guardados por fase") : t("Added phase percentages", "Porcentajes de fases adicionales")}</caption>
+                        <thead><tr><th scope="col">{t("Phase", "Fase")}</th><th scope="col">{t("Percent", "Porcentaje")}</th></tr></thead>
+                        <tbody>{allocations.map(allocation => <tr key={allocation.phaseId}><td>{allocation.name} ({allocation.code})</td><td>{allocation.percent}%</td></tr>)}</tbody>
+                      </table>}
+                      {proposal.method === "deduct_specific" && <ul aria-label={t("Saved deductions", "Deducciones guardadas")}>{proposal.deductions.map(deduction => <li key={deduction.phaseId}>{row.definition.phases.find(phase => phase.id === deduction.phaseId)?.name || deduction.phaseId}: {deduction.percent}%</li>)}</ul>}
+                      {proposal.method === "custom" && <p>{t("Approval reason", "Motivo de aprobación")}: {proposal.approvalReason}</p>}
+                      {proposal.method === "apu_default" && <p>{t("Percentages inherit from the linked immutable APU version.", "Los porcentajes se heredan de la versión inmutable del APU vinculado.")}</p>}
+                    </section>;
+                  })()}
                   <p style={{ overflowWrap:"anywhere" }}>SHA-256: {row.fingerprint || "—"}</p>
                 </section>
               </details>}

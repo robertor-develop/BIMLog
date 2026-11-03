@@ -1,4 +1,6 @@
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
+import { customerFeedbackDeliveryReceipt } from "../lib/feedback-customer-delivery";
+import { customerFeedbackQueueProgress } from "../lib/feedback-customer-queue";
 import { Router, type NextFunction, type Request, type Response } from "express";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
@@ -359,7 +361,7 @@ router.get("/feedback/mine", authMiddleware, async (req, res) => {
   const active = new Set<number>();
   for (const projectId of projectIds) if (await projectAuthorized(projectId, user, actor.companyId)) active.add(projectId);
   const visible=rows.filter(row=>!row.projectId||active.has(row.projectId)),ids=visible.map(row=>row.id);
-  const operationsRows=ids.length?(await db.execute(sql`SELECT feedback_id,state,attempts,last_error_code,updated_at FROM feedback_operations_outbox WHERE company_id=${actor.companyId} AND feedback_id IN (${sql.join(ids.map(id=>sql`${id}`),sql`,`)})` ) as any).rows||[]:[];
+  const operationsRows=ids.length?(await db.execute(sql`SELECT feedback_id,state,attempts,last_error_code,updated_at,receipt_id,receipt_revision,settled_at,lease_expires_at,next_attempt_at FROM feedback_operations_outbox WHERE company_id=${actor.companyId} AND feedback_id IN (${sql.join(ids.map(id=>sql`${id}`),sql`,`)})` ) as any).rows||[]:[];
   const operationsByFeedback=new Map<number,any>(operationsRows.map((row:any)=>[Number(row.feedback_id),row]));
   const transcriptions=ids.length?await db.select().from(feedbackTranscriptionJobsTable).where(and(inArray(feedbackTranscriptionJobsTable.feedbackId,ids),eq(feedbackTranscriptionJobsTable.requestedById,user.userId))).orderBy(desc(feedbackTranscriptionJobsTable.createdAt)):[];
   const relays=ids.length?await db.select({id:feedbackRelayJobsTable.id,feedbackId:feedbackRelayJobsTable.feedbackId,assetId:feedbackRelayJobsTable.assetId,lineageId:feedbackRelayJobsTable.lineageId,state:feedbackRelayJobsTable.state,version:feedbackRelayJobsTable.version,createdAt:feedbackRelayJobsTable.createdAt,updatedAt:feedbackRelayJobsTable.updatedAt}).from(feedbackRelayJobsTable).where(and(inArray(feedbackRelayJobsTable.feedbackId,ids),eq(feedbackRelayJobsTable.companyId,actor.companyId))).orderBy(feedbackRelayJobsTable.feedbackId,feedbackRelayJobsTable.assetId,feedbackRelayJobsTable.lineageId,desc(feedbackRelayJobsTable.version),desc(feedbackRelayJobsTable.updatedAt),desc(feedbackRelayJobsTable.id)):[];
@@ -368,7 +370,7 @@ router.get("/feedback/mine", authMiddleware, async (req, res) => {
   const snapshotEvents=ids.length?await db.select({feedbackId:feedbackAuditEventsTable.feedbackId,afterState:feedbackAuditEventsTable.afterState,createdAt:feedbackAuditEventsTable.createdAt}).from(feedbackAuditEventsTable).where(and(inArray(feedbackAuditEventsTable.feedbackId,ids),eq(feedbackAuditEventsTable.eventType,"package_snapshot_created"),sql`${feedbackAuditEventsTable.afterState}->>'visibility'='customer'`)).orderBy(desc(feedbackAuditEventsTable.id)):[];
   const snapshotByFeedback=new Map<number,Record<string,unknown>>();for(const event of snapshotEvents)if(!snapshotByFeedback.has(event.feedbackId))snapshotByFeedback.set(event.feedbackId,{...(event.afterState as Record<string,unknown>),generatedAt:event.createdAt.toISOString()});
   const transcriptionByFeedback=new Map<number,typeof feedbackTranscriptionJobsTable.$inferSelect>();for(const job of transcriptions)if(!transcriptionByFeedback.has(job.feedbackId))transcriptionByFeedback.set(job.feedbackId,job);
-  return res.json({feedback:visible.map(row=>({...customerFeedbackDto(row),operationsRoute:operationsByFeedback.has(row.id)?{state:operationsByFeedback.get(row.id).state,attempts:Number(operationsByFeedback.get(row.id).attempts),updatedAt:operationsByFeedback.get(row.id).updated_at,errorCode:operationsByFeedback.get(row.id).last_error_code}:null,packageSnapshot:packageSnapshotDto(snapshotByFeedback.get(row.id)),transcription:transcriptionByFeedback.has(row.id)?transcriptionDto(transcriptionByFeedback.get(row.id)!):null,relays:(relaysByFeedback.get(row.id)||[]).map(relay=>({assetId:relay.assetId,state:relay.state,version:relay.version,createdAt:relay.createdAt,updatedAt:relay.updatedAt,reason:customerRelayReason(relay.state),history:custody.filter(event=>event.jobId===relay.id).map(event=>({sequence:event.sequence,state:event.state,at:event.occurredAt,reason:customerRelayReason(event.state)}))}))}))});
+  return res.json({feedback:visible.map(row=>({...customerFeedbackDto(row),operationsRoute:operationsByFeedback.has(row.id)?{state:operationsByFeedback.get(row.id).state,attempts:Number(operationsByFeedback.get(row.id).attempts),updatedAt:operationsByFeedback.get(row.id).updated_at,errorCode:operationsByFeedback.get(row.id).last_error_code,receipt:customerFeedbackDeliveryReceipt(operationsByFeedback.get(row.id)),queue:customerFeedbackQueueProgress(operationsByFeedback.get(row.id))}:null,packageSnapshot:packageSnapshotDto(snapshotByFeedback.get(row.id)),transcription:transcriptionByFeedback.has(row.id)?transcriptionDto(transcriptionByFeedback.get(row.id)!):null,relays:(relaysByFeedback.get(row.id)||[]).map(relay=>({assetId:relay.assetId,state:relay.state,version:relay.version,createdAt:relay.createdAt,updatedAt:relay.updatedAt,reason:customerRelayReason(relay.state),history:custody.filter(event=>event.jobId===relay.id).map(event=>({sequence:event.sequence,state:event.state,at:event.occurredAt,reason:customerRelayReason(event.state)}))}))}))});
 });
 
 router.post("/feedback/:id/reopen", authMiddleware, async (req, res) => {
@@ -392,13 +394,13 @@ router.get("/feedback/:id/history", authMiddleware, async (req, res) => {
   const user = req.user; if (!user) return res.status(401).json({ code: "AUTH_REQUIRED", error: "Unauthorized" });
   const id = asId(req.params.id); if (!id) return res.status(400).json({ code: "FEEDBACK_ID_INVALID", error: "Invalid feedback id" });
   const feedback = await accessible(id, user); if (!feedback) return res.status(403).json({ code: "FEEDBACK_HISTORY_DENIED", error: "History is not authorized" });
-  const history = await db.select({ id: feedbackAuditEventsTable.id, eventType: feedbackAuditEventsTable.eventType,
+  const history = await db.select({ id: feedbackAuditEventsTable.id, eventType: feedbackAuditEventsTable.eventType, actorUserId: feedbackAuditEventsTable.actorUserId,
     beforeState: feedbackAuditEventsTable.beforeState,
     afterState: feedbackAuditEventsTable.afterState, reason: feedbackAuditEventsTable.reason, createdAt: feedbackAuditEventsTable.createdAt })
     .from(feedbackAuditEventsTable).where(eq(feedbackAuditEventsTable.feedbackId, id)).orderBy(feedbackAuditEventsTable.createdAt);
-  return res.json({ feedback: { id: feedback.id, stableId: feedback.stableId, version: feedback.version }, history: history.filter(event => CUSTOMER_EVENT_TYPES.has(event.eventType)).map(event => ({
+  return res.json({ feedback: { id: feedback.id, stableId: feedback.stableId, version: feedback.version }, history: history.filter(event => CUSTOMER_EVENT_TYPES.has(event.eventType)||(event.eventType==='commented'&&event.actorUserId===feedback.userId)).map(event => ({
     id: event.id, eventType: event.eventType, visibility: "customer", beforeState: customerEventState(event.beforeState),
-    afterState: customerEventState(event.afterState), message: FEEDBACK_CUSTOMER_EVENT_TYPES.has(event.eventType) ? event.reason : null, createdAt: event.createdAt,
+    afterState: customerEventState(event.afterState), message: FEEDBACK_CUSTOMER_EVENT_TYPES.has(event.eventType)||(event.eventType==='commented'&&event.actorUserId===feedback.userId) ? event.reason : null, createdAt: event.createdAt,
   })) });
 });
 

@@ -1,0 +1,16 @@
+.meeting-source-browser h1{font-size:1.65rem;font-weight:750;margin:18px 0 12px}
+.meeting-source-browser h2{font-size:1.25rem;font-weight:700;margin:16px 0}
+.meeting-source-browser p{margin:14px 0;line-height:1.6}
+.meeting-source-browser a{color:#1d4ed8;text-decoration:underline;display:inline-block;padding:6px 0}
+.meeting-source-browser form{margin:20px 0;align-items:end}
+.meeting-source-browser label{font-weight:600;min-width:0}
+.meeting-source-browser input{border-radius:8px;margin-top:6px;font-weight:400}
+.meeting-source-browser button{border:1px solid #94a3b8;border-radius:8px;padding:10px 14px;background:hsl(var(--card));cursor:pointer;text-align:left}
+.meeting-source-browser button[aria-pressed=true]{border-color:#1d4ed8;background:#dbeafe;color:#172554}
+.meeting-source-browser button:focus-visible,.meeting-source-browser a:focus-visible{outline:3px solid #2563eb;outline-offset:3px}
+.meeting-source-browser ul{display:grid;gap:10px;margin:16px 0;list-style:none}
+.meeting-source-browser section{padding:16px;border:1px solid #94a3b8;border-radius:10px}
+.meeting-source-browser dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:14px}
+.meeting-source-browser dt{font-weight:650;color:hsl(var(--muted-foreground))}
+.meeting-source-browser dd{margin-top:4px}
+.meeting-source-browser [role=alert]{padding:12px;border:1px solid #dc2626;border-radius:8px}

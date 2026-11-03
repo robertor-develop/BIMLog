@@ -22,8 +22,8 @@ assert.match(panel, /if \(workingViewInFlight\.current\) return/);
 assert.match(panel, /workingViewInFlight\.current = true/);
 assert.match(panel, /workingViewInFlight\.current = false/);
 assert.match(panel, /setWorkingViewState\("success"\)/);
-assert.match(workingView, /apiClient\.loadVisualState\(issue, signal\)/);
-assert.match(workingView, /bridgeClient\.applyPlatformWorkingView\(issue, context, stored\.visualStateJson, stored\.visualStateDigest, signal\)/);
+assert.match(workingView, /apiClient\.loadVisualState\(issue, context\.modelFingerprint, signal\)/);
+assert.match(workingView, /bridgeClient\.applyPlatformWorkingView\(issue, context, stored\.visualStateJson, stored\.visualStateDigest, signal, legacyModelContinuityConfirmed\)/);
 const openFunction = workingView.slice(
   workingView.indexOf("export async function openBimlogWorkingView"),
   workingView.indexOf("export async function repairBimlogWorkingViewFromCurrent"),
@@ -33,11 +33,11 @@ assert.doesNotMatch(openFunction, /captureCurrentVisualState/);
 assert.doesNotMatch(openFunction, /saveVisualState/);
 assert.doesNotMatch(openFunction, /identity_not_found|legacy_viewpoint_name/);
 assert.match(openFunction, /BIMLog is the source of truth/);
-assert.match(view, /Open working view/);
+assert.match(view, /Open Working View/);
 assert.match(view, /will not search or capture a local Saved Viewpoint/);
 assert.match(view, /Upload is handled separately by the governed synchronization workflow/);
 assert.match(view, /disabled=\{!bridgeOpenEnabled \|\| workingViewState === "opening"\}/);
-assert.match(view, /Opening working view…/);
+assert.match(view, /Opening Working View…/);
 
 console.log(JSON.stringify({
   status: "PASS",

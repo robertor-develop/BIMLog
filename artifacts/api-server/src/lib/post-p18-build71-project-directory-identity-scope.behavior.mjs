@@ -28,7 +28,6 @@ for (const path of [
   "/projects/:projectId/directory/companies",
   "/projects/:projectId/directory/contacts",
   "/projects/:projectId/directory/:entryId",
-  "/projects/:projectId/directory/:entryId/invite",
   "/projects/:projectId/directory/import",
 ]) {
   const escaped = path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -43,6 +42,7 @@ const inviteRoute = route.match(
   /router\.post\(\s*"\/projects\/:projectId\/directory\/:entryId\/invite"[\s\S]*?\n\s*\},\s*\n\s*\);/,
 )?.[0];
 assert.ok(inviteRoute, "invite route must exist");
+assert.match(inviteRoute,/authMiddleware,\s*requirePermission\("admin"\)/,"Invitation route must match the existing service's administrator authority");
 assert.match(
   inviteRoute,
   /eq\(projectDirectoryTable\.id, entryId\)[\s\S]*eq\(projectDirectoryTable\.projectId, projectId\)/,

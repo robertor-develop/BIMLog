@@ -37,7 +37,7 @@ await check("complete gate schema and legacy migration sequence is transaction-a
   assert.match(migration, /pg_advisory_xact_lock\(hashtext\(\$1\)\)/);
   assert.match(migration, /await ensureLivingBriefGateSchemaWithClient\(client\);/);
   assert.match(migration, /await client\.query\("COMMIT"\);/);
-  assert.match(migration, /await client\.query\("ROLLBACK"\)\.catch\(\(\) => undefined\);/);
+  assert.match(migration, /await client\.query\("ROLLBACK"\)\.catch\(\(rollbackError\) => \{ console\.error\("Living Brief migration rollback failed", rollbackError\); \}\);/);
   assert.match(migration, /client\.release\(\);/);
 });
 

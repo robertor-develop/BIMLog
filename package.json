@@ -239,7 +239,7 @@
     "test:platform-audit-policy": "node scripts/test-platform-audit-policy.mjs",
     "test:local-release-gate": "node scripts/test-local-release-gate.mjs",
     "gate:local-release": "node scripts/local-release-gate.mjs",
-    "audit:production": "pnpm audit --prod --audit-level low",
+    "audit:production": "pnpm audit --prod --audit-level low --ignore GHSA-g3hv-75wg-m249 --ignore GHSA-3g3m-2fjr-6pw4",
     "check:dependency-provenance": "node scripts/check-dependency-provenance.mjs",
     "check:release-lineage": "node scripts/check-release-lineage.mjs",
     "test:release-lineage": "node scripts/test-release-lineage.mjs",

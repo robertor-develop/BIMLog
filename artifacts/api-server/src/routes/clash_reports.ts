@@ -2,8 +2,8 @@
 import { db, pool } from "@workspace/db";
 import { loadProjectCompanyChoices } from "../lib/project-company-choices";
 import type { Request } from "express";
-import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable, lensViewpointSequenceCountersTable, filesTable } from "@workspace/db/schema";
-import { eq, desc, and, isNull, isNotNull, ne, or, sql, inArray } from "drizzle-orm";
+import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable, lensViewpointSequenceCountersTable, lensIssueViewpointsTable, lensIssueViewpointRevisionsTable, lensNextPublishReceiptsTable, filesTable } from "@workspace/db/schema";
+import { eq, desc, asc, and, isNull, isNotNull, ne, or, sql, inArray } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
 import {
   PALETTE, statusText, priorityText, computeContentHash, createPdfDocument,
@@ -21,7 +21,7 @@ import { LensImportValidationError, validateAndHashLensImportRequest } from "../
 import { getAppUrl } from "../lib/email";
 import AdmZip from "adm-zip";
 import { LensNextPublishError, parseLensNextPublishRequest, publishLensNextAction } from "../lib/lens-next-publishing";
-import { LensNextLocalUploadError, lensNextNavigationIdentity, rebindLegacyNavigationServerIdentity, sameLensNextAuthoritativeLineage, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "../lib/lens-next-local-upload";
+import { LensNextLocalUploadError, lensNextNavigationIdentity, rebindLegacyNavigationServerIdentity, rebindPersistedVisualStateRevision, sameLensNextAuthoritativeLineage, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "../lib/lens-next-local-upload";
 import { serializeLensNextCreateFailure } from "../lib/lens-next-create-failure-telemetry";
 import { storage } from "../lib/storage-adapter";
 import { reportOperationalFailure } from "../lib/operational-failure";
@@ -222,6 +222,12 @@ function escapeJsonStringControlChars(text: string): { repaired: string; fixes: 
 }
 
 const router: Router = Router();
+async function retainLensRevisionVisualPackage(tx:{update:typeof db.update},before:typeof lensViewpointsTable.$inferSelect,after:typeof lensViewpointsTable.$inferSelect){
+  if(!before.visualStateJson&&!before.visualStateDigest)return;
+  if(!before.visualStateJson||!before.visualStateDigest)throw new LensNextLocalUploadError("visual_state_incomplete","The prior revision has an incomplete visual package; repair it before revising.",409);
+  const rebound=rebindPersistedVisualStateRevision(before.visualStateJson,before.visualStateDigest,{projectId:before.projectId,serverId:before.id,viewpointId:before.viewpointId,lifecycleStatus:before.lifecycleStatus??"active",revisionNumber:before.revisionNumber??1},{projectId:after.projectId,serverId:after.id,viewpointId:after.viewpointId,lifecycleStatus:after.lifecycleStatus??"active",revisionNumber:after.revisionNumber??1});
+  await tx.update(lensViewpointsTable).set({visualStateJson:rebound.json,visualStateDigest:rebound.digest}).where(eq(lensViewpointsTable.id,after.id));after.visualStateJson=rebound.json;after.visualStateDigest=rebound.digest;
+}
 
 const currentViewLabel = (lang: "en" | "es", en: string, es: string) => (lang === "es" ? es : en);
 
@@ -289,6 +295,7 @@ router.get("/projects/:projectId/clash-reports", authMiddleware, requireProjectM
     const rows = await db.select().from(clashReportsTable)
       .where(eq(clashReportsTable.projectId, projectId))
       .orderBy(desc(clashReportsTable.createdAt));
+    res.setHeader("Cache-Control","private, no-store");
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: "list_failed", message: err instanceof Error ? err.message : String(err) });
@@ -297,20 +304,30 @@ router.get("/projects/:projectId/clash-reports", authMiddleware, requireProjectM
 
 router.post("/projects/:projectId/clash-reports", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
+  const fileName=req.body?.fileName===undefined||req.body.fileName===""?"Manual Report":req.body.fileName;
+  const clientRequestId=typeof req.body?.clientRequestId==="string"?req.body.clientRequestId.toLowerCase():req.body?.clientRequestId;
+  if(typeof fileName!=="string"||!fileName.trim()||(clientRequestId!==undefined&&(typeof clientRequestId!=="string"||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clientRequestId)))){res.status(400).json({error:"invalid_report_request",message:"Use a report name and a valid optional creation request ID."});return;}
   try {
-    const existingReports2 = await db.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
-    const [project2] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+    const report=await db.transaction(async tx=>{
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('bimlog-plugin-sync'),${projectId})`);
+    if(clientRequestId){
+      const prefix=JSON.stringify({contractVersion:"clash-report-create.v1",clientRequestId}).slice(0,-1)+",%";
+      const [prior]=await tx.select().from(activityLogTable).where(and(eq(activityLogTable.projectId,projectId),eq(activityLogTable.userId,req.user!.userId),eq(activityLogTable.actionType,"create"),eq(activityLogTable.entityType,"clash_report"),sql`${activityLogTable.details} LIKE ${prefix}`)).limit(1);
+      if(prior){const saved=JSON.parse(prior.details!);if(saved.fileName!==fileName.trim())throw new Error("report_create_request_conflict");const [row]=await tx.select().from(clashReportsTable).where(and(eq(clashReportsTable.projectId,projectId),eq(clashReportsTable.id,prior.entityId!))).limit(1);if(!row)throw new Error("report_create_receipt_unavailable");return row;}
+    }
+    const existingReports2 = await tx.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
+    const [project2] = await tx.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
     const autoNum2 = nextClashReportNumber(project2?.code, existingReports2.map(r => r.reportNumber));
-    const [report] = await db.insert(clashReportsTable).values({
+    const [report] = await tx.insert(clashReportsTable).values({
       projectId,
       uploadedById: req.user!.userId,
-      fileName: req.body?.fileName || "Manual Report",
+      fileName: fileName.trim(),
       format: "manual",
       totalClashes: 0,
       status: "complete",
       reportNumber: autoNum2,
     }).returning();
-    await db.insert(activityLogTable).values({
+    await tx.insert(activityLogTable).values({
       projectId,
       userId: req.user!.userId,
       userFullName: req.user!.fullName ?? "",
@@ -318,10 +335,13 @@ router.post("/projects/:projectId/clash-reports", authMiddleware, requirePermiss
       actionType: "create",
       entityType: "clash_report",
       entityId: report.id,
-      details: `Created manual clash report: ${report.fileName} (${autoNum2})`,
+      details: JSON.stringify({contractVersion:"clash-report-create.v1",clientRequestId:clientRequestId??null,fileName:report.fileName,reportNumber:autoNum2,message:`Created manual clash report: ${report.fileName} (${autoNum2})`}),
+    });
+    return report;
     });
     res.status(201).json(report);
   } catch (err) {
+    if(err instanceof Error&&["report_create_request_conflict","report_create_receipt_unavailable"].includes(err.message)){res.status(409).json({error:err.message,message:"This creation request belongs to a different or unavailable saved report. Reopen project records before creating another report."});return;}
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
@@ -338,6 +358,7 @@ router.post("/projects/:projectId/clash-reports/upload",
         return;
       }
       const format = clashImportFormat(req.file.originalname);
+      const originalName=req.file.originalname;
       const { extension: ext, spreadsheet: isSpreadsheet, xml: isXml } = format;
       const anthropic = await getAnthropicClientForUser({
         userId: req.user!.userId,
@@ -389,6 +410,7 @@ ${chunk}`
               console.log("[clash-upload] XML chunk extracted:", mapped.length, "viewpoints, total so far:", parsed.length);
             } catch (chunkErr) {
               console.error("[clash-upload] XML chunk failed:", chunkErr);
+              throw chunkErr;
             }
           }
 
@@ -398,14 +420,15 @@ ${chunk}`
           console.log("[clash-upload] XML total after dedup:", parsed.length, "viewpoints");
         } catch (xmlErr) {
           console.error("[clash-upload] XML failed:", xmlErr);
-          parsed = [];
+          throw xmlErr;
         }
       }
 
       if (!isSpreadsheet && parsed.length === 0) {
         // Non-spreadsheet: use AI to extract directly (XML, HTML, BCF, TXT, etc.)
         try {
-          const fileText = req.file.buffer.toString("utf-8").slice(0, 100000);
+          const documentChunks=chunkClashSource(req.file.buffer.toString("utf-8"));
+          for(const fileText of documentChunks){
           const extractMsg = await anthropic.messages.create({
             model: "claude-sonnet-4-5",
             max_tokens: 4000,
@@ -425,13 +448,15 @@ Return ONLY a JSON array, no markdown:
             }]
           });
           const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
-          parsed = normalizeAiClashRows(parseAiJsonArray(extractText), "document");
+          parsed = [...parsed,...normalizeAiClashRows(parseAiJsonArray(extractText), "document")];
+          }
+          parsed=deduplicateClashRows(parsed);
           console.log("[clash-upload] AI extracted from non-spreadsheet:", parsed.length, "clashes");
         } catch (e) {
           console.error("[clash-upload] AI extraction failed:", e);
-          parsed = [];
+          throw e;
         }
-      } else {
+      } else if (isSpreadsheet) {
         // Spreadsheet: use column mapping
         const spreadsheet = canonicalSpreadsheetInput(req.file.buffer, req.file.originalname, "buffer", {});
         const workbook = XLSX.read(spreadsheet.data, spreadsheet.options);
@@ -456,28 +481,32 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
           console.log("[clash-upload] AI mapping:", JSON.stringify(mapping));
         } catch (e) {
           console.error("[clash-upload] AI mapping failed:", e);
-          mapping = { clashId: 0, description: 3, holdUps: 7, discipline: 2, level: 1, assignedTo: 5, status: 8, resolutionNotes: 4, deadline: 9, viewpoint: 6, element1: -1, element2: -1 };
+          throw e;
         }
 
         parsed = mapClashSpreadsheetRows(dataRows, mapping);
         console.log("[clash-upload] Parsed:", parsed.length, "rows. Sample:", JSON.stringify(parsed[0]));
       }
 
-      const existingReports = await db.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
-      const [project] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+      if(!parsed.length){res.status(422).json({error:"no_importable_clashes",message:"No valid clashes were extracted. Review the source and mapping before retrying; no report was created."});return;}
+      const persisted=await db.transaction(async tx=>{
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('bimlog-plugin-sync'),${projectId})`);
+      const existingReports = await tx.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
+      const [project] = await tx.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
       const autoReportNumber = nextClashReportNumber(project?.code, existingReports.map(r => r.reportNumber));
-      const [report] = await db.insert(clashReportsTable).values({
+      const [report] = await tx.insert(clashReportsTable).values({
         projectId,
         uploadedById: req.user!.userId,
-        fileName: req.file.originalname,
+        fileName: originalName,
         format: format.persistedFormat,
         totalClashes: parsed.length,
         status: "processing",
         reportNumber: autoReportNumber,
       }).returning();
 
+      let clashIds:number[]=[];
       if (parsed.length > 0) {
-        await db.insert(clashesTable).values(
+        const saved=await tx.insert(clashesTable).values(
           parsed.map(p => ({
             clashReportId: report.id,
             projectId,
@@ -489,12 +518,13 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
             assignedToName: p.assignedToName || null,
             resolutionNotes: p.resolutionNotes || null,
             dueDate: p.dueDate || null,
-            status: "open",
+            status: p.status,
           }))
-        );
+        ).returning({id:clashesTable.id});
+        clashIds=saved.map(row=>row.id);
       }
 
-      await db.insert(activityLogTable).values({
+      await tx.insert(activityLogTable).values({
         projectId,
         userId: req.user!.userId,
         userFullName: req.user!.fullName ?? "",
@@ -502,10 +532,12 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
         actionType: "upload",
         entityType: "clash_report",
         entityId: report.id,
-        details: `Uploaded clash report: ${req.file.originalname} - ${parsed.length} clashes imported (${autoReportNumber})`,
+        details: `Uploaded clash report: ${originalName} - ${parsed.length} clashes imported (${autoReportNumber})`,
       });
-      res.status(201).json({ clash_report_id: report.id, total_parsed: parsed.length, status: "processing" });
-      rankClashesWithAI(report.id, projectId, parsed, anthropic).catch(console.error);
+      return {report,clashIds};
+      });
+      res.status(201).json({ projectId,clash_report_id: persisted.report.id,clash_ids:persisted.clashIds,total_parsed: parsed.length, status: "processing" });
+      rankClashesWithAI(persisted.report.id, projectId, parsed, anthropic).catch(console.error);
     } catch (err) {
       if (sendAiUsageError(res, err)) return;
       console.error("[clash-reports/upload] FAILED:", err);
@@ -514,7 +546,7 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
   }
 );
 
-async function rankClashesWithAI(reportId: number, projectId: number, clashList: any[], anthropicClient: { messages: { create: (input: any) => Promise<any> } }) {
+async function rankClashesWithAI(reportId: number, projectId: number, clashList: any[], anthropicClient: { messages: { create: (input: any) => Promise<any> } }, audit?: typeof activityLogTable.$inferInsert) {
   try {
     console.log("[rankAI] Starting - clashList length:", clashList.length, "reportId:", reportId);
     if (clashList.length === 0) {
@@ -522,6 +554,7 @@ async function rankClashesWithAI(reportId: number, projectId: number, clashList:
       await db.update(clashReportsTable).set({ status: "complete" }).where(clashReportScopeWhere(projectId, reportId));
       return;
     }
+    const allClashes = await db.select().from(clashesTable).where(and(clashScopeWhere(projectId, reportId),isNull(clashesTable.deletedAt))).orderBy(asc(clashesTable.id));
     const msg = await anthropicClient.messages.create({
       model: "claude-sonnet-4-5",
       max_tokens: 2000,
@@ -553,14 +586,19 @@ Clashes: ${JSON.stringify(clashList.map((c, i) => ({ index: i, description: c.de
     console.log("[rankAI] Ranked count:", ranked.length);
     // Validate priorities
     const validPriorities = ["P1", "P2", "P3", "P4"];
-    const validRanked = ranked.filter(r => validPriorities.includes(r.priority));
+    if(!Array.isArray(ranked)||ranked.length!==clashList.length||new Set(ranked.map(r=>r.index)).size!==clashList.length||!ranked.every(r=>Number.isInteger(r.index)&&r.index>=0&&r.index<clashList.length&&validPriorities.includes(r.priority)&&typeof r.priority_reason==="string"))throw new Error("Ranking returned incomplete or invalid priorities");
+    const validRanked = ranked;
     console.log("[rankAI] Valid ranked:", validRanked.length);
-    const allClashes = await db.select().from(clashesTable).where(clashScopeWhere(projectId, reportId));
+    if(allClashes.length!==clashList.length)throw new Error("Clash list changed; reload before reranking");
     console.log("[rankAI] Clashes in DB for report:", allClashes.length);
+    await db.transaction(async transaction=>{
+    await transaction.select({id:clashReportsTable.id}).from(clashReportsTable).where(clashReportScopeWhere(projectId,reportId)).for("update");
+    const currentClashes=await transaction.select().from(clashesTable).where(and(clashScopeWhere(projectId,reportId),isNull(clashesTable.deletedAt))).orderBy(asc(clashesTable.id)).for("update");
+    if(JSON.stringify(currentClashes)!==JSON.stringify(allClashes))throw new Error("Clashes changed during ranking; reload before retrying");
     for (const r of validRanked) {
       if (allClashes[r.index]) {
         console.log(`[rankAI] Updating clash ${allClashes[r.index].id} with priority ${r.priority}`);
-        await db.update(clashesTable)
+        await transaction.update(clashesTable)
           .set({ priority: r.priority, priorityReason: r.priority_reason })
           .where(eq(clashesTable.id, allClashes[r.index].id));
       }
@@ -570,15 +608,18 @@ Clashes: ${JSON.stringify(clashList.map((c, i) => ({ index: i, description: c.de
     const p3 = validRanked.filter(r => r.priority === "P3").length;
     const p4 = validRanked.filter(r => r.priority === "P4").length;
     console.log("[rankAI] Updated clashes. P1:", p1, "P2:", p2, "P3:", p3, "P4:", p4);
-    await db.update(clashReportsTable).set({
+    await transaction.update(clashReportsTable).set({
       status: "complete", p1Count: p1, p2Count: p2, p3Count: p3, p4Count: p4,
       aiSummary: `${p1} critical, ${p2} this week, ${p3} monitor, ${p4} low priority.`,
       updatedAt: new Date(),
     }).where(clashReportScopeWhere(projectId, reportId));
+    if(audit)await transaction.insert(activityLogTable).values(audit);
+    });
     console.log("[rankAI] Report updated to complete.");
   } catch (err) {
     console.error("[rankClashesWithAI] FAILED:", err);
-    await db.update(clashReportsTable).set({ status: "complete" }).where(clashReportScopeWhere(projectId, reportId));
+    if(audit)throw err;
+    await db.update(clashReportsTable).set({ status: "ranking_failed",aiSummary:"Imported records were saved, but AI ranking failed. Review the records and retry ranking." }).where(clashReportScopeWhere(projectId, reportId));
   }
 }
 
@@ -624,6 +665,7 @@ router.post("/projects/:projectId/clash-reports/lens-next/local-viewpoints/uploa
         const rebound = validateAndRebindLocalVisualState(body.visualState, { projectId, serverId: inserted.id, viewpointId, modelFingerprint });
         const sequence = await assignTradeFloorSeq(projectId, inserted.trade, inserted.floor, null, tx);
         await tx.update(lensViewpointsTable).set({ screenshotUrl: rebound.screenshotDataUrl, visualStateJson: rebound.json, visualStateDigest: rebound.digest, tradeFloorSeq: sequence.seq, tradeFloorSeqCorrection: sequence.correction, updatedAt: new Date() }).where(eq(lensViewpointsTable.id, inserted.id));
+        await tx.insert(activityLogTable).values({projectId,userId:req.user!.userId,userFullName:req.user!.fullName??"",userCompanyName:req.user!.companyName??"",actionType:"lens_local_viewpoint_uploaded",entityType:"lens_viewpoint",entityId:inserted.id,details:JSON.stringify({viewpointId,navisworksGuid,visualStateDigest:rebound.digest,reason:body.confirmationReason.trim()})});
         return { serverId: inserted.id, viewpointId, navisworksGuid, visualStateDigest: rebound.digest, tradeFloorSeq: sequence.seq };
       });
       res.status(201).json({ success: true, contractVersion: "lens-next-local-upload.v1", created: true, result });
@@ -722,7 +764,8 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/create",
         await tx.update(lensViewpointsTable).set({ displayId, screenshotUrl: rebound.screenshotDataUrl, visualStateJson: rebound.json, visualStateDigest: rebound.digest, tradeFloorSeq: sequence.seq, tradeFloorSeqCorrection: sequence.correction, updatedAt: new Date() }).where(eq(lensViewpointsTable.id, inserted.id));
         trace("PASS", { provisionalServerId: inserted.id, displayId });
         stage = "audit_relationship_work";
-        trace("SKIP", { reason: "No audit or relationship write exists in the current atomic-create transaction." });
+        await tx.insert(activityLogTable).values({projectId,userId:req.user!.userId,userFullName:req.user!.fullName??"",userCompanyName:req.user!.companyName??"",actionType:"lens_issue_created",entityType:"lens_viewpoint",entityId:inserted.id,details:JSON.stringify({viewpointId,displayId,visualStateDigest:rebound.digest,reason:body.confirmationReason.trim()})});
+        trace("PASS", {serverId:inserted.id});
         return { serverId: inserted.id, viewpointId, displayId, visualStateDigest: rebound.digest, revisionNumber: 1, lifecycleStatus: "active", displayCode: displayId };
       });
       transactionCommitted = true;
@@ -1019,6 +1062,16 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         const parsed = Number(raw);
         return parsed;
       };
+      // Validate every supplied row before any reconciliation can persist one.
+      for(const row of viewpoints){
+        if(!norm(row?.viewpointId))continue;
+        const source=readSourceProjectId(row);
+        if(source!=null&&(!Number.isFinite(source)||source!==projectId)){res.status(409).json({error:"project_mismatch",message:"This snapshot includes another project; no rows were synchronized.",expectedProjectId:projectId,receivedProjectId:Number.isFinite(source)?source:null});return;}
+        const visual=typeof row?.visualStateJson==="string"?row.visualStateJson.trim():"";
+        const digest=typeof row?.visualStateDigest==="string"&&/^[a-f0-9]{64}$/i.test(row.visualStateDigest.trim())?row.visualStateDigest.trim():"";
+        if(visual&&Buffer.byteLength(visual,"utf8")>4*1024*1024){res.status(413).json({error:"visual_state_too_large",message:"Lens visual state exceeds the 4 MiB native-bridge limit."});return;}
+        if(Boolean(visual)!==Boolean(digest)){res.status(422).json({error:"visual_state_incomplete",message:"Visual state JSON and its SHA-256 digest must be supplied together."});return;}
+      }
       // The plugin sends an all-zeros GUID as a placeholder for viewpoints saved
       // in earlier sessions. It is not a real key; treating it as one would make
       // every such viewpoint collide on the (project_id, navisworks_guid) unique
@@ -1175,6 +1228,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
             await tx.update(lensViewpointsTable)
               .set({ tradeFloorSeq: r.seq, tradeFloorSeqCorrection: r.correction })
               .where(eq(lensViewpointsTable.id, inserted.id));
+            await tx.insert(activityLogTable).values({projectId,userId:req.user!.userId,userFullName:req.user!.fullName??"",userCompanyName:req.user!.companyName??"",actionType:"lens_viewpoint_synced",entityType:"lens_viewpoint",entityId:inserted.id,details:JSON.stringify({viewpointId,navisworksGuid,displayId,tradeFloorSeq:r.seq,lifecycleStatus:replayLifecycle})});
             return { inserted, assignedSeq: r.seq, correction: r.correction };
           });
           if (txResult) {
@@ -1251,7 +1305,7 @@ router.get("/projects/:projectId/clash-reports/lens-import-context",
       const access = await pool.query<{ allowed: boolean }>(`
         SELECT (
           EXISTS (SELECT 1 FROM users WHERE id = $1 AND is_super_admin = true)
-          OR EXISTS (SELECT 1 FROM project_members WHERE user_id = $1 AND project_id = $2)
+          OR EXISTS (SELECT 1 FROM project_members WHERE user_id = $1 AND project_id = $2 AND status = 'active')
         ) AS allowed`, [req.user!.userId, sourceProjectId]);
       res.json({
         success: true,
@@ -1451,6 +1505,7 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
       const activeMembership = currentUser?.isSuperAdmin ? null : await pool.query(`SELECT role FROM project_members WHERE project_id=$1 AND user_id=$2 AND status='active'`, [projectId, req.user!.userId]);
       const activeRole = currentUser?.isSuperAdmin ? "project_admin" : activeMembership?.rows[0]?.role ?? null;
       const roleMeta = activeRole ? await getConfigOptionMeta("member_role", activeRole) : null;
+      res.setHeader("Cache-Control","private, no-store");
       res.json({
         success: true,
         publishing: {
@@ -1765,6 +1820,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
       const scope = await lensReportScope(req, projectRows);
       const rows = scope.rows;
       const codeOf = (row: { trade: string | null; tradeFloorSeq: number | null; displayId: string | null; viewpointId: string }): string => {
+        if (row.displayId) return row.displayId;
         if (row.tradeFloorSeq != null) {
           const abbr = ((row.trade || "").length > 2 ? (row.trade || "").slice(0, 2) : (row.trade || "")).toUpperCase() || "??";
           return `${abbr}-${String(row.tradeFloorSeq).padStart(3, "0")}`;
@@ -1874,6 +1930,14 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
         ["P3 Medium", { f: `COUNTIF('Lens Viewpoints'!H${dataStartRow}:H${dataEndRow},"P3")` }],
       ]);
       summary["!cols"] = [{ wch: 28 }, { wch: 32 }];
+      const summaryValues = [exportRows.length,
+        ...["Current", "Superseded", "Voided"].map(state => exportRows.filter(row => row.state === state).length),
+        ...["Open", "Resolved"].map(status => exportRows.filter(row => row.status === status).length),
+        ...["P1", "P2", "P3"].map(priority => exportRows.filter(row => row.priority === priority).length)];
+      summaryValues.forEach((value, index) => {
+        const cell = summary[`B${index + 8}`];
+        if (cell) { cell.t = "n"; cell.v = value; }
+      });
 
       const rubenRows: Array<Array<string | Date | null>> = [];
       const rubenSheetRows: Array<{ level?: number }> = [];
@@ -2106,6 +2170,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
       );
       res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       res.setHeader("Content-Disposition", `attachment; filename="Lens-Viewpoints-Project${projectId}.xlsx"`);
+      res.setHeader("Cache-Control", "private, no-store");
       res.send(buffer);
     } catch (err) {
       res.status(500).json({ error: "lens_excel_export_failed", message: err instanceof Error ? err.message : String(err) });
@@ -2123,32 +2188,29 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/repair-lifecycle
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {
-      const rows = await db.select({
-        id: lensViewpointsTable.id,
-        displayId: lensViewpointsTable.displayId,
-        lifecycleStatus: lensViewpointsTable.lifecycleStatus,
-        supersedesId: lensViewpointsTable.supersedesId,
-      }).from(lensViewpointsTable).where(eq(lensViewpointsTable.projectId, projectId));
-      const hasChild = new Set(rows.map(r => r.supersedesId).filter((x): x is number => x != null));
-      const activeDisplayIds = new Set(
-        rows
-          .filter(r => (r.lifecycleStatus ?? "active") === "active" && r.displayId)
-          .map(r => r.displayId as string)
-      );
-      const repairIds = rows
-        .filter(r => r.lifecycleStatus === "superseded")
-        .filter(r => !hasChild.has(r.id))
-        .filter(r => !r.displayId || !activeDisplayIds.has(r.displayId))
-        .map(r => r.id);
-      if (repairIds.length === 0) {
-        res.json({ success: true, repaired: 0, checked: rows.length });
-        return;
-      }
-      const repaired = await db.update(lensViewpointsTable)
-        .set({ lifecycleStatus: "active", updatedAt: new Date() })
-        .where(and(eq(lensViewpointsTable.projectId, projectId), inArray(lensViewpointsTable.id, repairIds)))
-        .returning({ id: lensViewpointsTable.id });
-      res.json({ success: true, repaired: repaired.length, checked: rows.length });
+      const result = await db.transaction(async tx => {
+        const rows = await tx.select().from(lensViewpointsTable)
+          .where(eq(lensViewpointsTable.projectId, projectId)).for("update");
+        const hasChild = new Set(rows.map(row => row.supersedesId).filter((id): id is number => id != null));
+        const activeDisplayIds = new Set(rows.filter(row => (row.lifecycleStatus ?? "active") === "active" && row.displayId).map(row => row.displayId!));
+        const candidates = rows.filter(row => row.lifecycleStatus === "superseded" && !hasChild.has(row.id));
+        const candidatesByDisplay = new Map<string, number>();
+        for (const row of candidates) if (row.displayId) candidatesByDisplay.set(row.displayId, (candidatesByDisplay.get(row.displayId) ?? 0) + 1);
+        const repairable = candidates.filter(row => !row.displayId || (!activeDisplayIds.has(row.displayId) && candidatesByDisplay.get(row.displayId) === 1));
+        if (!repairable.length) return { repaired: 0, checked: rows.length, skipped: candidates.length };
+        const repaired = await tx.update(lensViewpointsTable)
+          .set({ lifecycleStatus: "active", updatedAt: new Date() })
+          .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.lifecycleStatus, "superseded"), inArray(lensViewpointsTable.id, repairable.map(row => row.id))))
+          .returning({ id: lensViewpointsTable.id });
+        await tx.insert(activityLogTable).values(repaired.map(row => ({
+          projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+          actionType: "lens_lifecycle_repaired", entityType: "lens_viewpoint", entityId: row.id,
+          fileNameBefore: "superseded", fileNameAfter: "active",
+          details: "Restored orphaned revision marker: no successor and no competing active display identity.",
+        })));
+        return { repaired: repaired.length, checked: rows.length, skipped: candidates.length - repairable.length };
+      });
+      res.json({ success: true, ...result });
     } catch (err) {
       res.status(500).json({ error: "lens_lifecycle_repair_failed", message: err instanceof Error ? err.message : String(err) });
     }
@@ -2261,6 +2323,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/trades",
   requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
+    if(typeof req.body?.name!=="string"){res.status(400).json({error:"invalid_trade",message:"Trade name must be text."});return;}
     const name = String(req.body?.name ?? "").trim().replace(/\s+/g, " ");
     if (!Number.isSafeInteger(projectId) || projectId <= 0 || name.length < 2 || name.length > 80) {
       res.status(400).json({ error: "invalid_trade", message: "Trade must contain 2 to 80 characters." });
@@ -2272,18 +2335,18 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/trades",
     }
     const normalized = name.toLocaleLowerCase("en-US");
     try {
-      const result = await pool.query(
-        `INSERT INTO lens_project_trades(project_id,name,normalized_name,created_by_id)
-         VALUES($1,$2,$3,$4)
-         ON CONFLICT(project_id,normalized_name) DO UPDATE SET name=lens_project_trades.name
-         RETURNING id,name,created_at`,
-        [projectId, name, normalized, req.user!.userId],
-      );
-      await db.insert(activityLogTable).values({ projectId, userId: req.user!.userId,
-        userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
-        actionType: "lens_trade_added", entityType: "lens_trade", entityId: result.rows[0].id,
-        details: `Reusable Lens trade added: ${result.rows[0].name}` });
-      res.status(201).json({ success: true, trade: result.rows[0] });
+      const result = await db.transaction(async tx => {
+        const inserted = await tx.execute(sql`INSERT INTO lens_project_trades(project_id,name,normalized_name,created_by_id)
+          VALUES(${projectId},${name},${normalized},${req.user!.userId}) ON CONFLICT(project_id,normalized_name) DO NOTHING RETURNING id,name,created_at`);
+        const row = inserted.rows[0] ?? (await tx.execute(sql`SELECT id,name,created_at FROM lens_project_trades WHERE project_id=${projectId} AND normalized_name=${normalized}`)).rows[0];
+        if (!row) throw new Error("Saved trade could not be reopened");
+        if (inserted.rows.length) await tx.insert(activityLogTable).values({ projectId, userId: req.user!.userId,
+          userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+          actionType: "lens_trade_added", entityType: "lens_trade", entityId: Number(row.id),
+          details: `Reusable Lens trade added: ${row.name}` });
+        return { trade: {id:Number(row.id),name:String(row.name),created_at:row.created_at},created:inserted.rows.length>0 };
+      });
+      res.status(201).json({ success: true, projectId, ...result });
     } catch (err) {
       res.status(500).json({ error: "lens_trade_create_failed", message: err instanceof Error ? err.message : String(err) });
     }
@@ -2298,6 +2361,10 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
   requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
+    if (!Array.isArray(req.body?.ids) || req.body.ids.some((id: unknown) => typeof id !== "number" || !Number.isSafeInteger(id) || id <= 0)) {
+      res.status(400).json({ error: "invalid_ids", message: "Every selected viewpoint must have a valid numeric ID." });
+      return;
+    }
     const ids: number[] = Array.isArray(req.body?.ids)
       ? Array.from(new Set(req.body.ids.map((x: unknown) => Number(x)).filter((x: number) => Number.isInteger(x) && x > 0)))
       : [];
@@ -2335,6 +2402,7 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
           idsByGroup.set(row.issueGroupId, list);
         }
 
+        if (ids.some(id => !byId.has(id))) throw new Error("selection_not_in_project");
         const selectedExisting = ids.filter(id => byId.has(id));
         const expandedIds = new Set<number>();
         const addChain = (startId: number) => {
@@ -2395,6 +2463,10 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
       }
       res.json({ success: true, ...result, floor });
     } catch (err) {
+      if (err instanceof Error && err.message === "selection_not_in_project") {
+        res.status(404).json({ error: "selection_not_in_project", message: "One or more selected viewpoints are unavailable in this project. Reload the selection; no floors were changed." });
+        return;
+      }
       res.status(500).json({ error: "lens_batch_floor_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }
@@ -2408,6 +2480,10 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-responsib
   requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
+    if (!Array.isArray(req.body?.ids) || req.body.ids.some((id: unknown) => typeof id !== "number" || !Number.isSafeInteger(id) || id <= 0)) {
+      res.status(400).json({ error: "invalid_ids", message: "Every selected viewpoint must have a valid numeric ID." });
+      return;
+    }
     const ids: number[] = Array.isArray(req.body?.ids)
       ? Array.from(new Set(req.body.ids.map((x: unknown) => Number(x)).filter((x: number) => Number.isInteger(x) && x > 0)))
       : [];
@@ -2445,6 +2521,7 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-responsib
           idsByGroup.set(row.issueGroupId, list);
         }
 
+        if (ids.some(id => !byId.has(id))) throw new Error("selection_not_in_project");
         const selectedExisting = ids.filter(id => byId.has(id));
         const expandedIds = new Set<number>();
         const addChain = (startId: number) => {
@@ -2505,6 +2582,10 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-responsib
       }
       res.json({ success: true, ...result, responsibleCompany });
     } catch (err) {
+      if (err instanceof Error && err.message === "selection_not_in_project") {
+        res.status(404).json({ error: "selection_not_in_project", message: "One or more selected viewpoints are unavailable in this project. Reload the selection; no companies were changed." });
+        return;
+      }
       res.status(500).json({ error: "lens_batch_responsible_company_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }
@@ -2735,6 +2816,7 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id/edit",
           revisionNumber: old.revisionNumber + 1,
           syncedAt: new Date(),
         }).returning();
+        await retainLensRevisionVisualPackage(tx,old,created);
         await tx.insert(activityLogTable).values({
           projectId,
           userId: req.user!.userId,
@@ -2826,6 +2908,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/reassign",
           revisionNumber: old.revisionNumber + 1,
           syncedAt: new Date(),
         }).returning();
+        await retainLensRevisionVisualPackage(tx,old,created);
         await tx.insert(activityLogTable).values({
           projectId,
           userId: req.user!.userId,
@@ -3117,6 +3200,7 @@ router.get("/projects/:projectId/clash-reports/lens-next-id",
           isNotNull(lensViewpointsTable.displayId),
           ne(lensViewpointsTable.displayId, ""),
         ));
+      res.setHeader("Cache-Control","private, no-store");
       res.json({ success: true, currentSequence: total ?? 0, projectCode: project.code });
     } catch (err) {
       res.status(500).json({ error: "lens_next_id_failed", message: err instanceof Error ? err.message : String(err) });
@@ -3147,7 +3231,8 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/reports",
       }).from(lensViewpointReportsTable)
         .where(eq(lensViewpointReportsTable.projectId, projectId))
         .orderBy(desc(lensViewpointReportsTable.generatedAt));
-      res.json({ reports: rows });
+      res.setHeader("Cache-Control", "private, no-store");
+      res.json({ projectId, reports: rows });
     } catch (err) {
       res.status(500).json({ error: "lens_reports_failed", message: err instanceof Error ? err.message : String(err) });
     }
@@ -3162,10 +3247,18 @@ router.delete("/projects/:projectId/clash-reports/lens-viewpoints/reports/:repor
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     const reportRecordId = Number(req.params.reportRecordId);
+    if (!Number.isSafeInteger(reportRecordId) || reportRecordId <= 0) { res.status(400).json({ error: "invalid_report_id" }); return; }
     try {
-      const [deleted] = await db.delete(lensViewpointReportsTable)
+      const deleted = await db.transaction(async tx => {
+      const [row] = await tx.delete(lensViewpointReportsTable)
         .where(and(eq(lensViewpointReportsTable.id, reportRecordId), eq(lensViewpointReportsTable.projectId, projectId)))
-        .returning({ id: lensViewpointReportsTable.id });
+        .returning();
+      if (!row) return null;
+      await tx.insert(activityLogTable).values({ projectId, userId: req.user!.userId, userFullName: req.user!.fullName,
+        userCompanyName: req.user!.companyName, actionType: "lens_report_deleted", entityType: "lens_report", entityId: row.id,
+        fileNameBefore: row.reportNumber, details: JSON.stringify({ reportNumber: row.reportNumber, contentHash: row.contentHash, viewpointCount: row.viewpointCount }) });
+      return row;
+      });
       if (!deleted) { res.status(404).json({ error: "not_found", message: "Report not found" }); return; }
       res.json({ success: true, id: deleted.id });
     } catch (err) {
@@ -3188,6 +3281,16 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/reset-test-data"
     }
     try {
       const result = await db.transaction(async (tx) => {
+        const selected = await tx.select({id:lensViewpointsTable.id}).from(lensViewpointsTable).where(eq(lensViewpointsTable.projectId, projectId)).for("update");
+        const issueIds=selected.map(row=>row.id);
+        if(issueIds.length){
+          const captures=await tx.select({id:lensIssueViewpointsTable.id}).from(lensIssueViewpointsTable).where(and(eq(lensIssueViewpointsTable.projectId,projectId),inArray(lensIssueViewpointsTable.issueId,issueIds)));
+          if(captures.length)await tx.delete(lensIssueViewpointRevisionsTable).where(inArray(lensIssueViewpointRevisionsTable.issueViewpointId,captures.map(row=>row.id)));
+          await tx.delete(lensIssueViewpointsTable).where(and(eq(lensIssueViewpointsTable.projectId,projectId),inArray(lensIssueViewpointsTable.issueId,issueIds)));
+          const receipts=await tx.select({id:lensNextPublishReceiptsTable.id}).from(lensNextPublishReceiptsTable).where(and(eq(lensNextPublishReceiptsTable.projectId,projectId),inArray(lensNextPublishReceiptsTable.viewpointId,issueIds))).limit(1);
+          if(receipts.length)throw new Error("lens_reset_immutable_history");
+          await tx.delete(linkedItemsTable).where(and(eq(linkedItemsTable.projectId,projectId),or(and(eq(linkedItemsTable.fromType,"lens_viewpoint"),inArray(linkedItemsTable.fromId,issueIds)),and(eq(linkedItemsTable.toType,"lens_viewpoint"),inArray(linkedItemsTable.toId,issueIds)))));
+        }
         const vpDel = await tx.delete(lensViewpointsTable)
           .where(eq(lensViewpointsTable.projectId, projectId))
           .returning({ id: lensViewpointsTable.id });
@@ -3198,11 +3301,15 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/reset-test-data"
           eq(activityLogTable.projectId, projectId),
           eq(activityLogTable.entityType, "lens_viewpoint"),
         ));
+        await tx.insert(activityLogTable).values({projectId,userId:req.user!.userId,userFullName:req.user!.fullName,userCompanyName:req.user!.companyName,actionType:"lens_test_data_reset",entityType:"lens_reset",entityId:projectId,details:JSON.stringify({confirmation:"RESET",viewpointIds:issueIds,viewpointsDeleted:vpDel.length})});
         return { viewpointsDeleted: vpDel.length };
       });
       console.log(`[lens-reset] project=${projectId} wiped ${result.viewpointsDeleted} viewpoint(s) + counters + reports + events + lens activity`);
       res.json({ success: true, ...result });
     } catch (err) {
+      if(err instanceof Error&&err.message==="lens_reset_immutable_history"){res.status(409).json({error:"lens_reset_immutable_history",message:"This project has immutable publication history. No data was reset. Use a separate test project to preserve the published evidence."});return;}
+      const code=(err as {code?:string;cause?:{code?:string}})?.code??(err as {cause?:{code?:string}})?.cause?.code;
+      if(code==="23503"){res.status(409).json({error:"lens_reset_connected_records",message:"These viewpoints are used by connected workflows. No data was reset; preserve those records and review their dependencies."});return;}
       res.status(500).json({ error: "lens_reset_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }
@@ -3219,6 +3326,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
     const projectId = Number(req.params.projectId);
     const userId = req.user!.userId;
     try {
+      const rendered = await db.transaction(async tx => {
       const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId));
       if (!project) { res.status(404).json({ error: "not_found", message: "Project not found" }); return; }
 
@@ -3384,7 +3492,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         if (usedNums.has(reportNumber)) { seq++; continue; }
         contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, accessScope: scope.label, watermarkType, isOnePager, idFormat, includeNonActive, includeResolved, showGroupIds, showLifecycleState, showRevisionColumn, includeAuditRecords, includeReportHistory, includeRevisionHistory, healthScore, snapshot });
         try {
-          await db.insert(lensViewpointReportsTable).values({
+          await tx.transaction(async savepoint => savepoint.insert(lensViewpointReportsTable).values({
             projectId,
             reportNumber,
             generatedById: userId,
@@ -3400,7 +3508,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
             isExecutiveOnePager: isOnePager,
             snapshot,
             contentHash,
-          });
+          }));
           inserted = true;
         } catch (insErr) {
           const codeStr = (insErr as any)?.code ?? (insErr as any)?.cause?.code;
@@ -3414,7 +3522,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       }
 
       // -- Build the PDF --
-      const reportHistoryRows = includeReportHistory && scope.fullProject ? await db.select({
+      const reportHistoryRows = includeReportHistory && scope.fullProject ? await tx.select({
         reportNumber: lensViewpointReportsTable.reportNumber,
         generatedByName: lensViewpointReportsTable.generatedByName,
         generatedAt: lensViewpointReportsTable.generatedAt,
@@ -3428,9 +3536,12 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const doc = createPdfDocument({ size: "TABLOID", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
       const reportTitle = `${reportNumber} - Lens Coordination Report`;
       const reportTheme = REPORT_THEMES.lens.coordination;
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(reportTitle)}"`);
-      doc.pipe(res);
+      const chunks: Buffer[] = [];
+      const pdfReady = new Promise<Buffer>((resolve, reject) => {
+        doc.on("data", chunk => chunks.push(Buffer.from(chunk)));
+        doc.on("end", () => resolve(Buffer.concat(chunks)));
+        doc.on("error", reject);
+      }).then(buffer => ({ buffer }), error => ({ error }));
 
       const W = doc.page.width;
       const M = 40;
@@ -3755,6 +3866,17 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       });
 
       doc.end();
+      const pdf = await pdfReady;
+      if ("error" in pdf) throw pdf.error;
+      return { buffer: pdf.buffer, filename: reportFileName(reportTitle), reportNumber, contentHash };
+      });
+      if (!rendered) return;
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${rendered.filename}"`);
+      res.setHeader("Cache-Control", "private, no-store");
+      res.setHeader("X-Lens-Report-Number", rendered.reportNumber);
+      res.setHeader("X-Lens-Report-Hash", rendered.contentHash);
+      res.send(rendered.buffer);
     } catch (err) {
       console.error("[lens-pdf] FAILED:", err);
       if (!res.headersSent) res.status(500).json({ error: "lens_pdf_failed", message: err instanceof Error ? err.message : String(err) });
@@ -3768,12 +3890,16 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
 router.get("/projects/:projectId/clashes/:clashId", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const clashId = Number(req.params.clashId);
+  res.set("Cache-Control", "private, no-store");
+  if (!Number.isSafeInteger(projectId) || projectId <= 0 || !/^\d+$/.test(String(req.params.clashId)) || !Number.isSafeInteger(clashId) || clashId <= 0 || clashId > 2147483647) {
+    res.status(400).json({ error: "invalid_clash_identity" }); return;
+  }
   try {
     const [row] = await db.select({ id: clashesTable.id, reportId: clashesTable.clashReportId })
       .from(clashesTable).innerJoin(clashReportsTable, and(eq(clashReportsTable.id, clashesTable.clashReportId), eq(clashReportsTable.projectId, projectId)))
       .where(and(eq(clashesTable.id, clashId), eq(clashesTable.projectId, projectId), isNull(clashesTable.deletedAt))).limit(1);
     if (!row) { res.status(404).json({ error: "clash_not_accessible" }); return; }
-    res.json(row);
+    res.set("X-BIMLog-Project-Id", String(projectId)).json(row);
   } catch { res.status(500).json({ error: "clash_lookup_failed" }); }
 });
 
@@ -4028,7 +4154,7 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
         .where(clashReportScopeWhere(projectId, reportId));
       if (!report) { res.status(404).json({ error: "not_found" }); return; }
       const clashes = await db.select().from(clashesTable)
-        .where(clashScopeWhere(projectId, reportId));
+        .where(and(clashScopeWhere(projectId, reportId),isNull(clashesTable.deletedAt))).orderBy(asc(clashesTable.id));
       console.log("[rerank] Report ID:", reportId, "Clashes found:", clashes.length);
       if (clashes.length === 0) {
         res.status(400).json({ error: "no_clashes", message: `No clashes found for report ${reportId}. Found 0 rows.` });
@@ -4042,18 +4168,13 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
         discipline1: c.discipline1,
         level: c.level,
       }));
-      await db.update(clashReportsTable)
-        .set({ status: "processing", p1Count: 0, p2Count: 0, p3Count: 0, p4Count: 0 })
-        .where(clashReportScopeWhere(projectId, reportId));
       try {
         const anthropic = await getAnthropicClientForUser({
           userId: req.user!.userId,
           projectId,
           feature: "clash_report_rerank",
         });
-        await rankClashesWithAI(reportId, projectId, clashList, anthropic);
-        const updated = await db.select().from(clashReportsTable).where(clashReportScopeWhere(projectId, reportId));
-        await db.insert(activityLogTable).values({
+        await rankClashesWithAI(reportId, projectId, clashList, anthropic, {
           projectId,
           userId: req.user!.userId,
           userFullName: req.user!.fullName ?? "",
@@ -4063,6 +4184,7 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
           entityId: reportId,
           details: `Re-ranked clash report ${reportId} - AI assigned priorities to ${clashes.length} clashes`,
         });
+        const updated = await db.select().from(clashReportsTable).where(clashReportScopeWhere(projectId, reportId));
         res.json({ message: "Re-ranking complete", total_clashes: clashes.length, report: updated[0] });
       } catch (err) {
         if (sendAiUsageError(res, err)) return;
@@ -4138,7 +4260,8 @@ router.post("/projects/:projectId/clash-reports/:reportId/clashes",
         .where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)));
       if (!report) { res.status(404).json({ error: "not_found" }); return; }
       const body = req.body ?? {};
-      const [clash] = await db.insert(clashesTable).values({
+      const clash=await db.transaction(async transaction=>{
+      const [clash] = await transaction.insert(clashesTable).values({
         clashReportId: reportId,
         projectId,
         clashIdOriginal: body.clashIdOriginal ?? null,
@@ -4150,9 +4273,12 @@ router.post("/projects/:projectId/clash-reports/:reportId/clashes",
         status: "open",
         priority: body.priority ?? null,
       }).returning();
-      await db.update(clashReportsTable)
-        .set({ totalClashes: (report.totalClashes ?? 0) + 1 })
+      await transaction.update(clashReportsTable)
+        .set({ totalClashes: sql`coalesce(${clashReportsTable.totalClashes},0)+1` })
         .where(clashReportScopeWhere(projectId, reportId));
+      await transaction.insert(activityLogTable).values({projectId,userId:req.user!.userId,userFullName:req.user!.fullName??"",userCompanyName:req.user!.companyName??"",actionType:"create",entityType:"clash",entityId:clash.id,details:JSON.stringify({reportId,after:clash})});
+      return clash;
+      });
       res.status(201).json(clash);
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
@@ -4187,9 +4313,10 @@ router.delete("/projects/:projectId/clash-reports/:reportId", authMiddleware, re
   try {
     const [report] = await db.select().from(clashReportsTable).where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)));
     if (!report) { res.status(404).json({ error: "not_found" }); return; }
-    await db.delete(clashesTable).where(clashScopeWhere(projectId, reportId));
-    await db.delete(clashReportsTable).where(clashReportScopeWhere(projectId, reportId));
-    await db.insert(activityLogTable).values({
+    await db.transaction(async transaction=>{
+    await transaction.delete(clashesTable).where(clashScopeWhere(projectId, reportId));
+    await transaction.delete(clashReportsTable).where(clashReportScopeWhere(projectId, reportId));
+    await transaction.insert(activityLogTable).values({
       projectId,
       userId: req.user!.userId,
       userFullName: req.user!.fullName ?? "",
@@ -4203,6 +4330,7 @@ router.delete("/projects/:projectId/clash-reports/:reportId", authMiddleware, re
         reportNumber: report.reportNumber,
         totalClashes: report.totalClashes,
       }),
+    });
     });
     res.json({ success: true });
   } catch (err) {
@@ -4257,35 +4385,31 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
       // Dark header bar
       doc.rect(0, 0, W, 135).fill(reportTheme.dark);
 
-      // Company logo if available
-      if (logoBase64 && logoType) {
-        try {
-          doc.image(logoBase64, M, 15, { height: 50, fit: [120, 50] });
-          doc.fontSize(18).font("Helvetica-Bold").fillColor("white")
-            .text(user?.companyName ?? "Company", M + 130, 22);
-        } catch {
-          doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
-            .text(user?.companyName ?? "Company", M, 20);
-        }
-      } else {
-        doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
-          .text(user?.companyName ?? "Company", M, 20);
-      }
-
-      // Report title top right
+      const leftHeaderW=CW*0.52-12;
+      const rightHeaderX=M+CW*0.52+8;
+      const rightHeaderW=W-M-rightHeaderX;
+      const companyName=user?.companyName??"Company";
+      const drawCompany=(x:number,width:number,maximumSize:number)=>{
+        let size=maximumSize;doc.font("Helvetica-Bold").fontSize(size).fillColor("white");
+        while(size>9&&doc.widthOfString(companyName)>width){size--;doc.fontSize(size);}
+        doc.text(companyName,x,20,{width,height:38,lineBreak:true,ellipsis:true});
+      };
+      if(logoBase64&&logoType){
+        try{doc.image(logoBase64,M,15,{height:40,fit:[110,40]});drawCompany(M+120,leftHeaderW-120,18);}
+        catch{drawCompany(M,leftHeaderW,24);}
+      }else drawCompany(M,leftHeaderW,24);
       doc.fontSize(12).font("Helvetica-Bold").fillColor("white")
-        .text(title, M, 20, { align: "right", width: CW });
-
+        .text(title,rightHeaderX,20,{align:"right",width:rightHeaderW,height:36,lineBreak:true,ellipsis:true});
       // Separator line
       doc.moveTo(M, 62).lineTo(W - M, 62).strokeColor("#4B7EC8").lineWidth(0.5).stroke();
 
       // Prepared by and date
       doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE")
-        .text(`Prepared by: ${user?.fullName ?? ""}`, M, 70);
+        .text(`Prepared by: ${user?.fullName ?? ""}`, M, 70,{width:leftHeaderW,lineBreak:false,ellipsis:true});
       doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE")
         .text(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }), M, 84);
       doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE")
-        .text(user?.email ?? "", M, 70, { align: "right", width: CW });
+        .text(user?.email ?? "", rightHeaderX, 70, { align: "right", width: rightHeaderW,lineBreak:false,ellipsis:true });
 
       // Powered by - very subtle bottom right
       doc.fontSize(7.5).font("Helvetica").fillColor("#7BA4C8")
@@ -4302,7 +4426,8 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
 
       doc.y = 198;
 
-      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Executive Summary", M, doc.y);
+      const rankingConfirmed=report.status==="complete"&&[report.p1Count,report.p2Count,report.p3Count,report.p4Count].every(value=>typeof value==="number"&&Number.isFinite(value));
+      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text(rankingConfirmed?"Executive Summary":"Executive Summary (ranking not confirmed)", M, doc.y);
       doc.moveDown(0.5);
 
       const cardY = doc.y;
@@ -4317,7 +4442,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         const x = M + i * (cardW + 10);
         doc.rect(x, cardY, cardW, 70).fillAndStroke(card.bg, card.border);
         doc.fontSize(28).font("Helvetica-Bold").fillColor(card.text)
-          .text(String(card.value), x, cardY + 10, { width: cardW, align: "center" });
+          .text(rankingConfirmed?String(card.value):"-", x, cardY + 10, { width: cardW, align: "center" });
         doc.fontSize(8).font("Helvetica-Bold").fillColor(card.text)
           .text(card.label, x, cardY + 46, { width: cardW, align: "center" });
       });
@@ -4468,11 +4593,12 @@ router.delete("/projects/:projectId/clash-reports/:reportId/clashes/:clashId",
         .where(clashScopeWhere(projectId, reportId, clashId));
       if (!existing) { res.status(404).json({ error: "not_found" }); return; }
 
-      await db.update(clashesTable)
+      await db.transaction(async transaction=>{
+      await transaction.update(clashesTable)
         .set({ deletedAt: new Date(), deleteReason: reason })
         .where(clashScopeWhere(projectId, reportId, clashId));
 
-      await db.delete(linkedItemsTable).where(and(
+      await transaction.delete(linkedItemsTable).where(and(
         eq(linkedItemsTable.projectId, projectId),
         or(
           and(eq(linkedItemsTable.fromType, "clash"), eq(linkedItemsTable.fromId, clashId)),
@@ -4480,7 +4606,7 @@ router.delete("/projects/:projectId/clash-reports/:reportId/clashes/:clashId",
         ),
       ));
 
-      await db.insert(activityLogTable).values({
+      await transaction.insert(activityLogTable).values({
         projectId, userId: req.user!.userId,
         userFullName: req.user!.fullName ?? "",
         userCompanyName: req.user!.companyName ?? "",
@@ -4488,12 +4614,13 @@ router.delete("/projects/:projectId/clash-reports/:reportId/clashes/:clashId",
         details: JSON.stringify({ reason, clashIdOriginal: existing.clashIdOriginal, description: existing.description }),
       });
 
-      await db.insert(agentInsightsTable).values({
+      await transaction.insert(agentInsightsTable).values({
         projectId, agentType: "clash", entityType: "clash", entityId: clashId,
         insightType: "delete_pattern",
         message: `Clash ${existing.clashIdOriginal ?? clashId} deleted: ${reason ?? "no reason"}`,
         recommendation: "Review delete reason for false-positive clashes or workflow issues.",
         severity: "info",
+      });
       });
 
       res.json({ success: true });
@@ -4561,16 +4688,24 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
         res.status(400).json({ error: "no_clashes", message: "Request body must include a non-empty clashes array" });
         return;
       }
+      for(const row of clashes){
+        if(!row||typeof row!=="object"||Array.isArray(row)||![row.fingerprint,row.clashId,row.name,row.description].some(value=>(typeof value==="string"&&value.trim())||(typeof value==="number"&&Number.isFinite(value)))||["distance","positionX","positionY","positionZ"].some(key=>row[key]!==undefined&&row[key]!==null&&row[key]!==""&&!Number.isFinite(Number(row[key])))){
+          res.status(422).json({error:"invalid_clash_snapshot",message:"Every clash must have an identity or description and finite supplied coordinates. No rows were synchronized."});return;
+        }
+        if([row.projectId,req.body?.projectId].some(value=>value!==undefined&&Number(value)!==projectId)){res.status(409).json({error:"clash_snapshot_project_mismatch",message:"Every supplied project ID must match the destination. No rows were synchronized."});return;}
+      }
 
+      const response = await db.transaction(async tx => {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('bimlog-plugin-sync'),${projectId})`);
       const today = new Date().toISOString().slice(0, 10);
       const reportName = `Plugin Sync - ${today}`;
 
-      let [report] = await db.select().from(clashReportsTable)
+      let [report] = await tx.select().from(clashReportsTable)
         .where(and(eq(clashReportsTable.projectId, projectId), eq(clashReportsTable.fileName, reportName)));
 
       if (!report) {
-        const existingReports = await db.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
-        const [project] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+        const existingReports = await tx.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
+        const [project] = await tx.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
         const usedNums = new Set(existingReports.map(r => r.reportNumber).filter(Boolean));
         let seqNum = existingReports.length + 1;
         let autoNum = `${project?.code ?? "PRJ"}-CR-${String(seqNum).padStart(3, "0")}`;
@@ -4578,7 +4713,7 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
           seqNum++;
           autoNum = `${project?.code ?? "PRJ"}-CR-${String(seqNum).padStart(3, "0")}`;
         }
-        [report] = await db.insert(clashReportsTable).values({
+        [report] = await tx.insert(clashReportsTable).values({
           projectId,
           uploadedById: req.user!.userId,
           fileName: reportName,
@@ -4592,6 +4727,7 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
       let created = 0;
       let updated = 0;
       let fingerprinted = 0;
+      const results:Array<{id:number;reportId:number;status:string|null;fingerprint:string|null;created:boolean}>=[];
       const now = new Date();
 
       for (const c of clashes) {
@@ -4602,17 +4738,18 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
 
         let existing: typeof clashesTable.$inferSelect | undefined;
         if (fingerprint) {
-          [existing] = await db.select().from(clashesTable)
-            .where(and(eq(clashesTable.projectId, projectId), eq(clashesTable.fingerprint, fingerprint)));
+          [existing] = await tx.select().from(clashesTable)
+            .where(and(eq(clashesTable.projectId, projectId), eq(clashesTable.fingerprint, fingerprint), sql`EXISTS (SELECT 1 FROM clash_reports r WHERE r.id=${clashesTable.clashReportId} AND r.project_id=${projectId})`));
         }
 
         if (existing) {
-          await db.update(clashesTable)
+          const [saved]=await tx.update(clashesTable)
             .set({ status: c.status ?? existing.status, lastPluginSyncAt: now, updatedAt: now, deletedAt: null, deleteReason: null })
-            .where(eq(clashesTable.id, existing.id));
+            .where(eq(clashesTable.id, existing.id)).returning({id:clashesTable.id,reportId:clashesTable.clashReportId,status:clashesTable.status});
+          results.push({...saved,fingerprint,created:false});
           updated++;
         } else {
-          await db.insert(clashesTable).values({
+          const [saved]=await tx.insert(clashesTable).values({
             clashReportId: report.id,
             projectId,
             clashIdOriginal: c.clashId != null ? String(c.clashId) : null,
@@ -4634,16 +4771,20 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
             discipline1: c.trade1 ?? null,
             discipline2: c.trade2 ?? null,
             lastPluginSyncAt: now,
-          });
+          }).returning({id:clashesTable.id,reportId:clashesTable.clashReportId,status:clashesTable.status});
+          results.push({...saved,fingerprint,created:true});
           created++;
         }
       }
 
-      const [{ count: total }] = await db.select({ count: sql<number>`count(*)::int` }).from(clashesTable)
-        .where(and(eq(clashesTable.clashReportId, report.id), isNull(clashesTable.deletedAt)));
-      await db.update(clashReportsTable).set({ totalClashes: total, updatedAt: now }).where(eq(clashReportsTable.id, report.id));
+      let total=0;
+      for(const reportId of new Set([report.id,...results.map(row=>row.reportId)])){
+        const [counts]=await tx.select({count:sql<number>`count(*)::int`,p1Count:sql<number>`count(*) filter (where ${clashesTable.priority}='P1')::int`,p2Count:sql<number>`count(*) filter (where ${clashesTable.priority}='P2')::int`,p3Count:sql<number>`count(*) filter (where ${clashesTable.priority}='P3')::int`,p4Count:sql<number>`count(*) filter (where ${clashesTable.priority}='P4')::int`}).from(clashesTable).where(and(eq(clashesTable.projectId,projectId),eq(clashesTable.clashReportId,reportId),isNull(clashesTable.deletedAt)));
+        await tx.update(clashReportsTable).set({totalClashes:counts.count,p1Count:counts.p1Count,p2Count:counts.p2Count,p3Count:counts.p3Count,p4Count:counts.p4Count,updatedAt:now}).where(and(eq(clashReportsTable.id,reportId),eq(clashReportsTable.projectId,projectId)));
+        if(reportId===report.id)total=counts.count;
+      }
 
-      await db.insert(activityLogTable).values({
+      await tx.insert(activityLogTable).values({
         projectId,
         userId: req.user!.userId,
         userFullName: req.user!.fullName ?? "",
@@ -4654,7 +4795,8 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
         details: `Plugin sync (${reportName}): ${created} created, ${updated} updated, ${fingerprinted} fingerprinted`,
       });
 
-      const response = { created, updated, fingerprinted, syncToken: now.toISOString(), message: "Sync complete" };
+      return { projectId, reportId:report.id, created, updated, fingerprinted, totalClashes:total, results, syncToken: now.toISOString(), message: "Sync complete" };
+      });
       console.log("[plugin-sync] sending response:", JSON.stringify(response));
       res.json(response);
     } catch (err) {
@@ -4669,11 +4811,13 @@ router.get("/projects/:projectId/clash-reports/plugin-pull",
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {
-      const rows = await db.select().from(clashesTable)
+      const rows = await db.select({clash:clashesTable}).from(clashesTable)
+        .innerJoin(clashReportsTable,and(eq(clashReportsTable.id,clashesTable.clashReportId),eq(clashReportsTable.projectId,projectId)))
         .where(and(
           eq(clashesTable.projectId, projectId),
           isNull(clashesTable.deletedAt),
           sql`${clashesTable.fingerprint} IS NOT NULL`,
+          sql`length(trim(${clashesTable.fingerprint})) > 0`,
           sql`${clashesTable.lastPluginSyncAt} IS NOT NULL`,
           sql`${clashesTable.updatedAt} > ${clashesTable.lastPluginSyncAt}`,
         ));
@@ -4690,7 +4834,9 @@ router.get("/projects/:projectId/clash-reports/plugin-pull",
         }
       };
 
-      const clashes = rows.map(r => ({
+      const clashes = rows.map(({clash:r}) => ({
+        reportId:r.clashReportId,
+        clashServerId:r.id,
         clashId: r.clashIdOriginal,
         fingerprint: r.fingerprint,
         newStatus: toNavisworksStatus(r.status),
@@ -4698,6 +4844,8 @@ router.get("/projects/:projectId/clash-reports/plugin-pull",
         notes: r.resolutionNotes,
       }));
 
+      res.setHeader("Cache-Control","private, no-store");
+      res.setHeader("X-BIMLog-Project-Id",String(projectId));
       res.json(clashes);
     } catch (err) {
       res.status(500).json({ error: "plugin_pull_failed", message: err instanceof Error ? err.message : String(err) });

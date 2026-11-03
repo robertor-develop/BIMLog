@@ -25,13 +25,14 @@ export async function loadMeetingWorkspace<TMeeting, TActionItem>({
     }),
   ]);
 
+  if (!meetingsResponse.ok || !actionItemsResponse.ok) throw new Error(`MEETING_WORKSPACE_UNAVAILABLE:${meetingsResponse.status}:${actionItemsResponse.status}`);
+  const meetings = await meetingsResponse.json();
+  const actionItems = await actionItemsResponse.json();
+  if (!Array.isArray(meetings) || !Array.isArray(actionItems)) throw new Error("MEETING_WORKSPACE_RESPONSE_INVALID");
+
   return {
-    meetings: meetingsResponse.ok
-      ? ((await meetingsResponse.json()) as TMeeting[])
-      : undefined,
-    actionItems: actionItemsResponse.ok
-      ? ((await actionItemsResponse.json()) as TActionItem[])
-      : undefined,
+    meetings: meetings as TMeeting[],
+    actionItems: actionItems as TActionItem[],
   };
 }
 
@@ -52,7 +53,7 @@ export async function updateMeetingActionItem(
   actionItemId: number,
   status: string,
 ): Promise<void> {
-  await fetch(`${API}/projects/${projectId}/action-items/${actionItemId}`, {
+  const response = await fetch(`${API}/projects/${projectId}/action-items/${actionItemId}`, {
     method: "PATCH",
     headers: {
       ...authHeaders(token),
@@ -60,4 +61,5 @@ export async function updateMeetingActionItem(
     },
     body: JSON.stringify({ status }),
   });
+  if (!response.ok) throw new Error(`ACTION_ITEM_UPDATE_REJECTED:${response.status}`);
 }

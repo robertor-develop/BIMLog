@@ -12,6 +12,7 @@ function authorize(actor:Actor,permission:"GOVERNED_CHANGE_REQUEST"|"GOVERNED_CH
 
 export async function requestGovernedEdtChange(input:{actor:Actor;companyId:number;projectId:number;workItemId?:string;actionType:GovernedAction;targetVersion:number;beforeState:Record<string,unknown>;afterState:Record<string,unknown>;reason:string;evidence:Record<string,unknown>;idempotencyKey:string},host?:EdtTransactionHost){
   authorize(input.actor,"GOVERNED_CHANGE_REQUEST",input.companyId,input.projectId);
+  if(!Number.isSafeInteger(input.targetVersion)||input.targetVersion<1)throw new EdtEngineConflict("REQUEST_BODY_INVALID","The proposal target version must be a positive integer.");
   if(input.reason.trim().length<8) throw new EdtEngineConflict("REASON_REQUIRED","A meaningful governed-change reason is required.");
   const fingerprint=edtFingerprint({actionType:input.actionType,workItemId:input.workItemId??null,targetVersion:input.targetVersion,beforeState:input.beforeState,afterState:input.afterState});
   return withEdtTransaction(async client=>{

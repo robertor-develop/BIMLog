@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
+import { ProjectApuReuseDraft } from "@/components/ProjectApuReuseDraft";
 import { pricingErrorMessage } from "./company-pricing-errors";
 import { librarySelectionState } from "./settings-experience";
 import { economicPoolKeys, type EconomicPoolNodes, type EconomicPoolKey } from "@workspace/api-zod";
@@ -17,7 +18,7 @@ type AllocationPhase = { phaseId: string; code: string; name: string; percent: s
 type Definition = { schemaVersion: 1; currency: string; industry: string; name: string; nodes: Node[];
   economicPools?: EconomicPoolNodes;
   economicAllocation?: { directProductionNodeIds: string[]; phases: AllocationPhase[] } };
-type Version = { templateId: string; versionId: string; version: number; status: string; provenance: { code: string; definition: Definition }; createdById?: number; publishedById?: number };
+type Version = { templateId: string; versionId: string; version: number; status: string; provenance: { code: string; definition: Definition; source?: { kind?: string; projectId?: number; planVersion?: number; planFingerprint?: string } }; createdById?: number; publishedById?: number };
 const initial: Definition = { schemaVersion: 1, currency: "USD", industry: "BIM Services", name: "", nodes: [{ id: "labor", label: "Labor", method: "hours_hourly_rate", hours: "1", hourlyRate: "0" }] };
 
 export function CompanyPricingTemplates() {
@@ -178,6 +179,7 @@ export function CompanyPricingTemplates() {
       {loading && <p role="status">{t("Loading pricing templates…", "Cargando plantillas de precios…")}</p>}
       {error && <div role="alert" style={{ color: "#991B1B", padding: 12, border: "1px solid #FCA5A5" }}>{error} {listError && <button type="button" onClick={() => void reload()}>{t("Retry", "Reintentar")}</button>}</div>}
       {notice && <p role="status" style={{ color: "#166534" }}>{notice}</p>}
+      {!listError && <ProjectApuReuseDraft token={token} canManage={canManage} onCreated={reload} />}
       <section aria-label={t("Published template selection", "Selección de plantillas publicadas")} data-library-state={selectionState.state} style={{ marginBottom: 16, padding: 12, border: "1px solid #BFDBFE", borderRadius: 9, background: "#EFF6FF" }}>
         <strong>{t(selectionState.title, selectionState.state === "ready" ? `${publishedCount} opción${publishedCount === 1 ? "" : "es"} publicada${publishedCount === 1 ? "" : "s"} disponible${publishedCount === 1 ? "" : "s"}` : selectionState.state === "loading" ? "Cargando biblioteca publicada…" : selectionState.state === "error" ? "Biblioteca no disponible" : "Aún no hay opciones publicadas")}</strong>
         <div style={{ fontSize: 12, marginTop: 4 }}>{selectionState.action ? t(selectionState.action, selectionState.action === "Retry" ? "Reintentar" : canManage ? "Crear un borrador gobernado" : "Solicite a un administrador de empresa que publique una opción") : t("Published templates can be selected and previewed without changing their immutable versions.", "Las plantillas publicadas se pueden seleccionar y previsualizar sin cambiar sus versiones inmutables.")}</div>
@@ -195,6 +197,7 @@ export function CompanyPricingTemplates() {
             <strong>{item.provenance.code} · {item.provenance.definition.name}</strong><br />
             <span>v{item.version} · {statusText(item.status)} · {item.provenance.definition.currency}</span><br />
             <small>{item.provenance.definition.nodes.length} {t("components", "componentes")} · {methodSummary(item)} · {t("Company library", "Biblioteca de empresa")}</small>
+            {item.provenance.source?.kind === "project_apu" && <small style={{ display: "block", overflowWrap: "anywhere" }}>{t("Source project / saved plan", "Proyecto fuente / plan guardado")}: #{item.provenance.source.projectId} / v{item.provenance.source.planVersion}<br />{t("Source fingerprint", "Huella de fuente")}: {item.provenance.source.planFingerprint}</small>}
           </button>)}
         </section>
         <section aria-label={t("Template editor", "Editor de plantilla")} style={{ minWidth: 0 }}>
@@ -285,7 +288,26 @@ export function CompanyPricingTemplates() {
             {canManage && <div className="company-pricing-actions" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}><button type="button" disabled={busy} onClick={() => void run("preview")}>{t("Preview", "Vista previa")}</button><button className="company-pricing-primary" type="button" disabled={busy} onClick={() => void run("save")}>{t("Save new draft version", "Guardar nueva versión borrador")}</button><button type="button" disabled={busy || hasUnsavedChanges || selected?.status !== "draft"} onClick={() => void run("publish")}>{t("Publish (different PMO user with Finance approval)", "Publicar (otro usuario PMO con aprobación financiera)")}</button><button type="button" disabled={busy || hasUnsavedChanges || selected?.status !== "published"} onClick={() => setConfirmingRetire(true)}>{t("Retire (Finance approval required)", "Retirar (requiere aprobación financiera)")}</button></div>}
             {confirmingRetire && selected?.status === "published" && <div className="company-pricing-retire-confirm" role="group" aria-label={t("Confirm template retirement", "Confirmar retiro de plantilla")}><p>{t("Retire this template from all future selections? Existing contract references remain unchanged. A different PMO user with Finance approval is required.", "¿Retirar esta plantilla de futuras selecciones? Las referencias de contratos existentes permanecen sin cambios. Se requiere otro usuario PMO con aprobación financiera.")}</p><div><button type="button" disabled={busy} onClick={() => setConfirmingRetire(false)}>{t("Cancel", "Cancelar")}</button><button type="button" disabled={busy || hasUnsavedChanges} onClick={() => void run("retire")}>{t("Confirm retirement", "Confirmar retiro")}</button></div></div>}
             {preview && <p role="status"><strong>{t("Calculated preview", "Vista previa calculada")}: {preview.total} {preview.currency}</strong> · {preview.lines.length} {t("components", "componentes")}</p>}
-            {!!history.length && <details><summary>{t("Immutable version history", "Historial inmutable de versiones")}</summary>{history.map(version => <p key={version.versionId}>v{version.version} · {statusText(version.status)} · {version.versionId}</p>)}</details>}
+            {!!history.length && <details><summary>{t("Immutable version history", "Historial inmutable de versiones")}</summary>{history.map(version => <details key={version.versionId} style={{marginTop:12}}>
+              <summary>v{version.version} · {statusText(version.status)} · {version.provenance.definition.name}</summary>
+              <section aria-label={`${t("Saved pricing version", "Versión de precios guardada")} ${version.version}`}>
+                <p>{t("Read-only saved definition", "Definición guardada de solo lectura")} · {version.versionId}</p>
+                <p>{version.provenance.code} · {version.provenance.definition.industry} · {version.provenance.definition.currency}</p>
+                <div style={{overflowX:"auto"}}><table><caption>{t("Saved cost components", "Componentes de costo guardados")}</caption>
+                  <thead><tr><th scope="col">{t("Component", "Componente")}</th><th scope="col">{t("Calculation", "Cálculo")}</th><th scope="col">{t("Cost pool", "Grupo de costos")}</th></tr></thead>
+                  <tbody>{version.provenance.definition.nodes.map(node => <tr key={node.id}>
+                    <td>{node.label} ({node.id})</td>
+                    <td>{node.method === "fixed_amount" ? `${t("Fixed amount", "Monto fijo")}: ${node.amount}` : node.method === "quantity_unit_cost" ? `${t("Quantity × unit cost", "Cantidad × costo unitario")}: ${node.quantity} × ${node.unitCost}` : `${t("Hours × hourly rate", "Horas × tarifa por hora")}: ${node.hours} × ${node.hourlyRate}`}</td>
+                    <td>{economicPoolKeys.filter(key => version.provenance.definition.economicPools?.[key].includes(node.id)).map(poolLabel).join(", ") || t("Not classified", "Sin clasificar")}</td>
+                  </tr>)}</tbody>
+                </table></div>
+                {version.provenance.definition.economicAllocation && <section>
+                  <h3>{t("Saved production allocation", "Asignación de producción guardada")}</h3>
+                  <p>{t("Funding component IDs", "IDs de componentes de financiamiento")}: {version.provenance.definition.economicAllocation.directProductionNodeIds.join(", ")}</p>
+                  <ul>{version.provenance.definition.economicAllocation.phases.map(phase => <li key={phase.phaseId}>{phase.name} ({phase.code}): {phase.percent}%</li>)}</ul>
+                </section>}
+              </section>
+            </details>)}</details>}
           </div>
         </section>
       </div>}

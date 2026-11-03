@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import bcrypt from "bcryptjs";
 
 const connection = process.env.PROD_DATABASE_URL;
 if (!connection) throw new Error("An isolated local PROD_DATABASE_URL is required");
@@ -37,7 +38,7 @@ await pool.query(`DROP TABLE IF EXISTS living_brief_gate_credentials CASCADE`);
 await pool.query(`DROP TABLE IF EXISTS platform_settings CASCADE`);
 await pool.query(`DROP TABLE IF EXISTS users CASCADE`);
 await pool.query(`DROP TABLE IF EXISTS companies CASCADE`);
-await pool.query(`CREATE TABLE companies (id serial PRIMARY KEY, name text NOT NULL)`);
+await pool.query(`CREATE TABLE companies (id serial PRIMARY KEY, name text NOT NULL, retired_into_company_id integer)`);
 await pool.query(`CREATE TABLE users (
   id serial PRIMARY KEY, email text NOT NULL UNIQUE, password_hash text NOT NULL,
   full_name text NOT NULL, company_id integer NOT NULL REFERENCES companies(id),
@@ -208,12 +209,34 @@ const api = async (pathname: string, token?: string, init: RequestInit = {}) => 
   return { status: response.status, body: await response.json() as Record<string, unknown> };
 };
 const readResult = await api("/living-brief/docs", readerToken, { headers: { "x-brief-token": readerBrief } });
+assert.equal((await api("/living-brief/unlock",undefined,{method:"POST"})).status,401);
+assert.equal((await api("/living-brief/unlock",auth(910003,"living-brief-denied@example.test"),{method:"POST"})).status,403);
+const unlockedReader=await api("/living-brief/unlock",readerToken,{method:"POST"});
+assert.equal(unlockedReader.status,200);
+assert.equal(typeof unlockedReader.body.briefToken,"string");
+assert.equal((await api("/living-brief/docs",readerToken,{headers:{"x-brief-token":String(unlockedReader.body.briefToken)}})).status,200);
+assert.equal((await api("/living-brief/docs",adminToken,{headers:{"x-brief-token":String(unlockedReader.body.briefToken)}})).status,401);
+check("passwordless unlock requires authenticated eligibility and issues access bound to the exact reader",true);
 assert.equal(readResult.status, 200);
 assert.equal((readResult.body.docs as unknown[]).length, 11);
 const ordinaryMutation = await api("/living-brief/reconcile", readerToken, { method: "POST", body: JSON.stringify({ expectedMirrorHashes: {} }) });
 assert.equal(ordinaryMutation.status, 403);
 assert.equal((await api("/living-brief/reconcile", undefined, { method: "POST", body: "{}" })).status, 401);
 check("authenticated ordinary users are read-only and admin authority is required", true);
+
+assert.equal((await api("/living-brief/access", readerToken)).status, 403);
+assert.equal((await api("/living-brief/access")).status, 401);
+assert.equal((await api("/living-brief/access", readerToken, {method:"POST",body:JSON.stringify({userId:910003,grant:true})})).status,403);
+assert.equal((await api("/living-brief/access", adminToken, {method:"POST",body:JSON.stringify({userId:"invalid",grant:true})})).status,400);
+assert.equal((await api("/living-brief/access", adminToken, {method:"POST",body:JSON.stringify({userId:910003,grant:true})})).status,200);
+const grantedUsers=(await api("/living-brief/access",adminToken)).body.users as Array<{id:number;canAccessLivingBrief:boolean}>;
+assert.equal(grantedUsers.find(user=>user.id===910003)?.canAccessLivingBrief,true);
+const deniedToken=auth(910003,"living-brief-denied@example.test");
+assert.equal((await api("/living-brief/eligibility",deniedToken)).body.eligible,true);
+assert.equal((await api("/living-brief/access", adminToken, {method:"POST",body:JSON.stringify({userId:910003,grant:false})})).status,200);
+assert.equal((await api("/living-brief/eligibility",deniedToken)).body.eligible,false);
+assert.equal((await api("/living-brief/docs",deniedToken,{headers:{"x-brief-token":signBriefAccessToken(910003,1)}})).status,403);
+check("access grant and revoke persist across requests, enforce current eligibility and reject unauthorized or invalid changes",true);
 
 await pool.query(`UPDATE living_brief_documents SET content='api mismatch' WHERE document_key=$1`, [first.key]);
 rows = await mirror.readLivingBriefMirrorRows();
@@ -234,6 +257,23 @@ const serializedResponses = JSON.stringify({
 });
 assert.doesNotMatch(serializedResponses, /postgres(?:ql)?:\/\/|JWT_SECRET|password_hash|[A-Z]:\\|node_modules|\.git[\\/]/i);
 check("API responses expose no credentials filesystem paths or repository internals", true);
+
+const fixtureAccountPassword="local-fixture-account-secret-only";
+await pool.query(`UPDATE users SET password_hash=$1 WHERE id=910001`,[await bcrypt.hash(fixtureAccountPassword,4)]);
+assert.equal((await api("/living-brief/password/recovery",readerToken)).status,403);
+const recovery=await api("/living-brief/password/recovery",adminToken);
+assert.equal(recovery.status,200);
+assert.equal(recovery.body.expectedCredentialVersion,1);
+const resetBody={currentAccountPassword:fixtureAccountPassword,newPassword:"local-fixture-new-gate-only",reason:"Local isolated recovery acceptance",confirmation:"RESET_LIVING_BRIEF_GATE",expectedCredentialVersion:1};
+assert.equal((await api("/living-brief/password",adminToken,{method:"POST",body:JSON.stringify({...resetBody,confirmation:"incorrect"})})).status,400);
+assert.equal((await api("/living-brief/password",adminToken,{method:"POST",body:JSON.stringify({...resetBody,currentAccountPassword:"incorrect"})})).status,403);
+assert.equal((await api("/living-brief/password",adminToken,{method:"POST",body:JSON.stringify(resetBody)})).status,200);
+assert.equal((await api("/living-brief/password/recovery",adminToken)).body.expectedCredentialVersion,2);
+assert.equal((await api("/living-brief/docs",readerToken,{headers:{"x-brief-token":readerBrief}})).status,401);
+assert.equal((await api("/living-brief/password",adminToken,{method:"POST",body:JSON.stringify(resetBody)})).status,409);
+const resetAudit=await pool.query(`SELECT count(*)::integer AS n FROM living_brief_gate_audit WHERE action='reset' AND actor_user_id=910001`);
+assert.equal(resetAudit.rows[0].n,1);
+check("recovery/reset requires administrator revalidation and confirmation, persists version, invalidates sessions and rejects stale reset with one audit entry",true);
 
 await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
 await mirror.synchronizeLivingBriefMirror();

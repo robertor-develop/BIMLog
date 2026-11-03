@@ -86,6 +86,7 @@ const defaultLensNextClientDiagnosticReporter: LensNextClientDiagnosticReporter 
   console.warn(`[BIMLogLensNext] ${code}`);
 };
 
+export class LensNextHttpError extends Error {constructor(message:string,public readonly status:number){super(message);this.name="LensNextHttpError";}}
 async function jsonBody(
   response: Response,
   label: string,
@@ -108,8 +109,8 @@ async function jsonBody(
     const digestDetail = diagnostics
       ? ` [local=${String(diagnostics.localDigest ?? "missing").slice(0, 12)} server=${String(diagnostics.serverDigest ?? "missing").slice(0, 12)} first=${String(diagnostics.firstMismatch?.field ?? "undetermined")}]`
       : "";
-    throw new Error(
-      `${label} failed (${response.status})${detail ? `: ${detail}` : ""}${digestDetail}`,
+    throw new LensNextHttpError(
+      `${label} failed (${response.status})${detail ? `: ${detail}` : ""}${digestDetail}`,response.status,
     );
   }
   return body;
@@ -386,6 +387,7 @@ export function createLensNextApiClient(
         const lifecycleStatus = String(item.lifecycle_status ?? item.lifecycleStatus);
         const id = String(item.id ?? "");
         if (!id || !["coordination", "detail", "context", "verification"].includes(viewpointType) || !["active", "archived"].includes(lifecycleStatus)) throw new Error("BIMLog Issue viewpoint item is invalid");
+        if(Number(item.issue_id??item.issueId)!==identity.serverId||Number(item.project_id??item.projectId)!==identity.projectId)throw new Error("BIMLog Issue viewpoint identity mismatch");
         return Object.freeze({ id, issueId: Number(item.issue_id ?? item.issueId), projectId: Number(item.project_id ?? item.projectId), modelFingerprint: item.model_fingerprint == null && item.modelFingerprint == null ? null : String(item.model_fingerprint ?? item.modelFingerprint), name: String(item.name ?? ""), viewpointType: viewpointType as LensNextIssueViewpoint["viewpointType"], displayOrder: Number(item.display_order ?? item.displayOrder), isPrimary: item.is_primary === true || item.isPrimary === true, lifecycleStatus: lifecycleStatus as LensNextIssueViewpoint["lifecycleStatus"], navisworksGuid: item.navisworks_guid == null && item.navisworksGuid == null ? null : String(item.navisworks_guid ?? item.navisworksGuid), screenshotUrl: item.screenshot_url == null && item.screenshotUrl == null ? null : String(item.screenshot_url ?? item.screenshotUrl), visualStateDigest: item.visual_state_digest == null && item.visualStateDigest == null ? null : String(item.visual_state_digest ?? item.visualStateDigest), capturedAt: String(item.captured_at ?? item.capturedAt ?? "") });
       }));
     },
@@ -479,10 +481,23 @@ export function createLensNextApiClient(
     },
     async uploadLocalViewpoint(localViewpoint: LensNextLocalViewpoint, modelFingerprint: string, visualState: Record<string, unknown>, confirmationReason: string, signal?: AbortSignal) {
       if (!localViewpoint.exactManagedIdentity || localViewpoint.serverId !== null) throw new Error("Only an exact local-only managed viewpoint can be uploaded");
-      const raw = await post(`/projects/${assertLensNextProjectId(localViewpoint.projectId)}/clash-reports/lens-next/local-viewpoints/upload`, {
+      let raw:unknown;
+      try{raw = await post(`/projects/${assertLensNextProjectId(localViewpoint.projectId)}/clash-reports/lens-next/local-viewpoints/upload`, {
         contractVersion: "lens-next-local-upload.v1", confirmed: true, confirmationReason: confirmationReason.trim(),
         modelFingerprint, localViewpoint, visualState,
-      }, signal);
+      }, signal);}catch(failure){
+        if(signal?.aborted)throw failure;
+        try{
+          const projectId=assertLensNextProjectId(localViewpoint.projectId);
+          const saved=adaptLensNextPullResponse(await get(`/projects/${projectId}/clash-reports/lens-pull`,signal),projectId).find(row=>row.identity.viewpointId===localViewpoint.viewpointId&&row.navisworksGuid?.toLowerCase()===localViewpoint.navisworksGuid.toLowerCase());
+          if(saved?.visualStateAvailable&&/^[a-f0-9]{64}$/i.test(saved.visualStateDigest??"")&&saved.identity.lifecycleStatus==="active"){
+            const packageRaw=await get(`/projects/${projectId}/clash-reports/lens-viewpoints/${saved.identity.serverId}/visual-state?modelFingerprint=${encodeURIComponent(modelFingerprint)}`,signal) as Record<string,unknown>;
+            const captured=JSON.parse(String(packageRaw.visualStateJson??"")) as Record<string,unknown>;
+            if(packageRaw.success===true&&sameIdentity(saved.identity,assertLensNextImmutableIdentity(packageRaw.identity))&&String(packageRaw.visualStateDigest??"").toLowerCase()===saved.visualStateDigest!.toLowerCase()&&String(captured.ModelFingerprint??captured.modelFingerprint??"").toLowerCase()===modelFingerprint.toLowerCase())return Object.freeze({serverId:saved.identity.serverId,viewpointId:localViewpoint.viewpointId,navisworksGuid:localViewpoint.navisworksGuid,visualStateDigest:saved.visualStateDigest!});
+          }
+        }catch(recoveryFailure){void recoveryFailure;}
+        throw failure;
+      }
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Atomic local upload receipt is invalid");
       const body = raw as Record<string, any>, result = body.result as Record<string, unknown>;
       const receipt = { serverId: Number(result?.serverId), viewpointId: String(result?.viewpointId ?? ""), navisworksGuid: String(result?.navisworksGuid ?? ""), visualStateDigest: String(result?.visualStateDigest ?? "") };
@@ -490,9 +505,22 @@ export function createLensNextApiClient(
       return Object.freeze(receipt);
     },
     async createIssue(projectId: number, viewpointId: string, modelFingerprint: string, visualState: Record<string, unknown>, issue: LensNextCreateDraft, confirmationReason: string, signal?: AbortSignal) {
-      const raw = await post(`/projects/${assertLensNextProjectId(projectId)}/clash-reports/lens-next/issues/create`, {
+      let raw:unknown;
+      try{raw = await post(`/projects/${assertLensNextProjectId(projectId)}/clash-reports/lens-next/issues/create`, {
         contractVersion: "lens-next-create.v1", confirmed: true, confirmationReason: confirmationReason.trim(), viewpointId, modelFingerprint, visualState, issue,
-      }, signal);
+      }, signal);}catch(failure){
+        if(signal?.aborted)throw failure;
+        try{
+          const saved=adaptLensNextPullResponse(await get(`/projects/${assertLensNextProjectId(projectId)}/clash-reports/lens-pull`,signal),projectId).find(row=>row.identity.viewpointId===viewpointId);
+          if(saved&&saved.identity.lifecycleStatus==="active"&&saved.identity.revisionNumber===1&&saved.visualStateAvailable&&/^[a-f0-9]{64}$/i.test(saved.visualStateDigest??"")&&saved.displayId&&saved.note===issue.note.trim()&&saved.trade===issue.trade.trim()&&saved.floor===issue.floor.trim()&&saved.reportType===issue.reportType.trim()&&saved.priority===issue.priority&&saved.status===issue.status&&(saved.responsibleCompany??"")===(issue.responsibleCompany??"").trim()&&(saved.openItems??"")===(issue.openItems??"").trim()){
+            const packageRaw=await get(`/projects/${projectId}/clash-reports/lens-viewpoints/${saved.identity.serverId}/visual-state?modelFingerprint=${encodeURIComponent(modelFingerprint)}`,signal) as Record<string,unknown>;
+            const captured=JSON.parse(String(packageRaw.visualStateJson??"")) as Record<string,unknown>;
+            if(packageRaw.success!==true||!sameIdentity(saved.identity,assertLensNextImmutableIdentity(packageRaw.identity))||String(packageRaw.visualStateDigest??"").toLowerCase()!==saved.visualStateDigest!.toLowerCase()||String(captured.ModelFingerprint??captured.modelFingerprint??"").toLowerCase()!==modelFingerprint.toLowerCase())throw new Error("Saved creation recovery model identity mismatch");
+            return Object.freeze({serverId:saved.identity.serverId,viewpointId,visualStateDigest:saved.visualStateDigest!,revisionNumber:1,lifecycleStatus:"active",displayId:saved.displayId,displayCode:saved.displayId}) as LensNextCreateReceipt;
+          }
+        }catch(recoveryFailure){void recoveryFailure;}
+        throw failure;
+      }
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Atomic issue creation receipt is invalid");
       const body = raw as Record<string, any>, result = body.result as Record<string, unknown>;
       const receipt = { serverId: Number(result?.serverId), viewpointId: String(result?.viewpointId ?? ""), visualStateDigest: String(result?.visualStateDigest ?? ""), revisionNumber: Number(result?.revisionNumber), lifecycleStatus: String(result?.lifecycleStatus ?? ""), displayId: String(result?.displayId ?? ""), displayCode: String(result?.displayCode ?? "") };

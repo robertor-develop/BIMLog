@@ -8,9 +8,10 @@ import { LensViewpointsView } from "./LensViewpointsView";
 import { downloadAuthenticatedPdf, downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 
 const API = "/api/v1";
+type ClashUploadReceipt={projectId:number;id:number;ids:number[];total:number};
 
 interface ClashReport {
-  id: number; fileName: string; format: string; totalClashes: number;
+  id: number; projectId:number; fileName: string; format: string; totalClashes: number;
   p1Count: number; p2Count: number; p3Count: number; p4Count: number;
   status: string; aiSummary?: string; createdAt: string; reportNumber?: string;
 }
@@ -85,7 +86,8 @@ function clashStatusLabel(status: string, t: (en: string, es: string) => string)
 }
 
 export function ClashReportsTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
-  const { token } = useAuthStore();
+  const { token,user } = useAuthStore();
+  const creationStorageKey=`clashReportCreateAttempt:${projectId}:${user?.id??"unknown"}`;
   const { lang } = useI18n();
   const t = (en: string, es: string) => lang === "es" ? es : en;
   const headers = { Authorization: `Bearer ${token}` };
@@ -96,7 +98,33 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState("");
+  const [uploadReceipt,setUploadReceipt]=useState<ClashUploadReceipt|null>(null);
+  const uploadTimers=useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(()=>{setUploading(false);setUploadReceipt(null);setUploadMsg("");return()=>{uploadTimers.current.forEach(clearTimeout);uploadTimers.current=[];};},[projectId,token]);
   const [error, setError] = useState("");
+  const scope = useRef(0);
+  const mutationLock = useRef(false);
+  const [mutating, setMutating] = useState(false);
+  const [receipt, setReceipt] = useState("");
+  const createAttempt=useRef<{projectId:number;key:string;saved:ClashReport|null}|null>(null);
+  const listRequest=useRef(0);
+  const mutateReport = async (url: string, method: string, body?: unknown) => {
+    if (!canWrite || mutationLock.current) return null;
+    const current = scope.current;
+    mutationLock.current = true; setMutating(true); setError(""); setReceipt("");
+    try {
+      const response = await fetch(url, {method, headers: {...headers,"Content-Type":"application/json"},body:body===undefined?undefined:JSON.stringify(body)});
+      if (current !== scope.current) return null;
+      if (!response.ok) throw new Error("Rejected mutation");
+      const saved = await response.json();
+      if (current !== scope.current) return null;
+      setReceipt(t("Saved response confirmed. Reload to verify the current record.","Respuesta guardada confirmada. Recargue para verificar el registro actual."));
+      return saved;
+    } catch (failure) {
+      if (current === scope.current) {setError(t("Change could not be confirmed. Reload saved records before retrying.","No se pudo confirmar el cambio. Recargue registros guardados antes de reintentar."));setReceipt("");}
+      return null;
+    } finally {if(current===scope.current){mutationLock.current=false;setMutating(false);}}
+  };
   const [selectedReport, setSelectedReport] = useState<ClashReport | null>(null);
   const [clashes, setClashes] = useState<Clash[]>([]);
   const [clashLoading, setClashLoading] = useState(false);
@@ -141,6 +169,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   };
 
   const loadLinkableItems = async () => {
+    const current=scope.current;
     try {
       const [siRes, rfiRes, meetRes] = await Promise.all([
         fetch(`${API}/projects/${projectId}/submittal-reports`, { headers }),
@@ -150,17 +179,18 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       const submittalReports = siRes.ok ? await siRes.json() : [];
       const rfis = rfiRes.ok ? await rfiRes.json() : [];
       const meetings = meetRes.ok ? await meetRes.json() : [];
-      setLinkableItems({ submittalItems: submittalReports, rfis: Array.isArray(rfis) ? rfis : rfis.rfis ?? [], meetings: Array.isArray(meetings) ? meetings : [] });
+      if(current===scope.current)setLinkableItems({ submittalItems: submittalReports, rfis: Array.isArray(rfis) ? rfis : rfis.rfis ?? [], meetings: Array.isArray(meetings) ? meetings : [] });
     } catch (e) {
       console.error("[loadLinkableItems]", e);
     }
   };
 
   const loadClashLinks = async (clashId: number) => {
+    const current=scope.current;
     const r = await fetch(`${API}/projects/${projectId}/links/clash/${clashId}`, { headers });
     if (r.ok) {
       const links = await r.json();
-      setClashLinks(prev => ({ ...prev, [clashId]: links }));
+      if(current===scope.current)setClashLinks(prev => ({ ...prev, [clashId]: links }));
     }
   };
 
@@ -173,15 +203,36 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
     if (r.ok) loadClashLinks(clashId);
   };
 
-  const loadReports = async () => {
+  const loadReports = async (expectedId?:number) => {
+    const current = scope.current;
+    const request=++listRequest.current;
     setLoading(true);
     try {
       const r = await fetch(`${API}/projects/${projectId}/clash-reports`, { headers });
-      if (r.ok) setReports(await r.json());
-    } finally { setLoading(false); }
+      if (!r.ok) {if(current===scope.current&&request===listRequest.current&&[401,403].includes(r.status)){setSelectedReport(null);setClashes([]);setClashLinks({});}throw new Error("Reports unavailable");}
+      const saved=await r.json();if(!Array.isArray(saved)||!saved.every((row:ClashReport)=>Number.isSafeInteger(row.id)&&row.projectId===projectId)||(expectedId!==undefined&&!saved.some((row:ClashReport)=>row.id===expectedId)))throw new Error("Invalid or missing saved report");
+      if(current!==scope.current||request!==listRequest.current)return false;
+      setReports(saved);setError("");return true;
+    } catch(failure) {if(current===scope.current&&request===listRequest.current){setReports([]);setError(t("Reports could not be loaded. Retry saved records.","No se pudieron cargar los reportes. Reintente registros guardados."));}return false;}
+    finally { if(current===scope.current&&request===listRequest.current)setLoading(false); }
   };
 
-  useEffect(() => { loadReports(); }, [projectId]);
+  const createReport=async()=>{
+    if(!canWrite||mutationLock.current)return;const current=scope.current;mutationLock.current=true;setMutating(true);setError("");setReceipt("");
+    try{
+      if(!createAttempt.current||createAttempt.current.projectId!==projectId){createAttempt.current={projectId,key:crypto.randomUUID(),saved:null};try{sessionStorage.setItem(creationStorageKey,createAttempt.current.key);}catch{/* Active-tab recovery still retains the key in memory. */}}
+      const attempt=createAttempt.current;
+      if(!attempt.saved){const response=await fetch(`${API}/projects/${projectId}/clash-reports`,{method:"POST",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({fileName:"New Manual Report",clientRequestId:attempt.key})});const saved=await response.json().catch(()=>({}));if(current!==scope.current)return;if(!response.ok)throw new Error([401,403].includes(response.status)?"access_denied":saved.message||saved.error||"Create rejected");if(!Number.isSafeInteger(saved.id)||saved.id<=0||saved.projectId!==projectId)throw new Error("Invalid saved report receipt");attempt.saved=saved;}
+      const saved=attempt.saved!;
+      if(!await loadReports(saved.id))throw new Error("Saved list unavailable");
+      const response=await fetch(`${API}/projects/${projectId}/clash-reports/${saved.id}`,{headers});const details=await response.json().catch(()=>({}));if(current!==scope.current)return;
+      if(!response.ok||details.report?.id!==saved.id||details.report?.projectId!==projectId||!Array.isArray(details.clashes)||!details.clashes.every((row:Clash)=>Number.isSafeInteger(row.id)))throw new Error("Saved report unavailable");
+      setSelectedReport(details.report);setClashes(details.clashes);selectTab("clash");const url=new URL(window.location.href);url.searchParams.set("report",String(saved.id));url.searchParams.delete("clash");window.history.replaceState(window.history.state,"",url);createAttempt.current=null;try{sessionStorage.removeItem(creationStorageKey);}catch{/* A verified server receipt remains authoritative. */}setReceipt(t("Created report saved and reopened.","Reporte creado, guardado y reabierto."));
+    }catch(failure){if(current===scope.current){setError(failure instanceof Error&&failure.message==="access_denied"?t("Creation or recovery denied. Restore your current session and project write access before retrying.","Creación o recuperación denegada. Restaure la sesión y el acceso de escritura del proyecto antes de reintentar."):t("New report could not be fully verified. Use Recover new report to reopen the same creation attempt.","No se verificó completamente el reporte nuevo. Use Recuperar reporte nuevo para reabrir el mismo intento."));setReceipt("");}}
+    finally{if(current===scope.current){mutationLock.current=false;setMutating(false);}}
+  };
+
+  useEffect(() => { scope.current++;mutationLock.current=false;createAttempt.current=null;try{const key=sessionStorage.getItem(creationStorageKey);if(key&&/^[0-9a-f-]{36}$/i.test(key))createAttempt.current={projectId,key,saved:null};}catch{/* Storage is optional; server authorization remains required. */}setMutating(false);setSelectedReport(null);setReports([]);setClashes([]);setClashLinks({});setLinkableItems({submittalItems:[],rfis:[],meetings:[]});setError("");setReceipt("");void loadReports();return()=>{scope.current++;}; }, [projectId,token,user?.id]);
 
   // Stable deep-link used by Meeting Minutes. The report and Clash are resolved
   // by database IDs; displayed clash numbers are never used as identity.
@@ -202,69 +253,55 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   }, [clashes, clashLoading]);
 
   async function loadClashes(report: ClashReport) {
+    const current=scope.current;
     loadLinkableItems();
     setSelectedReport(report);
     setClashLoading(true);
     try {
       const r = await fetch(`${API}/projects/${projectId}/clash-reports/${report.id}`, { headers });
-      if (r.ok) {
-        const data = await r.json();
-        setClashes(data.clashes ?? []);
-      }
-      const reportRes = await fetch(`${API}/projects/${projectId}/clash-reports`, { headers });
-      if (reportRes.ok) {
-        const reports = await reportRes.json();
-        const updated = reports.find((rr: ClashReport) => rr.id === report.id);
-        if (updated) setSelectedReport(updated);
-      }
-    } finally { setClashLoading(false); }
+      if (!r.ok) throw new Error("Report unavailable");
+      const data=await r.json();if(data.report?.id!==report.id||data.report?.projectId!==projectId||!Array.isArray(data.clashes))throw new Error("Invalid report details");
+      if(current!==scope.current)return;setClashes(data.clashes);setSelectedReport(data.report);setError("");
+      if(!await loadReports(report.id))throw new Error("Saved report list unavailable");
+    } catch(failure) {if(current===scope.current){setClashes([]);setError(t("Report details could not be verified. Reload saved records.","No se pudieron verificar los detalles. Recargue registros guardados."));}}
+    finally { if(current===scope.current)setClashLoading(false); }
   }
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const ext = file.name.split(".").pop()?.toLowerCase();
-    // Accept any file — AI handles extraction
-    if (false) {
-      setError("Unsupported format.");
-      return;
-    }
-    setUploading(true);
-    setError("");
-    setUploadMsg("Uploading clash register...");
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const r = await fetch(`${API}/projects/${projectId}/clash-reports/upload`, {
-        method: "POST",
-        headers,
-        body: formData,
-      });
-      if (!r.ok) {
-        const d = await r.json().catch(() => ({}));
-        const debugMsg = isDebug() ? ` | Raw: ${JSON.stringify(d)}` : "";
-        setError((d.message || d.error || "Upload failed") + debugMsg);
-        return;
-      }
-      const data = await r.json();
-      setUploadMsg(`${data.total_parsed} clashes imported. AI is ranking by priority...`);
-      await loadReports();
-      setTimeout(() => loadReports(), 5000);
-      setTimeout(() => { loadReports(); setUploadMsg(""); }, 12000);
-    } finally {
-      setUploading(false);
-      e.target.value = "";
-    }
+  const verifyUpload=async(saved:ClashUploadReceipt,current:number,poll=true)=>{
+    if(!await loadReports(saved.id))throw new Error("Saved import list unavailable");
+    const response=await fetch(`${API}/projects/${projectId}/clash-reports/${saved.id}`,{headers});const data=await response.json().catch(()=>({}));if(current!==scope.current)return;
+    if(!response.ok||data.report?.id!==saved.id||data.report?.projectId!==projectId||!Array.isArray(data.clashes)||!saved.ids.every(id=>data.clashes.some((row:{id:number;projectId:number})=>row.id===id&&row.projectId===projectId)))throw new Error("Saved imported identities unavailable");
+    setUploadReceipt(null);
+    setUploadMsg(t(`Import verified: ${saved.total} ${saved.total===1?"record":"records"}. ${data.report.status==="complete"?"Ranking complete.":data.report.status==="ranking_failed"?"Ranking failed; open the saved report and retry Re-rank AI.":"Ranking pending at last check; refresh saved records."}`,`Importación verificada: ${saved.total} ${saved.total===1?"registro":"registros"}. ${data.report.status==="complete"?"Clasificación completa.":data.report.status==="ranking_failed"?"Clasificación fallida; abra el reporte y reintente Reclasificar con IA.":"Clasificación pendiente en la última revisión; recargue registros."}`));
+    if(data.report.status==="ranking_failed")setError(t("Imported records are saved, but ranking failed. Review the report and retry Re-rank AI.","Los registros están guardados, pero falló la clasificación. Revise el reporte y reintente Reclasificar con IA."));
+    if(poll&&data.report.status==="processing"){uploadTimers.current.forEach(clearTimeout);uploadTimers.current=[5000,12000].map(ms=>setTimeout(()=>{if(current===scope.current)void verifyUpload(saved,current,false).catch(()=>{if(current===scope.current){setUploadReceipt(saved);setError(t("Saved import could not be reopened. Use Verify uploaded report; it does not upload again.","No se pudo reabrir la importación. Use Verificar reporte importado; no vuelve a subir el archivo."));}});},ms));}
+  };
+
+  const verifyPendingUpload=async()=>{
+    if(!uploadReceipt||mutationLock.current)return;const current=scope.current;mutationLock.current=true;setUploading(true);setError("");
+    try{await verifyUpload(uploadReceipt,current);}catch(failure){if(current===scope.current)setError(t("Saved import could not be reopened. Use Verify uploaded report; it does not upload again.","No se pudo reabrir la importación. Use Verificar reporte importado; no vuelve a subir el archivo."));}
+    finally{if(current===scope.current){mutationLock.current=false;setUploading(false);}}
+  };
+
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file=event.target.files?.[0];if(!file||!canWrite||mutationLock.current||uploadReceipt)return;
+    const current=scope.current;mutationLock.current=true;uploadTimers.current.forEach(clearTimeout);uploadTimers.current=[];
+    setUploading(true);setError("");setUploadMsg(t("Uploading clash register…","Subiendo registro de choques…"));
+    let saved:ClashUploadReceipt|null=null;
+    try{
+      const formData=new FormData();formData.append("file",file);
+      const response=await fetch(`${API}/projects/${projectId}/clash-reports/upload`,{method:"POST",headers,body:formData});const data=await response.json().catch(()=>({}));if(current!==scope.current)return;
+      if(!response.ok)throw new Error(data.message||data.error||t("Upload rejected. Inspect saved records before retrying.","Carga rechazada. Revise registros antes de reintentar."));
+      if(data.projectId!==projectId||!Number.isSafeInteger(data.clash_report_id)||!Number.isInteger(data.total_parsed)||data.total_parsed<=0||!Array.isArray(data.clash_ids)||data.clash_ids.length!==data.total_parsed||new Set(data.clash_ids).size!==data.clash_ids.length||!data.clash_ids.every((id:number)=>Number.isSafeInteger(id)&&id>0))throw new Error(t("Invalid import receipt. Inspect saved records before uploading again.","Comprobante de importación inválido. Revise registros antes de volver a subir."));
+      saved={projectId,id:data.clash_report_id,ids:data.clash_ids,total:data.total_parsed};setUploadReceipt(saved);setUploadMsg("");await verifyUpload(saved,current);
+    }catch(failure){if(current===scope.current){setUploadMsg("");setError(saved?t("Import saved, but its records could not be reopened. Use Verify uploaded report before another upload.","Importación guardada, pero no se reabrieron los registros. Use Verificar reporte importado antes de otra carga."):failure instanceof Error?failure.message:String(failure));}}
+    finally{if(current===scope.current){mutationLock.current=false;setUploading(false);event.target.value="";}}
   };
 
   const updateClash = async (clashId: number, updates: Partial<Clash>) => {
     if (!selectedReport) return;
-    await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/clashes/${clashId}`, {
-      method: "PATCH",
-      headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
-    });
-    setClashes(prev => prev.map(c => c.id === clashId ? { ...c, ...updates } : c));
+    const saved=await mutateReport(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/clashes/${clashId}`,"PATCH",updates);
+    if(saved)setClashes(prev=>prev.map(c=>c.id===clashId?saved:c));
   };
 
   const filteredClashes = clashes
@@ -374,35 +411,33 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       />
     )}
     <div id="clash-reports-list-current-view" className="tab-content-wrapper">
+      <a href={`/plugin-pull-review?projectId=${projectId}`} style={{display:"inline-block",marginBottom:12}}>{t("Review pending native clash changes","Revisar cambios nativos de choques pendientes")}</a>
+      {error&&<div role="alert"><p>{error}</p><button disabled={loading||clashLoading||mutating} onClick={()=>void loadClashes(selectedReport)}>{t("Reload saved records","Recargar registros guardados")}</button></div>}{receipt&&<p role="status">{receipt}</p>}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-        <button className="btn btn-outline btn-sm" onClick={() => setSelectedReport(null)}
+        <button className="btn btn-outline btn-sm" onClick={() => {const url=new URL(window.location.href);url.searchParams.delete("report");url.searchParams.delete("clash");window.history.replaceState(window.history.state,"",url);setSelectedReport(null);setReceipt("");}}
           style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <ChevronLeft size={14} /> {t("Back", "Volver")}
         </button>
         <div>
           <input
+            disabled={!canWrite||mutating}
+            aria-label={t("Report filename","Nombre del reporte")}
             value={selectedReport.fileName}
             onChange={e => setSelectedReport(prev => prev ? { ...prev, fileName: e.target.value } : prev)}
             onBlur={async e => {
-              await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/rename`, {
-                method: "PATCH",
-                headers: { ...headers, "Content-Type": "application/json" },
-                body: JSON.stringify({ fileName: e.target.value }),
-              });
+              const saved=await mutateReport(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/rename`,"PATCH",{fileName:e.target.value});if(saved)setSelectedReport(saved);
             }}
             style={{ fontWeight: 700, fontSize: 18, border: "none", borderBottom: "2px solid #1E3A5F",
               background: "transparent", outline: "none", width: "100%", cursor: "text" }}
           />
           <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 4 }}>
             <input
-              disabled={!canWrite}
+              disabled={!canWrite||mutating}
+              aria-label={t("Report number","Número de reporte")}
               value={selectedReport.reportNumber || ""}
               onChange={e => setSelectedReport(prev => prev ? { ...prev, reportNumber: e.target.value } : prev)}
               onBlur={async e => {
-                await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/rename`, {
-                  method: "PATCH", headers: { ...headers, "Content-Type": "application/json" },
-                  body: JSON.stringify({ reportNumber: e.target.value }),
-                });
+                const saved=await mutateReport(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/rename`,"PATCH",{reportNumber:e.target.value});if(saved)setSelectedReport(saved);
               }}
               placeholder="Report No. (e.g. ELA01-CR-001)"
               style={{ fontSize: 12, border: "none", borderBottom: canWrite ? "1px dashed #D1D5DB" : "none",
@@ -495,14 +530,9 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
 
       {canWrite && (
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
-          <button className="btn btn-sm btn-primary" onClick={async () => {
+          <button className="btn btn-sm btn-primary" disabled={mutating} onClick={async () => {
             if (!selectedReport) return;
-            const res = await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/clashes`, {
-              method: "POST",
-              headers: { ...headers, "Content-Type": "application/json" },
-              body: JSON.stringify({ description: "", status: "open" }),
-            });
-            if (res.ok) loadClashes(selectedReport);
+            const saved=await mutateReport(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/clashes`,"POST",{description:"",status:"open"});if(saved)await loadClashes(selectedReport);
           }}>
             + Add Clash
           </button>
@@ -625,7 +655,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                         );
                       })}
                       <td style={{ padding: "4px 8px" }}>
-                        <select value={c.status} onChange={e => updateClash(c.id, { status: e.target.value })}
+                        <select disabled={!canWrite||mutating} aria-label={t("Clash status","Estado del choque")} value={c.status} onChange={e => updateClash(c.id, { status: e.target.value })}
                           style={{ border: "1px solid #D1D5DB", borderRadius: 4, fontSize: 11, padding: "2px 4px", fontWeight: 600,
                             background: c.status === "resolved" ? "#DCFCE7" : c.status === "approved" ? "#D1FAE5" : c.status === "waiting_design" ? "#EDE9FE" : c.status === "follow_up" ? "#FEF3C7" : c.status === "in_progress" ? "#DBEAFE" : "#FEE2E2",
                             color: c.status === "resolved" ? "#16A34A" : c.status === "approved" ? "#059669" : c.status === "waiting_design" ? "#7C3AED" : c.status === "follow_up" ? "#D97706" : c.status === "in_progress" ? "#1D4ED8" : "#DC2626" }}>
@@ -817,6 +847,8 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       />
     )}
     <div id="clash-reports-list-current-view" className="tab-content-wrapper">
+      {error&&<div role="alert"><p>{error}</p><button disabled={loading||mutating} onClick={()=>void loadReports()}>{t("Reload saved records","Recargar registros guardados")}</button></div>}{receipt&&<p role="status">{receipt}</p>}
+      <a href={`/plugin-pull-review?projectId=${projectId}`} style={{display:"inline-block",marginBottom:12}}>{t("Review pending native clash changes","Revisar cambios nativos de choques pendientes")}</a>
       <div style={{ display: "flex", gap: 24, borderBottom: "1px solid #E5E7EB", marginBottom: 20 }}>
         {([["clash", t("Clash Hits", "Choques")], ["lens", t("Lens Viewpoints", "Vistas Lens")]] as const).map(([k, label]) => (
           <button key={k} onClick={() => selectTab(k)}
@@ -830,47 +862,39 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       </div>
 
       {activeTab === "clash" && (<>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20,flexWrap:"wrap",gap:12 }}>
+        <div style={{flex:"1 1 240px",minWidth:0}}>
           <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{t("Clash Reports","Reportes de Choques")}</h2>
           <p style={{ margin: "4px 0 0", color: "#6B7280", fontSize: 13 }}>
             {t("Upload clash register from Navisworks, Revit, or Excel — AI ranks every clash by priority","Sube el registro de choques — IA clasifica por prioridad")}
           </p>
+          {!canWrite&&<p style={{fontSize:12,color:"#475569",marginTop:6}}>{t("Read-only report access. Editing and deletion require project write permission.","Acceso de solo lectura. Editar y eliminar requiere permiso de escritura del proyecto.")}</p>}
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end",flex:"0 0 auto",maxWidth:"100%" }}>
           <PrintPdfButton
             lang={lang}
             onClick={() => void exportClashReportListPdf()}
             disabled={loading}
             loading={listExporting}
           />
+          <button className="btn btn-sm btn-outline" disabled={loading||mutating||uploading} onClick={()=>{setUploadMsg("");void loadReports();}}>{t("Refresh saved reports","Recargar reportes guardados")}</button>
+          {uploadReceipt&&<button className="btn btn-sm btn-outline" disabled={uploading||mutating} onClick={()=>void verifyPendingUpload()}>{t("Verify uploaded report","Verificar reporte importado")}</button>}
         {canWrite && (
           <button
             className="btn btn-sm btn-outline"
             style={{ marginRight: 8 }}
-            onClick={async () => {
-              const res = await fetch(`${API}/projects/${projectId}/clash-reports`, {
-                method: "POST",
-                headers: { ...headers, "Content-Type": "application/json" },
-                body: JSON.stringify({ fileName: "New Manual Report" }),
-              });
-              if (res.ok) {
-                const report = await res.json();
-                setSelectedReport(report);
-                setClashes([]);
-              }
-            }}
+            onClick={()=>void createReport()} disabled={mutating||loading}
           >
-            + New Report
+            {createAttempt.current?t("Recover new report","Recuperar reporte nuevo"):t("+ New Report","+ Nuevo reporte")}
           </button>
         )}
 
         {canWrite && (
-          <label style={{ cursor: uploading ? "not-allowed" : "pointer" }}>
+          <label style={{ cursor: uploading||uploadReceipt ? "not-allowed" : "pointer" }}>
             <input ref={fileRef} type="file" accept="*"
-              onChange={handleUpload} disabled={uploading} style={{ display: "none" }} />
+              onChange={handleUpload} disabled={uploading||!!uploadReceipt} style={{ display: "none" }} />
             <div className="btn btn-primary" style={{ display: "flex", alignItems: "center", gap: 6,
-              opacity: uploading ? 0.6 : 1, pointerEvents: uploading ? "none" : "auto" }}>
+              opacity: uploading||uploadReceipt ? 0.6 : 1, pointerEvents: uploading||uploadReceipt ? "none" : "auto" }}>
               <Upload size={14} />
               {uploading ? t("Processing...","Procesando...") : t("Upload Clash Register","Subir Registro de Choques")}
             </div>
@@ -912,18 +936,16 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {reports.map(r => (
                 <div key={r.id} style={{ background: "white", border: "1px solid #E5E7EB",
-                  borderRadius: 10, padding: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ flex: 1 }}>
+                  borderRadius: 10, padding: 16, display: "flex", justifyContent: "space-between", alignItems: "center",flexWrap:"wrap",gap:12 }}>
+                  <div style={{ flex:"1 1 240px",minWidth:0 }}>
                     <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>
                       <input
+                        disabled={!canWrite||mutating}
+                        aria-label={t("Report filename","Nombre del reporte")}
                         value={r.fileName}
                         onChange={e => setReports(prev => prev.map(x => x.id === r.id ? { ...x, fileName: e.target.value } : x))}
                         onBlur={async e => {
-                          await fetch(`${API}/projects/${projectId}/clash-reports/${r.id}/rename`, {
-                            method: "PATCH",
-                            headers: { ...headers, "Content-Type": "application/json" },
-                            body: JSON.stringify({ fileName: e.target.value }),
-                          });
+                          const saved=await mutateReport(`${API}/projects/${projectId}/clash-reports/${r.id}/rename`,"PATCH",{fileName:e.target.value});if(saved)setReports(current=>current.map(row=>row.id===saved.id?saved:row));
                         }}
                         style={{ fontWeight: 700, fontSize: 14, border: "none", borderBottom: "1px dashed #D1D5DB",
                           background: "transparent", outline: "none", width: "100%", cursor: "text" }}
@@ -936,9 +958,9 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                     </div>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700,
-                        background: r.status === "complete" ? "#DCFCE7" : "#FEF3C7",
-                        color: r.status === "complete" ? "#16A34A" : "#D97706" }}>
-                        {r.status === "complete" ? t("Complete","Completo") : t("Processing","Procesando")}
+                        background: r.status === "complete" ? "#DCFCE7" : r.status==="ranking_failed"?"#FEF2F2":"#FEF3C7",
+                        color: r.status === "complete" ? "#16A34A" : r.status==="ranking_failed"?"#B91C1C":"#D97706" }}>
+                        {r.status === "complete" ? t("Complete","Completo") : r.status==="ranking_failed"?t("Ranking failed","Clasificación fallida"):t("Processing","Procesando")}
                       </span>
                       {r.p1Count > 0 && <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#FEE2E2", color: "#DC2626" }}>P1: {r.p1Count}</span>}
                       {r.p2Count > 0 && <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#FEF3C7", color: "#D97706" }}>P2: {r.p2Count}</span>}
@@ -946,10 +968,10 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                       {r.p4Count > 0 && <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#F3F4F6", color: "#6B7280" }}>P4: {r.p4Count}</span>}
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0, marginLeft: 16 }}>
-                    <button className="btn btn-sm btn-outline" onClick={() => loadClashes(r)} style={{ fontSize: 12, padding: "4px 12px" }}>View Clashes</button>
-                    <button className="btn btn-sm btn-outline" onClick={async () => { const res = await fetch(`${API}/projects/${projectId}/clash-reports/${r.id}/rerank`, { method: "POST", headers }); if (res.ok) { setTimeout(() => loadReports(), 3000); setTimeout(() => loadReports(), 8000); } }} style={{ fontSize: 12, padding: "4px 12px" }}>Re-rank AI</button>
-                    <button onClick={() => setDeleteReport({ id: r.id, label: r.fileName })} style={{ fontSize: 12, padding: "4px 12px", background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>Delete</button>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0,flexWrap:"wrap",maxWidth:"100%" }}>
+                    <button className="btn btn-sm btn-outline" onClick={() => loadClashes(r)} style={{ fontSize: 12, padding: "4px 12px" }}>{t("View Clashes","Ver choques")}</button>
+                    <button className="btn btn-sm btn-outline" disabled={!canWrite||mutating} onClick={async () => {const saved=await mutateReport(`${API}/projects/${projectId}/clash-reports/${r.id}/rerank`,"POST");if(saved){setUploadMsg("");await loadReports();}}} style={{ fontSize: 12, padding: "4px 12px" }}>{t("Re-rank AI","Reclasificar con IA")}</button>
+                    <button disabled={!canWrite||mutating} onClick={() => setDeleteReport({ id: r.id, label: r.fileName })} style={{ fontSize: 12, padding: "4px 12px", background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 6, cursor:canWrite?"pointer":"not-allowed",opacity:canWrite?1:0.5, fontWeight: 600 }}>{t("Delete","Eliminar")}</button>
                   </div>
                 </div>
               ))}

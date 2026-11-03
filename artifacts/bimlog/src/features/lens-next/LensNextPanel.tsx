@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {executeLensNextCreation,type LensNextCreationAttempt} from "./lens-next-create-attempt";
+import {executeLensNextUpload,type LensNextUploadAttempt} from "./lens-next-upload-attempt";
 import { LensNextPanelView } from "./LensNextPanelView";
 import {
   createLensNextApiClient,
   createLensNextBridgeClient,
+  LensNextHttpError,
   type LensNextApiClient,
   type LensNextBridgeClient,
   type LensNextResponsibleCompanyOption,
@@ -167,6 +170,8 @@ export function LensNextPanel({
   const [selectedIssueViewpointId, setSelectedIssueViewpointId] = useState<string | null>(null);
   const [issueViewpointHistory, setIssueViewpointHistory] = useState<readonly Record<string, unknown>[] | "loading" | null>(null);
   const issueViewpointSaveInFlight = useRef(false);
+  const creationInFlight=useRef(false),pendingCreation=useRef<LensNextCreationAttempt|null>(null);
+  const uploadInFlight=useRef(false),pendingLocalUpload=useRef<LensNextUploadAttempt|null>(null);
   const pendingIssueViewpointSave = useRef<{
     fingerprint: string;
     input: { name: string; viewpointType: LensNextIssueViewpoint["viewpointType"]; modelFingerprint: string; visualStateJson: string; visualStateDigest: string; reason: string; idempotencyKey: string };
@@ -224,6 +229,10 @@ export function LensNextPanel({
     [issues, selectedServerId],
   );
   const activeIssues = useMemo(() => activeLensNextIssues(issues), [issues]);
+  const creationContextScope=useRef({client:apiClient,project:authorizedProjectId,bridge:bridgeContext});
+  if(creationContextScope.current.client!==apiClient||creationContextScope.current.project!==authorizedProjectId||creationContextScope.current.bridge!==bridgeContext)creationContextScope.current={client:apiClient,project:authorizedProjectId,bridge:bridgeContext};
+  const issueSelectionScope=useRef({issue:selectedIssue,client:apiClient});
+  if(issueSelectionScope.current.issue!==selectedIssue||issueSelectionScope.current.client!==apiClient)issueSelectionScope.current={issue:selectedIssue,client:apiClient};
   const filteredIssues = useMemo(
     () => sortLensNextIssuesBy(filterLensNextIssues(activeIssues, filters),issueSort),
     [activeIssues, filters,issueSort],
@@ -324,7 +333,7 @@ export function LensNextPanel({
   );
 
   const loadIssues = useCallback(
-    async (mode: "initial" | "refresh", signal?: AbortSignal) => {
+    async (mode: "initial" | "refresh", signal?: AbortSignal, expected?:{serverId:number;viewpointId:string}) => {
       const sequence = ++refreshSequence.current;
       if (!apiClient || authorizedProjectId === null) {
         setIssues([]);
@@ -335,7 +344,7 @@ export function LensNextPanel({
             ? "Select an authenticated project."
             : "Authenticated BIMLog session required.",
         );
-        return;
+        return false;
       }
       if (mode === "initial") setApiState("connecting");
       setRefreshState("refreshing");
@@ -347,9 +356,10 @@ export function LensNextPanel({
           apiClient.loadIssues(authorizedProjectId, signal),
           apiClient.loadReferenceData(authorizedProjectId, signal),
         ]);
-        if (sequence !== refreshSequence.current || signal?.aborted) return;
+        if (sequence !== refreshSequence.current || signal?.aborted) return false;
         if (issuesResult.status === "rejected") throw issuesResult.reason;
         const incoming = issuesResult.value;
+        if(expected&&!incoming.some(issue=>issue.identity.serverId===expected.serverId&&issue.identity.viewpointId===expected.viewpointId))throw new Error("Saved creation identity was not present in refreshed project records.");
         setIssues((current) => reconcileLensNextRefresh(current, incoming));
         if (catalogResult.status === "fulfilled") {
           const referenceData = catalogResult.value;
@@ -373,13 +383,17 @@ export function LensNextPanel({
         setApiState("connected");
         setRefreshState("fresh");
         setLastRefreshedAt(new Date().toISOString());
+        return true;
       } catch (error) {
-        if (signal?.aborted || sequence !== refreshSequence.current) return;
+        if (signal?.aborted || sequence !== refreshSequence.current) return false;
+        if(error instanceof LensNextHttpError&&[401,403].includes(error.status)){setIssues([]);setSelectedServerId(null);setHistory(null);setLinkedItems(null);setReferenceAttachments(null);}
+        else setIssues(current=>current.map(issue=>({...issue,publishingAllowed:false})));
         setApiState("error");
         setRefreshState("error");
         setApiError(
           error instanceof Error ? error.message : "BIMLog read failed",
         );
+        return false;
       }
     },
     [apiClient, authToken, authorizedProjectId],
@@ -514,44 +528,54 @@ export function LensNextPanel({
   }, [apiClient, selectedIssue]);
 
   const loadIssueViewpoints = useCallback(async (signal?: AbortSignal) => {
-    if (!apiClient || !selectedIssue) { setIssueViewpoints([]); setSelectedIssueViewpointId(null); setIssueViewpointsState("idle"); return; }
-    setIssueViewpointsState("loading"); setIssueViewpointsMessage(null);
+    const selection=issueSelectionScope.current;
+    if (!apiClient || !selectedIssue) { setIssueViewpoints([]); setSelectedIssueViewpointId(null); setIssueViewpointsState("idle"); return false; }
+    setIssueViewpointsState("loading"); setIssueViewpointsMessage(null);setIssueViewpointHistory(null);
     try {
       const loaded = await apiClient.loadIssueViewpoints(selectedIssue, signal);
+      if(signal?.aborted||selection!==issueSelectionScope.current)return false;
       setIssueViewpoints(loaded);
       setSelectedIssueViewpointId(current => loaded.some(item => item.id === current) ? current : (loaded.find(item => item.isPrimary && item.lifecycleStatus === "active") ?? loaded.find(item => item.lifecycleStatus === "active") ?? loaded[0])?.id ?? null);
       setIssueViewpointsState("idle");
-    } catch (error) { if (!signal?.aborted) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Issue viewpoints could not be loaded"); } }
+      return true;
+    } catch (error) { if (!signal?.aborted&&selection===issueSelectionScope.current) {setIssueViewpoints([]);setSelectedIssueViewpointId(null);setIssueViewpointHistory(null); setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Issue viewpoints could not be loaded"); } return false; }
   }, [apiClient, selectedIssue]);
   useEffect(() => { const controller = new AbortController(); void loadIssueViewpoints(controller.signal); return () => controller.abort(); }, [loadIssueViewpoints]);
 
   const addIssueViewpoint = useCallback(async (name: string, viewpointType: LensNextIssueViewpoint["viewpointType"], reason: string) => {
+    const selection=issueSelectionScope.current;
     if (!apiClient || !bridgeClient || !bridgeContext || !selectedIssue || selectedIssue.identity.projectId !== bridgeContext.projectId || issueViewpointSaveInFlight.current) return;
     issueViewpointSaveInFlight.current = true;
     setIssueViewpointsState("saving"); setIssueViewpointsMessage(null);
     try {
-      const fingerprint = JSON.stringify([selectedIssue.identity.serverId, name, viewpointType, reason, bridgeContext.modelFingerprint]);
+      const fingerprint = JSON.stringify([selectedIssue.identity.projectId,selectedIssue.identity.serverId, name, viewpointType, reason, bridgeContext.modelFingerprint]);
       let pending = pendingIssueViewpointSave.current;
       if (!pending || pending.fingerprint !== fingerprint) {
         const captured = await withIssueViewpointTimeout("capture", ISSUE_VIEWPOINT_CAPTURE_TIMEOUT_MS,
           signal => bridgeClient.captureCurrentVisualState(selectedIssue, bridgeContext, signal));
+        if(selection!==issueSelectionScope.current)return;
         pending = { fingerprint, input: { name, viewpointType, modelFingerprint: bridgeContext.modelFingerprint, visualStateJson: captured.visualStateJson, visualStateDigest: captured.visualStateDigest, reason, idempotencyKey: crypto.randomUUID() } };
         pendingIssueViewpointSave.current = pending;
       }
       const added = await withIssueViewpointTimeout("save", ISSUE_VIEWPOINT_SAVE_TIMEOUT_MS,
         signal => apiClient.addIssueViewpoint(selectedIssue, pending!.input, signal));
-      await withIssueViewpointTimeout("save", ISSUE_VIEWPOINT_SAVE_TIMEOUT_MS, signal => loadIssueViewpoints(signal));
+      if(selection!==issueSelectionScope.current)return;
+      const verified=await withIssueViewpointTimeout("save", ISSUE_VIEWPOINT_SAVE_TIMEOUT_MS, signal => loadIssueViewpoints(signal));
+      if(!verified)throw new Error("Save response received, but saved viewpoints could not be reopened. Retry the unchanged request to recover its saved identity.");
       pendingIssueViewpointSave.current = null;
       setSelectedIssueViewpointId(added.id); setIssueViewpointsMessage("Viewpoint captured and added to this Issue.");
-    } catch (error) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Viewpoint capture failed"); }
+    } catch (error) { if(selection===issueSelectionScope.current){setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Viewpoint capture failed");} }
     finally { issueViewpointSaveInFlight.current = false; }
   }, [apiClient, bridgeClient, bridgeContext, loadIssueViewpoints, selectedIssue]);
 
   const updateIssueViewpoint = useCallback(async (issueViewpointId: string, input: { action: "rename" | "reorder" | "make_primary" | "archive"; reason: string; name?: string; orderedIds?: readonly string[] }) => {
-    if (!apiClient || !selectedIssue) return;
+    const selection=issueSelectionScope.current;
+    if (!apiClient || !selectedIssue || !selectedIssue.publishingAllowed || issueViewpointSaveInFlight.current) return;
+    issueViewpointSaveInFlight.current=true;
     setIssueViewpointsState("saving"); setIssueViewpointsMessage(null);
-    try { await apiClient.updateIssueViewpoint(selectedIssue, issueViewpointId, input); await loadIssueViewpoints(); setIssueViewpointsMessage("Issue viewpoint updated."); }
-    catch (error) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Issue viewpoint update failed"); }
+    try { await apiClient.updateIssueViewpoint(selectedIssue, issueViewpointId, input);if(selection!==issueSelectionScope.current)return; if(!await loadIssueViewpoints())throw new Error("Update response received, but saved viewpoints could not be reopened. Reload before another change.");if(selection!==issueSelectionScope.current)return; setIssueViewpointsMessage("Issue viewpoint updated."); }
+    catch (error) {if(selection===issueSelectionScope.current){ setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Issue viewpoint update failed");} }
+    finally {issueViewpointSaveInFlight.current=false;}
   }, [apiClient, loadIssueViewpoints, selectedIssue]);
 
   const openSelectedIssueViewpoint = useCallback(async () => {
@@ -740,41 +764,37 @@ export function LensNextPanel({
   }, [apiClient, bridgeContext?.modelFingerprint, selectedIssue]);
 
   const uploadLocalViewpoint = useCallback(async (viewpoint: LensNextLocalViewpoint) => {
-    if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null) return;
+    if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || uploadInFlight.current) return;
     if (viewpoint.projectId !== authorizedProjectId || bridgeContext.projectId !== authorizedProjectId) { setLocalUploadState("error"); setLocalUploadMessage("Project/model identity mismatch; upload refused."); return; }
     const reason = window.prompt(`Reason for uploading ${viewpoint.displayId ?? viewpoint.viewpointId} from Navisworks into BIMLog:`)?.trim();
     if (!reason || !window.confirm(`Create one new BIMLog record and visual package for ${viewpoint.displayId ?? viewpoint.viewpointId}? Existing BIMLog records will not be overwritten.`)) return;
+    uploadInFlight.current=true;const current=creationContextScope.current;
     setLocalUploadMessage(null); setLocalUploadState("capturing");
     try {
-      const captured = await bridgeClient.captureLocalViewpoint(viewpoint, bridgeContext);
-      setLocalUploadState("uploading");
-      const receipt = await apiClient.uploadLocalViewpoint(viewpoint, bridgeContext.modelFingerprint, captured.visualState, reason);
-      setLocalUploadState("success"); setLocalUploadMessage(`Created BIMLog issue ${receipt.serverId} with a verified Visual Package.`);
-      setLocalInventory(await bridgeClient.loadLocalInventory());
-      await loadIssues("refresh");
-    } catch (error) { setLocalUploadState("error"); setLocalUploadMessage(error instanceof Error ? error.message : "Atomic local upload failed; no partial record was committed."); }
-  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues]);
+      const receipt=await executeLensNextUpload(pendingLocalUpload,JSON.stringify([authToken,authorizedProjectId,bridgeContext.modelFingerprint,viewpoint.navisworksGuid,viewpoint.viewpointId]),{isCurrent:()=>current===creationContextScope.current,upload:async()=>{const captured=await bridgeClient.captureLocalViewpoint(viewpoint,bridgeContext);if(current!==creationContextScope.current)throw new Error("Project/model changed during capture; no upload was submitted.");setLocalUploadState("uploading");return apiClient.uploadLocalViewpoint(viewpoint,bridgeContext.modelFingerprint,captured.visualState,reason);},reopen:async receipt=>{if(!await loadIssues("refresh",undefined,receipt))return false;const inventory=await bridgeClient.loadLocalInventory();if(current!==creationContextScope.current)return false;setLocalInventory(inventory);return true;}});
+      if(current!==creationContextScope.current)return;setLocalUploadState("success");setLocalUploadMessage(`Verified saved BIMLog issue ${receipt.serverId} and its Visual Package after reopening.`);
+    } catch (error) {if(current===creationContextScope.current){ setLocalUploadState("error"); setLocalUploadMessage(error instanceof Error ? error.message : "Upload outcome could not be confirmed. Inspect BIMLog before retrying the same viewpoint.");} }
+    finally{uploadInFlight.current=false;}
+  }, [apiClient, authorizedProjectId,authToken, bridgeClient, bridgeContext, loadIssues]);
 
   const createIssue = useCallback(async (draft: LensNextCreateDraft, reason: string) => {
-    if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId) return;
-    const viewpointId = crypto.randomUUID();
+    if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId || creationInFlight.current) return;
+    const current=creationContextScope.current;creationInFlight.current=true;
     const auditReason = reason.trim() || "Created through Lens Next";
     setCreatedIssueServerId(null);
     setCreateMessage(null); setCreateState("capturing");
     try {
-      const navigationView = await bridgeClient.captureNewIssueNavigationView(viewpointId, bridgeContext);
-      setCreateState("creating");
-      const receipt = await apiClient.createIssue(authorizedProjectId, viewpointId, bridgeContext.modelFingerprint, navigationView, draft, auditReason);
-      await loadIssues("refresh");
+      const receipt=await executeLensNextCreation(pendingCreation,{projectId:authorizedProjectId,modelFingerprint:bridgeContext.modelFingerprint,authorityKey:authToken,draft,reason:auditReason},{newIdentity:()=>crypto.randomUUID(),isCurrent:()=>current===creationContextScope.current,capture:viewpointId=>bridgeClient.captureNewIssueNavigationView(viewpointId,bridgeContext),create:(viewpointId,navigationView)=>{setCreateState("creating");return apiClient.createIssue(authorizedProjectId,viewpointId,bridgeContext.modelFingerprint,navigationView,draft,auditReason);},reopen:receipt=>loadIssues("refresh",undefined,receipt)});
+      if(current!==creationContextScope.current)return;
       setSelectedServerId(receipt.serverId);
       setCreatedIssueServerId(receipt.serverId);
       setCreateState("success");
       setCreateMessage(`Created issue ${receipt.displayId} in BIMLog with its lightweight navigation view and screenshot. Open Working View returns to the captured camera. No local Saved Viewpoint was created.`);
     } catch (error) {
-      setCreateState("error");
-      setCreateMessage(error instanceof Error ? error.message : "Issue creation failed");
+      if(current===creationContextScope.current){setCreateState("error");setCreateMessage(error instanceof Error ? error.message : "Issue creation failed");}
     }
-  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues]);
+    finally{creationInFlight.current=false;}
+  }, [apiClient, authorizedProjectId,authToken, bridgeClient, bridgeContext, loadIssues]);
 
   const editIssue = useCallback(async (draft: LensNextCreateDraft, reason: string) => {
     if (!apiClient || !selectedIssue) return;

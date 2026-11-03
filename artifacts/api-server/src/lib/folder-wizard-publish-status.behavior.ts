@@ -6,7 +6,7 @@ const client = { query: async (sql: string, values?: unknown[]) => {
   queries.push(sql);
   if (sql.includes("FROM projects p")) return { rows: [{ company_id: 3 }] };
   assert.deepEqual(values, [3, 5]);
-  return { rows: [{ id: "job-1", state: "retry", attempts: 2, max_attempts: 5,
+  return { rows: [{ id: "job-1", state: "retry", request_digest:"a".repeat(64),attempts: 2, max_attempts: 5,
     last_error_code: "FOLDER_WIZARD_GRAPH_UPLOAD_FAILED", filename: "proof.txt", source_file_id: "7",
     created_at: new Date("2026-09-25T00:00:00Z"), updated_at: "2026-09-25T00:01:00Z",
     next_attempt_at: new Date("2026-09-25T00:02:00Z"),
@@ -17,6 +17,7 @@ const result = await store.list({ projectId: 5, actorUserId: 2 });
 assert.equal(result[0]?.jobId, "job-1");
 assert.equal(result[0]?.state, "retry");
 assert.equal(result[0]?.sourceFileId, 7);
+assert.equal(result[0]?.requestDigest,"a".repeat(64));
 assert.equal(result[0]?.createdAt, "2026-09-25T00:00:00.000Z");
 assert.equal(result[0]?.nextAttemptAt, "2026-09-25T00:02:00.000Z");
 assert.equal(result[0]?.completedAt, null);

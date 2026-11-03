@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {useEffect,useRef} from "react";
 import { customFetch } from "./custom-fetch";
 
 export type CoordinationActionType =
@@ -116,10 +117,24 @@ export interface CoordinationConfirmResult {
   filename?: string;
 }
 
-export function useCoordinationConfirm(projectId: number) {
+export function useCoordinationConfirm(projectId: number, scopeKey="") {
   const qc = useQueryClient();
+  const pending=useRef<{key:string;result:CoordinationConfirmResult}|null>(null);
+  const generation=useRef(0);
+  useEffect(()=>{pending.current=null;generation.current++;return()=>{generation.current++;};},[projectId,scopeKey]);
+  const verify=async(key:string,result:CoordinationConfirmResult,started:number)=>{
+    if(started!==generation.current)throw new Error("Confirmation context changed; reopen saved events.");
+    pending.current={key,result};
+    const events=await customFetch<CoordinationEvent[]>(`/api/v1/projects/${projectId}/coordination/events`,{method:"GET"});
+    if(started!==generation.current)throw new Error("Confirmation context changed; reopen saved events.");
+    if(!Array.isArray(events)||!events.some(event=>event.id===result.eventId))throw new Error("Confirmation saved, but its event could not be reopened. Retry the same action to verify without another write.");
+    pending.current=null;return result;
+  };
   return useMutation({
     mutationFn: async (req: CoordinationConfirmRequest): Promise<CoordinationConfirmResult> => {
+      const key=JSON.stringify(req);
+      const started=generation.current;
+      if(pending.current){if(pending.current.key!==key)throw new Error("Verify the previously saved confirmation before changing the action.");return verify(key,pending.current.result,started);}
       const url = `/api/v1/projects/${projectId}/coordination/confirm`;
       // For downloaded action, server returns binary — handle manually so we can read the blob
       if (req.userAction !== "rejected" && req.destinationAction === "downloaded") {
@@ -144,13 +159,18 @@ export function useCoordinationConfirm(projectId: number) {
           const text = await resp.text();
           throw new Error(`HTTP ${resp.status}: ${text || resp.statusText}`);
         }
+        const eventId=Number(resp.headers.get("X-Coordination-Event-Id"));
+        if(resp.headers.get("X-BIMLog-Project-Id")!==String(projectId)||!Number.isSafeInteger(eventId)||eventId<=0||!resp.headers.get("Content-Type")?.includes("application/octet-stream"))throw new Error("Confirmation receipt is incomplete. Reopen recent events before retrying.");
         const blob = await resp.blob();
-        return { blob, filename: req.finalFilename };
+        if(!blob.size)throw new Error("Confirmed download is empty. Retry the same action.");
+        return verify(key,{ blob, filename: req.finalFilename,eventId },started);
       }
-      return customFetch<CoordinationConfirmResult>(url, {
+      const result=await customFetch<CoordinationConfirmResult>(url, {
         method: "POST",
         body: JSON.stringify(req),
       });
+      if(!Number.isSafeInteger(result.eventId)||Number(result.eventId)<=0)throw new Error("Confirmation event receipt is incomplete.");
+      return verify(key,result,started);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: eventsKey(projectId) });

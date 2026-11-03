@@ -1,6 +1,8 @@
 import { validatedReturn } from "@/lib/return-context";
+import {compareBudgetAmounts} from "@/lib/budget-amount-order";
 import { BudgetSourcePicker } from "@/components/commercial/BudgetSourcePicker";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {readVerifiedBudgetDecision,writeBudgetDecision,type BudgetDecisionReceipt} from "@/lib/budget-decision-verification";
 import { Link, useRoute, useSearch } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
@@ -49,7 +51,7 @@ const sortBudgetRows = <T extends Record<string, any>>(rows: T[], sort: string) 
       valueText(a.project_code ?? a.hierarchical_path).localeCompare(valueText(b.project_code ?? b.hierarchical_path)),
     );
   if (sort === "amount_desc")
-    return [...rows].sort((a, b) => Number(b.amount ?? b.calculated_total ?? 0) - Number(a.amount ?? a.calculated_total ?? 0));
+    return [...rows].sort((a, b) => compareBudgetAmounts(b.amount ?? b.calculated_total ?? "0",a.amount ?? a.calculated_total ?? "0"));
   if (sort === "version_desc") return [...rows].sort((a, b) => Number(b.version ?? 0) - Number(a.version ?? 0));
   if (sort === "version_asc") return [...rows].sort((a, b) => Number(a.version ?? 0) - Number(b.version ?? 0));
   if (sort === "status_asc")
@@ -99,29 +101,13 @@ export function FinancialBudgetWorkspace({ mode }: { mode: Mode }) {
       includeTotals: true,
     });
   const endpoint = snapshotId
-    ? `/projects/${projectId}/financial/snapshots/${snapshotId}`
+    ? `/projects/${projectId}/financial/snapshots/${encodeURIComponent(snapshotId)}`
     : `/projects/${projectId}/financial/workspace`;
-  const load = () => {
-    setLoading(true);
-    setError("");
-    fetch(`${API_BASE}/api/v1${endpoint}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (r) => {
-        const body = await r.json().catch(() => ({}));
-        if (!r.ok)
-          throw new Error(
-            body?.error?.[language] ||
-              tt(
-                "Financial access was denied.",
-                "Se denegó el acceso financiero.",
-              ),
-          );
-        return body;
-      })
-      .then(setData)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+  const loadEpoch=useRef(0),loadAbort=useRef<AbortController|null>(null);
+  const load=()=>{loadAbort.current?.abort();const controller=new AbortController(),current=++loadEpoch.current;loadAbort.current=controller;setLoading(true);setError("");setData(null);
+    void fetch(`${API_BASE}/api/v1${endpoint}`,{headers:{Authorization:`Bearer ${token}`},signal:controller.signal}).then(async response=>{const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.error?.[language]??tt("Financial access was denied.","Se denegó el acceso financiero."));
+    if(body.project?.id!==projectId||!Array.isArray(body.snapshots)||!Array.isArray(body.budgets)||(snapshotId&&(!body.snapshot||body.snapshot.id!==snapshotId||typeof body.snapshot.snapshotFingerprint!=="string"||typeof body.snapshot.contentFingerprint!=="string"||!Array.isArray(body.snapshot.lines))))throw new Error(tt("Snapshot evidence is incomplete or belongs to another project or approved version.","La evidencia está incompleta o pertenece a otro proyecto o versión aprobada."));return body;}).then(body=>{if(current===loadEpoch.current)setData(body);}).catch(cause=>{if(current===loadEpoch.current&&!controller.signal.aborted)setError(String(cause.message));}).finally(()=>{if(current===loadEpoch.current)setLoading(false);});
+    return()=>{controller.abort();if(current===loadEpoch.current)loadEpoch.current++;};
   };
   useEffect(load, [endpoint, token, language]);
   const current = data?.snapshots?.[0],
@@ -389,6 +375,7 @@ export function FinancialBudgetWorkspace({ mode }: { mode: Mode }) {
           )}{" "}
           {mode === "budget" && (
             <Budget
+              key={`${projectId}-${token}-${language}`}
               data={data}
               budgets={visibleBudgets}
               tt={tt}
@@ -646,60 +633,16 @@ function Budget({
       setBusy("");
     }
   };
-  const act = async (row: any, action: string) => {
-    setBusy(row.id);
-    setMessage("");
-    const url =
-      action === "approve" || action === "approve_override"
-        ? `/projects/${projectId}/financial/budgets/${row.id}/approve`
-        : `/projects/${projectId}/financial/budgets/${row.id}/actions`;
-    const body =
-      action === "approve" || action === "approve_override"
-        ? {
-            expectedRevision: row.revision,
-            confirmationFingerprint: row.content_fingerprint,
-            ...(action === "approve_override"
-              ? {
-                  ownerOverride: true,
-                  overrideReason,
-                  overrideConfirmation: "SOLE_OWNER_OVERRIDE",
-                }
-              : {}),
-          }
-        : {
-            action,
-            expectedRevision: row.revision,
-            reason: ["return", "reject", "withdraw"].includes(action)
-              ? tt(
-                  "Controlled workflow decision.",
-                  "Decisión controlada del flujo.",
-                )
-              : undefined,
-          };
-    try {
-      const r = await fetch(`${API_BASE}/api/v1${url}`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
-        }),
-        b = await r.json();
-      if (!r.ok) throw new Error(b?.error?.en || "Request denied");
-      if (action === "approve_override") {
-        setOverrideReason("");
-        setOverrideConfirmed(false);
-      }
-      setMessage(
-        tt("Controlled action recorded.", "Acción controlada registrada."),
-      );
-      reload();
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusy("");
-    }
+  const decisionLock=useRef(false),decisionReceipt=useRef<BudgetDecisionReceipt|null>(null),decisionAbort=useRef(new AbortController());
+  useEffect(()=>()=>decisionAbort.current.abort(),[]);
+  const act=async(row:any,action:string)=>{
+    if(decisionLock.current||busy)return;decisionLock.current=true;setBusy(row.id);setMessage("");
+    try{
+      if(!decisionReceipt.current)decisionReceipt.current=await writeBudgetDecision({projectId,token,row,action,reason:tt("Controlled workflow decision.","Decisión controlada del flujo."),...(action==="approve_override"?{ownerOverride:{reason:overrideReason}}:{}),signal:decisionAbort.current.signal});
+      await readVerifiedBudgetDecision({projectId,token,receipt:decisionReceipt.current,signal:decisionAbort.current.signal});
+      decisionReceipt.current=null;setOverrideReason("");setOverrideConfirmed(false);setMessage(tt("The exact saved budget action and evidence were reopened.","Se reabrieron la acción presupuestaria exacta y su evidencia guardadas."));reload();
+    }catch(error){if(!decisionAbort.current.signal.aborted)setMessage(error instanceof Error?error.message:String(error));}
+    finally{decisionLock.current=false;if(!decisionAbort.current.signal.aborted)setBusy("");}
   };
   return (
     <section className="fb-panel">
@@ -725,6 +668,8 @@ function Budget({
         </div>
       )}
       <div className="fb-import">
+        <p><Link href={`/budget-decision-review?projectId=${projectId}`}>{tt("Open budget lifecycle and exact approval review","Abrir ciclo presupuestario y revisión de aprobación exacta")}</Link></p>
+        {decisionReceipt.current&&<button disabled={Boolean(busy)} onClick={()=>void act({id:decisionReceipt.current!.budgetVersionId},"")}>{tt("Retry saved budget evidence read only","Reintentar solo lectura de evidencia presupuestaria guardada")}</button>}
         <h3>{tt("Controlled CSV/XLSX import", "Importación CSV/XLSX controlada")}</h3>
         <p>
           {tt(
@@ -1065,6 +1010,7 @@ function Snapshot({
               <ExportButton
                 projectId={projectId}
                 snapshotId={s.id}
+                snapshotFingerprint={s.snapshotFingerprint} contentFingerprint={s.contentFingerprint} budgetVersion={s.budgetVersion}
                 format="pdf"
                 token={token}
                 title={tt("Generate PDF Report", "Generar reporte PDF")}
@@ -1077,6 +1023,7 @@ function Snapshot({
               <ExportButton
                 projectId={projectId}
                 snapshotId={s.id}
+                snapshotFingerprint={s.snapshotFingerprint} contentFingerprint={s.contentFingerprint} budgetVersion={s.budgetVersion}
                 format="xlsx"
                 token={token}
                 title={tt("Download XLSX Workbook", "Descargar libro XLSX")}
@@ -1136,54 +1083,20 @@ function Snapshot({
     </section>
   );
 }
-function ExportButton({
-  projectId,
-  snapshotId,
-  format,
-  token,
-  title,
-  description,
-  deniedLabel,
-}: {
-  projectId: number;
-  snapshotId: string;
-  format: "pdf" | "xlsx";
-  token: string;
-  title: string;
-  description: string;
-  deniedLabel: string;
-}) {
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const download = async () => {
-    setBusy(true);
-    setError("");
-    try {
-      const response = await fetch(`${API_BASE}/api/v1/projects/${projectId}/financial/snapshots/${snapshotId}/export.${format}`, { headers: { Authorization: `Bearer ${token}` } });
-      if (!response.ok) throw new Error(deniedLabel);
-      const url = URL.createObjectURL(await response.blob()), link = document.createElement("a");
-      link.href = url;
-      link.download = fileNameFromDisposition(response.headers.get("Content-Disposition"), `approved-budget-baseline.${format}`);
-      link.click();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : deniedLabel);
-    } finally { setBusy(false); }
-  };
-  return (
-    <div className="fb-export-option">
-      <button
-        onClick={download}
-        disabled={busy}
-        title={description}
-        aria-describedby={`budget-export-${format}-help`}
-      >
-        {busy ? `${title}...` : title}
-      </button>
-      <small id={`budget-export-${format}-help`}>{description}</small>
-      {error && <small className="fb-export-error" role="alert">{error}</small>}
-    </div>
-  );
+const snapshotDownloadName=(header:string|null,format:"pdf"|"xlsx")=>{const fallback=`approved-budget-baseline.${format}`,name=fileNameFromDisposition(header,fallback);return name.toLowerCase().endsWith(`.${format}`)?name:fallback;};
+function ExportButton({projectId,snapshotId,snapshotFingerprint,contentFingerprint,budgetVersion,format,token,title,description,deniedLabel}:{projectId:number;snapshotId:string;snapshotFingerprint:string;contentFingerprint:string;budgetVersion:number;format:"pdf"|"xlsx";token:string;title:string;description:string;deniedLabel:string}){
+ const {tt,language}=useI18n(),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");const lock=useRef(false),epoch=useRef(0),abort=useRef<AbortController|null>(null);
+ useEffect(()=>{epoch.current++;abort.current?.abort();lock.current=false;setBusy(false);setError("");setNotice("");return()=>{epoch.current++;abort.current?.abort();};},[projectId,snapshotId,snapshotFingerprint,contentFingerprint,budgetVersion,format,token,language]);
+ const download=async()=>{if(lock.current)return;lock.current=true;setBusy(true);setError("");setNotice("");abort.current=new AbortController();const current=++epoch.current;
+  try{const response=await fetch(`${API_BASE}/api/v1/projects/${projectId}/financial/snapshots/${encodeURIComponent(snapshotId)}/export.${format}${format==="pdf"?"?lang="+(language==="es"?"es":"en"):""}`,{headers:{Authorization:`Bearer ${token}`},signal:abort.current.signal});if(!response.ok){const body=await response.json().catch(()=>({}));throw new Error(body.error?.[language]??deniedLabel);}
+   if(!response.headers.get("content-type")?.includes(format==="pdf"?"application/pdf":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")||response.headers.get("x-bimlog-project-id")!==String(projectId)||response.headers.get("x-bimlog-snapshot-id")!==snapshotId||response.headers.get("x-bimlog-budget-version")!==String(budgetVersion)||response.headers.get("x-bimlog-snapshot-fingerprint")!==snapshotFingerprint||response.headers.get("x-bimlog-budget-content-fingerprint")!==contentFingerprint)throw new Error(tt("The export does not match this exact approved project snapshot. Reopen it before retrying.","La exportación no coincide con esta instantánea aprobada exacta. Reábrala antes de reintentar."));
+   const bytes=await response.arrayBuffer(),signature=new Uint8Array(bytes.slice(0,4)),hash=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",bytes))).map(value=>value.toString(16).padStart(2,"0")).join(""),expected=response.headers.get("x-bimlog-artifact-sha256"),magic=format==="pdf"?new TextDecoder().decode(bytes.slice(0,5))==="%PDF-":signature.length===4&&signature[0]===80&&signature[1]===75&&signature[2]===3&&signature[3]===4;
+   if(!magic||!expected||!/^[a-f0-9]{64}$/.test(expected)||hash!==expected)throw new Error(tt("Snapshot export integrity verification failed. No file was downloaded.","Falló la verificación de integridad. No se descargó ningún archivo."));
+   if(current!==epoch.current)return;const url=URL.createObjectURL(new Blob([bytes],{type:format==="pdf"?"application/pdf":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})),link=document.createElement("a");link.href=url;link.download=snapshotDownloadName(response.headers.get("Content-Disposition"),format);document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);setNotice(tt(`Exact approved snapshot ${format.toUpperCase()} downloaded after SHA-256 verification: ${hash}`,`Instantánea aprobada exacta ${format.toUpperCase()} descargada tras verificar SHA-256: ${hash}`));
+  }catch(cause){if(current===epoch.current)setError(cause instanceof Error?cause.message:deniedLabel);}finally{if(current===epoch.current){lock.current=false;setBusy(false);}}
+ };
+ return <div className="fb-export-option"><button onClick={()=>void download()} disabled={busy} title={description} aria-describedby={`budget-export-${format}-help`}>{busy?`${title}...`:title}</button><small id={`budget-export-${format}-help`}>{description}</small>{error&&<small className="fb-export-error" role="alert">{error}</small>}{notice&&<small role="status" style={{overflowWrap:"anywhere"}}>{notice}</small>}</div>;
 }
+
 const styles = `.fb-page{min-height:100vh;background:#f5f7fa;color:#15202b;padding:24px;overflow-x:hidden}.fb-page>*{max-width:1180px;margin-left:auto;margin-right:auto}.fb-header{display:flex;justify-content:space-between;gap:20px;align-items:end}.fb-header h1{font-size:28px;margin:8px 0}.fb-header p,.fb-panel p{color:#5b6572}.fb-back{font-size:13px}.fb-authority{max-width:330px;padding:10px 12px;background:#e8f2ff;border-radius:8px;font-size:12px}.fb-nav{display:flex;gap:8px;margin-top:20px;overflow-x:auto;padding-bottom:8px}.fb-nav a,.fb-actions a,.fb-actions button,.fb-state button,.fb-preview button{white-space:nowrap;border:1px solid #ccd5df;border-radius:7px;padding:8px 12px;background:white;color:#174b7a;text-decoration:none;cursor:pointer}.fb-boundary{margin:16px 0;padding:12px;border-left:4px solid #d58b16;background:#fff9ec}.fb-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.fb-card,.fb-panel{background:white;border:1px solid #dfe5eb;border-radius:10px;padding:18px}.fb-card span{display:block;color:#66717e;font-size:12px}.fb-card strong{display:block;font-size:20px;margin-top:7px;font-variant-numeric:tabular-nums}.fb-panel{margin-top:14px}.fb-panel h2{margin:0 0 8px}.fb-panel-title{display:flex;justify-content:space-between;gap:16px;align-items:start}.fb-meta,.fb-actions{display:flex;gap:10px;flex-wrap:wrap}.fb-meta{font-size:12px;color:#596574;margin:12px 0}.fb-export-panel{display:grid;gap:12px;min-width:320px;max-width:430px;padding:12px;border:1px solid #ccdff1;border-radius:10px;background:#f8fbff}.fb-export-panel strong{display:block;color:#123f68;font-size:13px}.fb-export-panel p{margin:4px 0 0;font-size:12px;line-height:1.45}.fb-export-option{display:grid;gap:5px;max-width:210px}.fb-export-option small{font-size:11px;line-height:1.35;color:#596574;white-space:normal}.fb-export-error{color:#a22626}.fb-table{overflow-x:auto;border:1px solid #e4e9ef;border-radius:8px}.fb-row{display:grid;grid-template-columns:minmax(170px,1fr) minmax(220px,2fr) minmax(180px,1fr);gap:12px;padding:10px;border-bottom:1px solid #edf0f3;min-width:650px}.fb-head{font-size:11px;text-transform:uppercase;background:#f3f6f9;font-weight:700}.fb-empty,.fb-state{padding:36px;text-align:center;color:#66717e}.fb-error{color:#a22626}.fb-cards{display:grid;gap:10px}.fb-budget{border:1px solid #e2e7ed;border-radius:8px;padding:14px}.fb-budget>div:first-child{display:flex;justify-content:space-between}.fb-budget small,.fb-fingerprints code{display:block;overflow-wrap:anywhere;color:#697585}.fb-status{padding:3px 7px;border-radius:99px;background:#eef3f8;font-size:11px}.fb-message{padding:10px;background:#eef8ef;margin:10px 0}.fb-fingerprints{margin-top:14px}.fb-import{border:1px solid #dce4ec;border-radius:8px;padding:14px;margin:14px 0}.fb-import h3{margin:0}.fb-import-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.fb-import-fields label{display:grid;gap:4px;font-size:12px;color:#596574}.fb-import-fields input{min-width:0;border:1px solid #ccd5df;border-radius:6px;padding:8px;background:white}.fb-preview{display:grid;gap:7px;margin-top:12px;padding:12px;background:#f4f8fc;border-radius:7px}.fb-preview code,.fb-preview small{overflow-wrap:anywhere}.fb-preview button{justify-self:start}@media(max-width:720px){.fb-page{padding:12px}.fb-header{display:block}.fb-authority{display:block;margin-top:10px}.fb-summary,.fb-import-fields{grid-template-columns:1fr}.fb-panel-title{display:block}.fb-export-panel{min-width:0;max-width:none;margin-top:12px}.fb-export-option{max-width:none}.fb-row{min-width:0;grid-template-columns:1fr;gap:4px}.fb-head{display:none}.fb-table{overflow:visible}.fb-row span{overflow-wrap:anywhere}.fb-row span:last-child{font-variant-numeric:tabular-nums}.fb-actions{margin-top:10px}}`;
 const exportStyles = `.fb-current-view{background:white;border:1px solid #dfe5eb;border-radius:10px;padding:14px;margin:14px 0}.fb-current-view-head{display:flex;justify-content:space-between;gap:14px;align-items:start}.fb-current-view-head p{margin:4px 0 0;color:#5b6572;font-size:12px;line-height:1.45}.fb-current-view button{border:1px solid #174b7a;border-radius:7px;padding:9px 13px;background:#174b7a;color:white;font-weight:700;cursor:pointer}.fb-current-view button:disabled{background:#eef3f8;border-color:#ccd5df;color:#66717e;cursor:not-allowed}.fb-export-toolbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:12px}.fb-export-toolbar label{display:grid;gap:4px;min-width:0;font-size:12px;color:#596574}.fb-export-toolbar input,.fb-export-toolbar select{width:100%;min-width:0;border:1px solid #ccd5df;border-radius:7px;padding:8px;background:white;color:#15202b}.fb-check{align-content:end;grid-template-columns:auto 1fr!important;align-items:center;color:#15202b!important}.fb-check input{width:auto}.fb-filter-summary{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.fb-filter-summary span{border:1px solid #dfe5eb;border-radius:999px;padding:4px 8px;background:#f8fafc;font-size:12px;color:#344256}.fb-current-view .fb-export-error{margin-top:10px;border:1px solid #f3c5c5;background:#fff5f5;border-radius:7px;padding:8px;color:#9f1d1d}.fb-row-four{grid-template-columns:minmax(150px,1fr) minmax(190px,1.4fr) minmax(140px,.8fr) minmax(160px,1fr)}@media(max-width:720px){.fb-current-view-head{display:block}.fb-current-view button{width:100%;margin-top:10px;white-space:normal}.fb-export-toolbar{grid-template-columns:1fr}.fb-filter-summary span{max-width:100%;overflow-wrap:anywhere}.fb-row-four{grid-template-columns:1fr}}`;

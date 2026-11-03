@@ -44,7 +44,7 @@ export async function discoverProcoreIntakeTools(companyId: number, approved = i
     {
       name: "procore_file_versions",
       description: "List the exact versions currently available for one authorized Procore file.",
-      input_schema: { type:"object",properties:{projectId:projectIdSchema,fileRef:{type:"string"}},required:["projectId","fileRef"],additionalProperties:false },
+      input_schema: { type:"object",properties:{projectId:projectIdSchema,fileRef:{type:"string"},sourceCompanyId:{type:"string",pattern:"^[1-9][0-9]*$"}},required:["projectId","fileRef"],additionalProperties:false },
     },
     {
       name: "bimlog_propose_intake_plan",
@@ -64,6 +64,7 @@ export async function discoverProcoreIntakeTools(companyId: number, approved = i
                 ref: { type: "string" },
                 name: { type: "string" },
                 versionId: { type: "string" },
+                sourceCompanyId: { type:"string", pattern:"^[1-9][0-9]*$" },
                 mimeType: { type: "string" },
               },
               required: ["ref", "name", "versionId"],
@@ -120,7 +121,7 @@ export async function callProcoreIntakeTool(
     const match=/^file:([^:]+):([^:]+)$/.exec(fileRef);
     if(!match)throw new Error("PROCORE_FILE_REF_INVALID");
     if(!match[2]||!match[1])throw new Error("PROCORE_FILE_REF_INVALID");
-    const file=await (deps.versions ?? getProcoreFileVersions)(actor.userId,fileRef);
+    const file=await (deps.versions ?? getProcoreFileVersions)(actor.userId,fileRef,typeof input.sourceCompanyId==="string"?input.sourceCompanyId:undefined);
     return {readOnly:true,canonicalMutation:false,fileRef,...file};
   }
 
@@ -136,11 +137,12 @@ export async function callProcoreIntakeTool(
       const name = typeof item.name === "string" ? item.name.trim() : "";
       const versionId=typeof item.versionId==="string"?item.versionId.trim():"";
       if (!ref || !name || !versionId) throw new Error("INTAKE_SOURCE_SELECTION_INVALID");
-      const current=await (deps.versions ?? getProcoreFileVersions)(actor.userId,ref);
+      const current=await (deps.versions ?? getProcoreFileVersions)(actor.userId,ref,typeof item.sourceCompanyId==="string"?item.sourceCompanyId:undefined);
       if(current.name!==name)throw new Error("PROCORE_SOURCE_CHANGED");
       const version=current.versions.find(v=>v.id===versionId);
       if(!version)throw new Error("PROCORE_VERSION_UNAVAILABLE");
-      return { ref, fileId:current.fileId, projectRef:current.projectRef, name:current.name, versionId:version.id, versionLabel:version.label, versionStatus:"available", mimeType:current.mimeType };
+      if(item.sourceCompanyId!==undefined&&(typeof item.sourceCompanyId!=="string"||!/^[1-9]\d*$/.test(item.sourceCompanyId)))throw new Error("INTAKE_SOURCE_SELECTION_INVALID");
+      return { ...(typeof item.sourceCompanyId==="string"?{sourceCompanyId:item.sourceCompanyId}:{}), ref, fileId:current.fileId, projectRef:current.projectRef, name:current.name, versionId:version.id, versionLabel:version.label, versionStatus:"available", mimeType:current.mimeType };
     }));
     return {
       state: "proposal_only",
@@ -150,10 +152,11 @@ export async function callProcoreIntakeTool(
       sources,
       confirmationRequired: true,
       canonicalMutation: false,
-      importAvailable: false,
+      importAvailable: true,
+      confirmationTransport:"explicit_document_review_ui",
       versionPinned: true,
       nextAction:
-        "Review the exact source versions and destination. Import is not available in this MCP intake yet.",
+        "Review the exact source version, destination filename and relationship in the document import panel. Explicit user confirmation saves the document and its receipt; this proposal does not.",
     };
   }
 

@@ -62,7 +62,7 @@ export async function previewContractImport(input: { actorUserId: number; projec
   const stored = (await pool.query(`SELECT * FROM financial_contract_import_sessions WHERE project_id=$1 AND idempotency_key=$2`, [projectId, idempotencyKey])).rows[0];
   if (Number(stored.actor_user_id) !== auth.actor.userId || Number(stored.company_id) !== auth.scope.companyId || Number(stored.source_file_id) !== sourceFileId || stored.file_hash !== fileHash || stored.parsed_fingerprint !== parsedFingerprint || stored.currency !== currency || String(stored.preview.budgetSnapshotId) !== budgetSnapshotId)
     throw new FinancialControlError(409, "CONTRACT_IMPORT_IDEMPOTENCY_CONFLICT", "This idempotency key was already used with different import content.");
-  return { id: stored.id, fileHash: stored.file_hash, parsedFingerprint: stored.parsed_fingerprint, currency: stored.currency, total: String(stored.total), acceptedCount: Number(stored.accepted_count), rejectedCount: Number(stored.rejected_count), rejected: stored.preview.rejected, createsContract: false, sourceFile: { id: Number(stored.source_file_id) } };
+  return {projectId,budgetSnapshotId:stored.preview.budgetSnapshotId,lines:stored.preview.lines, id: stored.id, fileHash: stored.file_hash, parsedFingerprint: stored.parsed_fingerprint, currency: stored.currency, total: String(stored.total), acceptedCount: Number(stored.accepted_count), rejectedCount: Number(stored.rejected_count), rejected: stored.preview.rejected, createsContract: false, sourceFile: { id: Number(stored.source_file_id) } };
 }
 
 const uuid = () => crypto.randomUUID();
@@ -74,15 +74,19 @@ export async function confirmContractImport(input: Omit<CreateContractDraftInput
   try {
     await client.query(`SELECT pg_advisory_lock(hashtextextended($1,0))`, [`contract-import:${sessionId}`]); locked = true;
     await client.query("BEGIN");
+    const auth = await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.import", operation: "prepare", client });
     const row = (await client.query(`SELECT * FROM financial_contract_import_sessions WHERE id=$1 AND project_id=$2 FOR UPDATE`, [sessionId, projectId])).rows[0];
     if (!row) throw new FinancialControlError(404, "CONTRACT_IMPORT_NOT_FOUND", "Contract import preview not found.");
-    if (row.confirmed_contract_version_id) { await client.query("COMMIT"); return { contractVersionId: row.confirmed_contract_version_id, idempotent: true }; }
+    if (Number(row.company_id) !== auth.scope.companyId || Number(row.actor_user_id) !== auth.actor.userId)
+      throw new FinancialControlError(403,"CONTRACT_IMPORT_ACTOR_DENIED","Only the currently authorized preview owner can confirm or reopen this import receipt.");
     if (Number(row.rejected_count) > 0) throw new FinancialControlError(409, "CONTRACT_IMPORT_HAS_ERRORS", "Resolve every rejected row before confirmation.");
     if (String(input.fileHash) !== row.file_hash || String(input.parsedFingerprint) !== row.parsed_fingerprint || contractCurrency(input.currency) !== row.currency || exactPositiveAmount(input.total, "total") !== exactPositiveAmount(String(row.total), "total")) throw new FinancialControlError(409, "CONTRACT_IMPORT_CONFIRMATION_MISMATCH", "Confirmation must match the exact preview evidence.");
+    if (row.confirmed_contract_version_id) { const saved=(await client.query(`SELECT v.contract_id,v.content_fingerprint,v.title,c.legal_number,c.perspective,c.contract_type,c.counterparty_name FROM financial_contract_versions v JOIN financial_contracts c ON c.id=v.contract_id WHERE v.id=$1 AND c.project_id=$2 AND c.company_id=$3`,[row.confirmed_contract_version_id,projectId,auth.scope.companyId])).rows[0];if(!saved)throw new FinancialControlError(409,"CONTRACT_IMPORT_SAVED_VERSION_UNAVAILABLE","The confirmed contract version is unavailable in this scope.");if(saved.legal_number!==String(input.legalNumber??"").trim()||saved.title!==String(input.title??"").trim()||saved.counterparty_name!==String(input.counterpartyName??"").trim()||saved.perspective!==input.perspective||saved.contract_type!==input.contractType)throw new FinancialControlError(409,"CONTRACT_IMPORT_REPLAY_IDENTITY_CONFLICT","This import was already confirmed with a different legal draft identity.");await client.query("COMMIT");return {projectId,contractId:saved.contract_id,contractFingerprint:saved.content_fingerprint,contractVersionId:row.confirmed_contract_version_id,fileHash:row.file_hash,parsedFingerprint:row.parsed_fingerprint,idempotent:true}; }
     const draft = await createContractDraftWithClient({ ...input, projectId, currency: row.currency, originalValue: String(row.total), budgetSnapshotId: row.preview.budgetSnapshotId, lines: row.preview.lines, signedFileId: null }, client);
     await client.query(`UPDATE financial_contract_import_sessions SET confirmed_contract_version_id=$2,confirmed_at=now() WHERE id=$1 AND confirmed_contract_version_id IS NULL`, [sessionId, draft.versionId]);
+    await client.query(`INSERT INTO financial_contract_history(id,company_id,project_id,contract_id,contract_version_id,actor_user_id,event_type,after_state,reason_code,evidence) VALUES($1,$2,$3,$4,$5,$6,'contract_import_confirmed','draft','CONTRACT_IMPORT_CONFIRMED',$7::jsonb)`,[uuid(),auth.scope.companyId,projectId,draft.id,draft.versionId,auth.actor.userId,JSON.stringify({sessionId,sourceFileId:Number(row.source_file_id),fileHash:row.file_hash,parsedFingerprint:row.parsed_fingerprint})]);
     await client.query("COMMIT");
-    return { contractId: draft.id, contractVersionId: draft.versionId, idempotent: false };
+    return {projectId, contractId: draft.id,contractFingerprint:draft.contentFingerprint, contractVersionId: draft.versionId,fileHash:row.file_hash,parsedFingerprint:row.parsed_fingerprint, idempotent: false };
   } catch (error) {
     await rollbackWithOperationalEvidence(client, "FINANCIAL_CONTRACT_IMPORT_ROLLBACK_FAILED");
     throw error;

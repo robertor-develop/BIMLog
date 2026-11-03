@@ -7,12 +7,17 @@ import { CostValuePlanError } from "./cost-value-plan-service";
 import { projectApuIdentity } from "./apu-library-reuse";
 
 const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
-export async function getProjectLibraryApplications(actorUserId:number,projectId:number) {
+export async function getProjectLibraryApplications(actorUserId:number,projectId:number,options:{budgetControl?:boolean;receiptIds?:string[];projectApuVersionId?:string}={}) {
   await waitForGenericApuPersistenceMigration();
-  await authorizeFinancialOperation({actorUserId,projectId,featureKey:"cost.value_planner.view",operation:"read"});
-  const rows=(await pool.query(`SELECT p.id "projectApuVersionId",p.project_apu_id "projectApuId",p.version,p.status,p.currency,p.template_version_id "templateVersionId",p.template_fingerprint "templateFingerprint",p.applied_at "appliedAt",p.provenance,
-    t.name "templateName",t.version "templateVersion" FROM generic_project_apu_versions p JOIN generic_apu_template_versions t ON t.id=p.template_version_id WHERE p.project_id=$1 ORDER BY p.applied_at DESC LIMIT 100`,[projectId])).rows;
-  return {applications:rows};
+  const auth=await authorizeFinancialOperation({actorUserId,projectId,featureKey:options.budgetControl?"cost.budget.view":"cost.value_planner.view",operation:"read"});
+  if(options.projectApuVersionId&&!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(options.projectApuVersionId))throw new CostValuePlanError(400,"APU_VERSION_QUERY_INVALID","Provide an exact bounded project APU version identity.");
+  const rows=(await pool.query(`SELECT p.id "projectApuVersionId",p.project_apu_id "projectApuId",p.version,p.status,p.currency,p.template_version_id "templateVersionId",p.template_fingerprint "templateFingerprint",p.applied_by_id "makerUserId",p.applied_at "appliedAt",p.provenance,
+    t.name "templateName",t.version "templateVersion" FROM generic_project_apu_versions p JOIN generic_apu_template_versions t ON t.id=p.template_version_id WHERE p.project_id=$1 AND p.company_id=$2 AND ($3::text IS NULL OR p.id=$3) ORDER BY p.applied_at DESC LIMIT 100`,[projectId,auth.scope.companyId,options.projectApuVersionId??null])).rows;
+  if(!options.budgetControl)return {projectId,companyId:auth.scope.companyId,applications:rows};
+  const receiptIds=options.receiptIds??[];
+  if(receiptIds.length>100||receiptIds.some(id=>!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(id)))throw new CostValuePlanError(400,"APU_RECEIPT_QUERY_INVALID","Provide at most 100 bounded receipt identities.");
+  const history=(await pool.query(`SELECT h.id,h.event_type,h.actor_user_id,h.evidence,h.occurred_at,COALESCE(h.evidence->>'projectApuVersionId',a.evidence->>'projectApuVersionId') "projectApuVersionId" FROM financial_authority_journal h LEFT JOIN financial_authority_journal a ON a.id=h.evidence->>'originalReceiptId' AND a.company_id=h.company_id AND a.project_id=h.project_id AND a.event_type='generic_apu_overrun_approved' WHERE h.company_id=$1 AND h.project_id=$2 AND h.event_type IN('generic_apu_overrun_approved','generic_apu_overrun_reversed') AND COALESCE(h.evidence->>'projectApuVersionId',a.evidence->>'projectApuVersionId')=ANY($3::text[]) AND (cardinality($4::text[])=0 OR h.id=ANY($4::text[]) OR h.evidence->>'originalReceiptId'=ANY($4::text[])) ORDER BY h.occurred_at DESC,h.id DESC LIMIT 1000`,[auth.scope.companyId,projectId,rows.map(row=>row.projectApuVersionId),receiptIds])).rows;
+  return {projectId,companyId:auth.scope.companyId,applications:rows.map(row=>({...row,authorityHistory:history.filter(event=>event.projectApuVersionId===row.projectApuVersionId)}))};
 }
 export async function applyLibraryApu(actorUserId: number, projectId: number, input: { templateVersionId?: unknown; idempotencyKey?: unknown }) {
   await waitForGenericApuPersistenceMigration();

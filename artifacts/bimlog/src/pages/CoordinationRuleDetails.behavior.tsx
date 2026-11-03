@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { CoordinationRuleDetails } from "./CoordinationRuleDetails";
+const item={title:"Clearance",guidance:"Keep <script>unsafe()</script> clear",rationale:"Maintain access",applicability:{disciplines:["MEP"],nested:{minimumMm:900}},exceptions:["Approved deviation"],references:[{fileId:21,title:"Access plan"}],revision:4,status:"approved"};
+const html=renderToStaticMarkup(<CoordinationRuleDetails item={item} spanish={false}/>);
+for(const value of ["Maintain access","MEP","minimum Mm","900","Approved deviation","Access plan","21","approved"])assert.ok(html.includes(value),value);
+assert.ok(html.includes("&lt;script&gt;"));assert.ok(!html.includes("<script>"));
+const empty=renderToStaticMarkup(<CoordinationRuleDetails item={{title:"Empty",exceptions:[],references:[],applicability:{}}} spanish/>);
+assert.ok(empty.includes("Ninguno registrado"));assert.ok(empty.includes("Dónde aplica"));assert.ok(empty.includes("Referencias"));
+console.log("Rendered coordination rule: nested applicability, references, escaping, empty and Spanish states PASS");

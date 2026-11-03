@@ -35,9 +35,8 @@ for (const exactLine of [
 const patchedResolutions = [
   "adm-zip@0.6.1",
   "body-parser@2.4.0",
-  "brace-expansion@1.1.21",
-  "brace-expansion@2.1.7",
   "drizzle-orm@0.45.2",
+  "follow-redirects@1.16.2",
   "form-data@4.0.6",
   "lodash@4.18.1",
   "multer@2.5.0",

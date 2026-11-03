@@ -149,7 +149,14 @@ export function CompanyWorkflowGovernance() {
           checked={draft.scope.workflowTemplateIds.includes(workflow.id)}
           onChange={event => edit(value => { value.scope.workflowTemplateIds=event.target.checked ? [...value.scope.workflowTemplateIds,workflow.id] : value.scope.workflowTemplateIds.filter(id => id!==workflow.id); })} />
           {workflow.name} ({workflow.code})</label>)}</div>}
-        {!draft.scope.allWorkflows && !workflows.length && <p>{t("Publish a Delivery Workflow before scoping this policy to it.","Publique un flujo de entrega antes de asignarle esta política.")}</p>}
+        {!draft.scope.allWorkflows && draft.scope.workflowTemplateIds.filter(id => !workflows.some(workflow => workflow.id === id)).map(id => <label key={id} style={{display:"block",overflowWrap:"anywhere"}}>
+          <input type="checkbox" checked disabled={!editable} onChange={() => edit(value => { value.scope.workflowTemplateIds=value.scope.workflowTemplateIds.filter(savedId => savedId !== id); })} />
+          {t("Saved workflow reference", "Referencia de flujo guardada")}: {id}
+          <small style={{display:"block"}}>{editable
+            ? t("This workflow is absent from the current published list. Its saved scope remains in force; clear the checkbox only if this draft should remove the reference.", "Este flujo no aparece en la lista publicada vigente. Se conserva su alcance guardado; desmarque solo si este borrador debe eliminar la referencia.")
+            : t("This immutable policy retains the exact workflow reference even when it is absent from the current selection list.", "Esta política inmutable conserva la referencia exacta del flujo aunque no aparezca en la lista vigente.")}</small>
+        </label>)}
+        {!draft.scope.allWorkflows && !workflows.length && editable && <p>{t("Publish a Delivery Workflow before adding a new scope reference.","Publique un flujo de entrega antes de agregar una referencia nueva al alcance.")}</p>}
       </section>
       <section className="wgp-card"><h3>{t("Approval hierarchy","Jerarquía de aprobaciones")}</h3>
         <p>{t("For phase and final-deliverable approvals, roles apply in the entered order. A threshold applies only when the frozen contract-item value strictly exceeds it, in the same currency. Enter minor units; the readable amount is shown below. Blank currency means always.","Para aprobar fases y entregables finales, los roles se aplican en el orden ingresado. El umbral se aplica solo cuando el valor contractual congelado es estrictamente mayor, en la misma moneda. Ingrese unidades menores; el importe legible aparece debajo. Moneda vacía significa siempre.")}</p>

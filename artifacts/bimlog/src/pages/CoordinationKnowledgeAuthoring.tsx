@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Clock3, Edit3, FileText, Link2, Save, X } from "lucide-react";
+import { ResolutionMethodHistory } from "./ResolutionMethodHistory";
+import { CoordinationRuleDetails } from "./CoordinationRuleDetails";
 
 type KnowledgeStatus = "draft" | "under_review" | "approved" | "retired";
 export type KnowledgeRecord = Record<string, unknown> & { id: string; revision: number; status: KnowledgeStatus; code: string };
@@ -67,7 +69,17 @@ export function ConflictTypeWorkspace({ item, token, capabilities, lang, onClose
         {([['name','Name','Nombre'],['description','Description','Descripción'],['disciplineA','Discipline A','Disciplina A'],['disciplineB','Discipline B','Disciplina B'],['elementTypeA','Element A','Elemento A'],['elementTypeB','Element B','Elemento B'],['conflictCategory','Category','Categoría'],['coordinationStage','Stage','Etapa'],['tags','Tags (comma separated)','Etiquetas (separadas por coma)']] as const).map(([key,en,sp])=><label key={key}>{t(en,sp)}{key==='description'?<textarea value={draft[key]} onChange={e=>setDraft(current=>({...current,[key]:e.target.value}))}/>:<input value={draft[key]} onChange={e=>setDraft(current=>({...current,[key]:e.target.value}))}/>}</label>)}
         <div className="knowledge-editor-buttons"><button type="button" onClick={()=>setEditing(false)}>{t("Cancel","Cancelar")}</button><button type="submit" disabled={saving||!dirty}><Save aria-hidden />{saving?t("Saving…","Guardando…"):t("Save draft","Guardar borrador")}</button></div>
       </form> : <dl className="knowledge-detail-list"><div><dt>{t("Description","Descripción")}</dt><dd>{text(item.description)}</dd></div><div><dt>{t("Disciplines","Disciplinas")}</dt><dd>{text(item.discipline_a)} · {text(item.discipline_b)}</dd></div><div><dt>{t("Elements","Elementos")}</dt><dd>{text(item.element_type_a)} · {text(item.element_type_b)}</dd></div><div><dt>{t("Category / stage","Categoría / etapa")}</dt><dd>{text(item.conflict_category)} · {text(item.coordination_stage)}</dd></div><div><dt>{t("Tags","Etiquetas")}</dt><dd>{list(item.tags).join(", ")||"—"}</dd></div><div><dt>{t("Related guidance","Guía relacionada")}</dt><dd><Link2 aria-hidden />{t("Loaded from governed relationships when available.","Se carga desde relaciones gobernadas cuando están disponibles.")}</dd></div><div><dt>{t("Previous cases","Casos anteriores")}</dt><dd><FileText aria-hidden />{t("Historical issue references remain available through the evidence view.","Las referencias históricas permanecen disponibles mediante la vista de evidencia.")}</dd></div></dl>}
-      {history&&<ol className="knowledge-history">{history.map(version=><li key={version.id}>v{version.revision} · {version.status.replace("_"," ")}</li>)}</ol>}
+      {history&&<ol className="knowledge-history">{history.map(version=><li key={version.id}><details>
+        <summary>v{version.revision} · {version.status.replace("_"," ")} · {text(version.name)}</summary>
+        <dl className="knowledge-detail-list" aria-label={`${t("Saved conflict revision", "Revisión de conflicto guardada")} ${version.revision}`}>
+          <div><dt>{t("Description","Descripción")}</dt><dd>{text(version.description)}</dd></div>
+          <div><dt>{t("Disciplines","Disciplinas")}</dt><dd>{text(version.discipline_a)} · {text(version.discipline_b)}</dd></div>
+          <div><dt>{t("Elements","Elementos")}</dt><dd>{text(version.element_type_a)} · {text(version.element_type_b)}</dd></div>
+          <div><dt>{t("Category / stage","Categoría / etapa")}</dt><dd>{text(version.conflict_category)} · {text(version.coordination_stage)}</dd></div>
+          <div><dt>{t("Tags","Etiquetas")}</dt><dd>{list(version.tags).join(", ") || "—"}</dd></div>
+          <div><dt>{t("Revision ID","ID de revisión")}</dt><dd style={{overflowWrap:"anywhere"}}>{version.id}</dd></div>
+        </dl>
+      </details></li>)}</ol>}
       {message&&<p className="knowledge-workspace-message" role="status">{message}</p>}
       <LifecycleActions kind="conflict-types" entityId={entityId} item={item} token={token} capabilities={capabilities} lang={lang} onChanged={onChanged}/>
       <EvidenceHistory entityType="conflict_type" entityId={entityId} item={item} token={token} capabilities={capabilities} lang={lang}/>
@@ -89,6 +101,8 @@ export function RuleMethodWorkspace({ kind, item, token, capabilities, lang, onC
   return <aside className="knowledge-workspace" role="dialog" aria-modal="true" aria-labelledby="knowledge-rule-method-title"><header><div><span className="knowledge-code">{item.code}</span><h2 id="knowledge-rule-method-title">{text(isRule?item.title:item.name)}</h2><span className={`knowledge-status knowledge-status-${item.status}`}>● {item.status.replace("_"," ")}</span></div><button type="button" onClick={close} aria-label={t("Close detail","Cerrar detalle")}><X aria-hidden/></button></header>
     {item.status==="approved"&&<p className="knowledge-lock-note"><AlertTriangle aria-hidden/>{t("Approved content is immutable. Create a revision before editing.","El contenido aprobado es inmutable. Cree una revisión antes de editar.")}</p>}
     <div className="knowledge-workspace-actions">{mayEdit&&<button type="button" onClick={()=>setEditing(v=>!v)}><Edit3 aria-hidden/>{editing?t("View detail","Ver detalle"):t("Edit draft","Editar borrador")}</button>}</div>
+    {!isRule&&<ResolutionMethodHistory key={entityId} entityId={entityId} token={token} spanish={es}/>}
+    {isRule&&!editing&&<CoordinationRuleDetails item={item} spanish={es}/>}
     <section className="knowledge-workspace-body">{editing?<form className="knowledge-editor" onSubmit={event=>{event.preventDefault();void save();}}>{fields.map(([key,en,sp])=><label key={key}>{t(en,sp)}<textarea value={draft[key]??""} onChange={event=>setDraft(current=>({...current,[key]:event.target.value}))}/></label>)}<div className="knowledge-editor-buttons"><button type="button" onClick={()=>{setDraft(source);setEditing(false);}}>{t("Cancel","Cancelar")}</button><button type="submit" disabled={!dirty||saving}><Save aria-hidden/>{saving?t("Saving…","Guardando…"):t("Save draft only","Guardar solo borrador")}</button></div></form>:<pre className="knowledge-detail-json">{JSON.stringify(item,null,2)}</pre>}{message&&<p className="knowledge-workspace-message" role="status">{message}</p>}<LifecycleActions kind={kind} entityId={entityId} item={item} token={token} capabilities={capabilities} lang={lang} onChanged={onChanged}/><EvidenceHistory entityType={isRule?"coordination_rule":"resolution_method"} entityId={entityId} item={item} token={token} capabilities={capabilities} lang={lang}/></section>
   </aside>;
 }

@@ -4,7 +4,8 @@ const route=fs.readFileSync(new URL("../routes/edt-engine.ts",import.meta.url),"
 assert.match(route,/activation-requests", authMiddleware/);
 assert.match(route,/activation-requests\/:requestId\/approve", authMiddleware/);
 assert.match(route,/await resolveEdtRouteActor\(req, projectId\)/);
-assert.match(route,/ACTIVATION_PLAN_NOT_SERVER_RESOLVED/);
+assert.match(route,/requestResolvedEdtActivation\(/);
+assert.match(route,/approveResolvedEdtActivation\(/);
 assert.doesNotMatch(route,/companyId:\s*Number\(body/);
 assert.doesNotMatch(route,/actor:\s*body/);
 console.log("EDT_ENGINE_BUILD297_RESULT=PASS");
