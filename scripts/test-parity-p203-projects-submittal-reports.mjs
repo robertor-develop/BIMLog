@@ -26,6 +26,7 @@ assert.match(app,/ProjectsSubmittalReports/);assert.match(app,/path="\/projects\
 assert.match(tools,/data-capability-directory="complete-project-tools"/);
 assert.match(directory,/id:"submittal-tracking-reports"/);assert.match(directory,/href:"\/projects\/:projectId\/submittal-reports"/);
 for(const operation of ["submittal-reports/upload","/rename","/items","/pdf","method:\"DELETE\"","method:\"PATCH\""])assert.ok(ui.includes(operation),`${operation} must remain operable`);
+assert.ok(ui.includes("repeat(auto-fit,minmax(min(100%,320px),1fr))"),"operational report layout must reflow on narrow screens");
 for(const visible of [
   "Submittal Tracking Reports","Reportes de Seguimiento de Submittals","Permission state:","Estado de permiso:",
   "New tracker","Nuevo registro","Import spreadsheet or document","Importar hoja o documento","Export PDF","Exportar PDF",

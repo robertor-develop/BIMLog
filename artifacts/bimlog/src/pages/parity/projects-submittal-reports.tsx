@@ -43,7 +43,7 @@ export function ProjectsSubmittalReports(){
       <button onClick={()=>void loadReports(selected?.id)} disabled={busy}>{t("Refresh","Actualizar")}</button>
     </section>
     {loading&&<p role="status" aria-live="polite">{t("Loading trackers…","Cargando registros…")}</p>}{error&&<p role="alert" style={{color:"#B91C1C"}}>{error}</p>}{status&&<p role="status" aria-live="polite" style={{color:"#166534"}}>{status}</p>}
-    <div style={{display:"grid",gridTemplateColumns:"minmax(220px,300px) minmax(0,1fr)",gap:18,alignItems:"start"}}>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,320px),1fr))",gap:18,alignItems:"start"}}>
       <section aria-labelledby="tracker-list"><h2 id="tracker-list">{t("Saved trackers","Registros guardados")}</h2>{reports.length===0&&!loading?<p>{t("No trackers yet.","Aún no hay registros.")}</p>:<ul>{reports.map(report=><li key={report.id}><button onClick={()=>void loadReport(report.id)} aria-current={selected?.id===report.id}>{report.reportNumber||t("Unnumbered","Sin número")} — {report.fileName} ({report.totalItems||0})</button></li>)}</ul>}</section>
       <section aria-labelledby="tracker-detail"><h2 id="tracker-detail">{title}</h2>{!selected?<p>{t("Select a tracker to inspect its state, items, and next actions.","Seleccione un registro para revisar su estado, elementos y siguientes acciones.")}</p>:<>
         <p>{t("State","Estado")}: <strong>{selected.status||"complete"}</strong> · {t("Items","Elementos")}: {items.length} · {t("Next","Siguiente")}: {t("maintain rows or export the governed PDF.","mantenga filas o exporte el PDF controlado.")}</p>
