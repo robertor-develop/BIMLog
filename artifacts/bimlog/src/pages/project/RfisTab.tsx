@@ -721,6 +721,8 @@ function RfiReportSettingsPanel({ projectId, lang, onClose }: { projectId: numbe
   const [payload, setPayload] = useState<RfiReportSettingsPayload | null>(null);
   const [settings, setSettings] = useState<RfiReportSettingsDocument | null>(null);
   const [saving, setSaving] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+  const [serverPreview, setServerPreview] = useState<null | { snapshotHash: string; included: number; omitted: number }>(null);
   const token = () => JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
   useEffect(() => {
     let active = true;
@@ -757,6 +759,18 @@ function RfiReportSettingsPanel({ projectId, lang, onClose }: { projectId: numbe
     } catch (error) { toast({ title: error instanceof Error ? error.message : w("Settings were not reset.", "No se restablecieron los ajustes.", lang), variant: "destructive" }); }
     finally { setSaving(false); }
   };
+  const preview = async () => {
+    if (!settings) return;
+    setPreviewing(true); setServerPreview(null);
+    try {
+      const response = await fetch(`/api/v1/projects/${projectId}/rfis/report-settings/preview`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` }, body: JSON.stringify({ settings }) });
+      const data = await response.json().catch(() => ({})) as { error?: string; snapshotHash?: string; preview?: Array<{ visible?: boolean }> };
+      if (!response.ok || !data.snapshotHash || !Array.isArray(data.preview)) throw new Error(data.error || w("The report preview could not be verified.", "No se pudo verificar la vista previa del reporte.", lang));
+      setServerPreview({ snapshotHash: data.snapshotHash, included: data.preview.filter(item => item.visible !== false).length, omitted: data.preview.filter(item => item.visible === false).length });
+      toast({ title: w("Report preview verified", "Vista previa del reporte verificada", lang) });
+    } catch (error) { toast({ title: error instanceof Error ? error.message : w("Preview failed", "Falló la vista previa", lang), variant: "destructive" }); }
+    finally { setPreviewing(false); }
+  };
   if (!payload || !settings) return <div style={{ padding: 14, border: "1px solid hsl(var(--border))", borderRadius: 8, marginBottom: 12 }}>{w("Loading RFI report settings...", "Cargando ajustes de reporte RFI...", lang)}</div>;
   const visiblePreview = payload.inventory.filter(section => sectionMap.get(section.id)?.visible !== false);
   const hiddenPreview = payload.inventory.filter(section => sectionMap.get(section.id)?.visible === false);
@@ -768,6 +782,7 @@ function RfiReportSettingsPanel({ projectId, lang, onClose }: { projectId: numbe
           <Button type="button" variant="outline" size="sm" onClick={() => setSettings(payload.defaultSettings)}>{w("Full Template", "Plantilla Completa", lang)}</Button>
           <Button type="button" variant="outline" size="sm" onClick={() => setSettings(payload.leanPreset)}>{w("Focused Template", "Plantilla Enfocada", lang)}</Button>
           <Button type="button" variant="outline" size="sm" onClick={() => void reset()} disabled={saving}>{w("Reset to Default", "Restablecer", lang)}</Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => void preview()} disabled={saving || previewing}>{previewing ? w("Verifying Preview...", "Verificando vista previa...", lang) : w("Verify Preview", "Verificar vista previa", lang)}</Button>
           <Button type="button" size="sm" onClick={() => void save()} disabled={saving}>{saving ? w("Saving...", "Guardando...", lang) : w("Save Settings", "Guardar Ajustes", lang)}</Button>
           <Button type="button" variant="outline" size="sm" onClick={onClose}><X style={{ width: 13, height: 13 }} />{w("Close", "Cerrar", lang)}</Button>
         </div>
@@ -776,6 +791,7 @@ function RfiReportSettingsPanel({ projectId, lang, onClose }: { projectId: numbe
         <label style={{ display: "grid", gap: 4, fontSize: 12 }}>{w("Empty fields", "Campos vacios", lang)}<select value={settings.emptyFieldMode} onChange={event => setSettings({ ...settings, emptyFieldMode: event.target.value === "hide_empty" ? "hide_empty" : "not_recorded" })} style={{ height: 34, border: "1px solid hsl(var(--border))", borderRadius: 6, padding: "0 8px" }}><option value="not_recorded">{w("Show Not recorded", "Mostrar No registrado", lang)}</option><option value="hide_empty">{w("Hide empty fields", "Ocultar campos vacios", lang)}</option></select></label>
         <div style={{ fontSize: 12 }}><strong>{w("Preview", "Vista previa", lang)}</strong><div>{w("Included", "Incluido", lang)}: {visiblePreview.map(section => w(section.label, section.labelEs, lang)).join(", ")}</div><div>{w("Omitted", "Omitido", lang)}: {hiddenPreview.length ? hiddenPreview.map(section => w(section.label, section.labelEs, lang)).join(", ") : w("None", "Ninguno", lang)}</div></div>
       </div>
+      {serverPreview && <div role="status" aria-live="polite" style={{ marginTop: 10, padding: 10, borderRadius: 8, background: "#ECFDF5", color: "#166534", fontSize: 12 }}><strong>{w("Server-verified preview", "Vista previa verificada por el servidor", lang)}</strong><div>{w("Included sections", "Secciones incluidas", lang)}: {serverPreview.included} · {w("Omitted sections", "Secciones omitidas", lang)}: {serverPreview.omitted}</div><div style={{ overflowWrap: "anywhere" }}>{w("Evidence fingerprint", "Huella de evidencia", lang)}: {serverPreview.snapshotHash}</div></div>}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 10, marginTop: 12 }}>
         {payload.inventory.map(section => {
           const configured = sectionMap.get(section.id);
