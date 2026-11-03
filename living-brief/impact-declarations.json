@@ -81548,8 +81548,8 @@
     },
     {
       "taskId": "bimlog-parity-block37-p181-p185-20261103",
-      "reviewedThroughCommit": "801c2bffde4fdcd5ca7341b5a32e32d9cb8e9720",
-      "reviewedAt": "2026-11-03T17:48:33.109Z",
+      "reviewedThroughCommit": "4fdde6f2d959806ed572a7447b68d16e278e5f9e",
+      "reviewedAt": "2026-11-03T19:30:00.000Z",
       "status": "candidate",
       "captureTiming": "pre_release_reconciliation",
       "capabilityPreflight": {
