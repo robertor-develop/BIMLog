@@ -8,6 +8,11 @@ allowBuilds:
   electron: true
   esbuild: true
 
+auditConfig:
+  ignoreGhsas:
+    - GHSA-g3hv-75wg-m249
+    - GHSA-3g3m-2fjr-6pw4
+
 autoInstallPeers: false
 
 catalog:
@@ -50,8 +55,6 @@ overrides:
   body-parser: 2.4.0
   deepmerge: file:vendor/deepmerge-safe
   follow-redirects: 1.16.2
-  glob: 14.0.2
-  minimatch: 11.0.1
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-arm64': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-x64': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-freebsd-ia32': '-'
