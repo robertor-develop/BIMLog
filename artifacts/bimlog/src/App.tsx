@@ -500,7 +500,7 @@ function Router() {
       <Route path="/lens-sequence-status">
         {() => <ProtectedRoute component={LensSequenceStatus} />}
       </Route>
-      <Route path="/lens-sync-review">
+      <Route path="/lens-next-snapshot-replay">
         {() => <ProtectedRoute component={LensSyncReview} />}
       </Route>
       <Route path="/plugin-pull-review">
