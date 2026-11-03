@@ -1245,6 +1245,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/meeting-rfi-candidates-http.behavior.ts
 - artifacts/api-server/src/lib/meeting-schedule-placement.behavior.ts
 - artifacts/api-server/src/lib/meeting-schedule-placement.ts
+- artifacts/api-server/src/lib/meeting-submittal-candidates-http.behavior.ts
+- artifacts/api-server/src/lib/meeting-transcribe-audio-http.behavior.ts
 - artifacts/api-server/src/lib/my-ai-usage-browser.behavior.ts
 - artifacts/api-server/src/lib/my-ai-usage-http.behavior.ts
 - artifacts/api-server/src/lib/my-connections-browser.behavior.ts
@@ -1373,6 +1375,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/project-invitation.behavior.ts
 - artifacts/api-server/src/lib/project-links-review-browser.behavior.ts
 - artifacts/api-server/src/lib/project-links-review-http.behavior.ts
+- artifacts/api-server/src/lib/project-members-authority-http.behavior.ts
+- artifacts/api-server/src/lib/project-milestones-http.behavior.ts
+- artifacts/api-server/src/lib/project-operation-assignment-contract.behavior.ts
 - artifacts/api-server/src/lib/project-record-lineage.behavior.ts
 - artifacts/api-server/src/lib/project-record-lineage.ts
 - artifacts/api-server/src/lib/project-retirement-inventory.behavior.ts
@@ -1957,7 +1962,7 @@ It changes only when the code structure or curated architectural facts change.
 - /lens-import-plan
 - /lens-import-context
 - /lens-sequence-status
-- /lens-sync-review
+- /lens-next-snapshot-replay
 - /plugin-pull-review
 - /find-original-clash
 - /procore-connection-status

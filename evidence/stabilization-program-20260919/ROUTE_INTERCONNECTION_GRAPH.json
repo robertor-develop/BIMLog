@@ -533,7 +533,7 @@
     },
     {
       "order": 86,
-      "path": "/lens-sync-review",
+      "path": "/lens-next-snapshot-replay",
       "guard": "authenticated",
       "target": "LensSyncReview"
     },
