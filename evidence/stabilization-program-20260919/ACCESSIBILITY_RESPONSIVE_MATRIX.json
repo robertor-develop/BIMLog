@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "generatedFrom": "tracked route graph; deterministic",
   "counts": {
-    "routeTemplates": 125,
+    "routeTemplates": 126,
     "projectSurfaces": 20,
-    "customerSurfaces": 145,
-    "viewportCases": 435
+    "customerSurfaces": 146,
+    "viewportCases": 438
   },
   "viewports": [
     {
@@ -877,7 +877,30 @@
       ]
     },
     {
-      "order": 47,
+      "order": 46,
+      "path": "/projects/:id/submittal-reports",
+      "guard": "project",
+      "target": "ProjectsSubmittalReports",
+      "samplePath": "/projects/1/submittal-reports",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 48,
       "path": "/help",
       "guard": "authenticated",
       "target": "HelpCenter",
@@ -900,7 +923,7 @@
       ]
     },
     {
-      "order": 48,
+      "order": 49,
       "path": "/setup-guide",
       "guard": "authenticated",
       "target": "SetupGuideRedirect",
@@ -923,7 +946,7 @@
       ]
     },
     {
-      "order": 49,
+      "order": 50,
       "path": "/training/project-setup",
       "guard": "authenticated",
       "target": "ProjectSetupTraining",
@@ -946,7 +969,7 @@
       ]
     },
     {
-      "order": 50,
+      "order": 51,
       "path": "/profile",
       "guard": "authenticated",
       "target": "Profile",
@@ -969,7 +992,7 @@
       ]
     },
     {
-      "order": 51,
+      "order": 52,
       "path": "/settings/company-profile",
       "guard": "authenticated",
       "target": "CompanyProfile",
@@ -992,7 +1015,7 @@
       ]
     },
     {
-      "order": 52,
+      "order": 53,
       "path": "/settings/notifications",
       "guard": "authenticated",
       "target": "NotificationSettings",
@@ -1015,7 +1038,7 @@
       ]
     },
     {
-      "order": 53,
+      "order": 54,
       "path": "/settings/financial-controls",
       "guard": "authenticated",
       "target": "FinancialControlsSettings",
@@ -1038,7 +1061,7 @@
       ]
     },
     {
-      "order": 54,
+      "order": 55,
       "path": "/settings/billing-support",
       "guard": "authenticated",
       "target": "CommercialWorkspace",
@@ -1061,7 +1084,7 @@
       ]
     },
     {
-      "order": 55,
+      "order": 56,
       "path": "/admin/feedback",
       "guard": "access",
       "target": "AdminPanel",
@@ -1084,7 +1107,7 @@
       ]
     },
     {
-      "order": 56,
+      "order": 57,
       "path": "/company-catalogs",
       "guard": "access",
       "target": "CompanyMasterCatalogs",
@@ -1107,7 +1130,7 @@
       ]
     },
     {
-      "order": 57,
+      "order": 58,
       "path": "/company-workflows",
       "guard": "access",
       "target": "CompanyDeliveryWorkflows",
@@ -1130,7 +1153,7 @@
       ]
     },
     {
-      "order": 58,
+      "order": 59,
       "path": "/company-workflow-governance",
       "guard": "access",
       "target": "CompanyWorkflowGovernance",
@@ -1153,7 +1176,7 @@
       ]
     },
     {
-      "order": 59,
+      "order": 60,
       "path": "/company-pricing-templates",
       "guard": "access",
       "target": "CompanyPricingTemplates",
@@ -1176,7 +1199,7 @@
       ]
     },
     {
-      "order": 60,
+      "order": 61,
       "path": "/knowledge",
       "guard": "authenticated",
       "target": "CoordinationKnowledgeLibrary",
@@ -1199,7 +1222,7 @@
       ]
     },
     {
-      "order": 61,
+      "order": 62,
       "path": "/knowledge/search",
       "guard": "authenticated",
       "target": "KnowledgeSearch",
@@ -1222,7 +1245,7 @@
       ]
     },
     {
-      "order": 62,
+      "order": 63,
       "path": "/knowledge/starter-library",
       "guard": "authenticated",
       "target": "KnowledgeStarterLibrary",
@@ -1245,7 +1268,7 @@
       ]
     },
     {
-      "order": 63,
+      "order": 64,
       "path": "/knowledge/taxonomy",
       "guard": "authenticated",
       "target": "KnowledgeTaxonomy",
@@ -1268,7 +1291,7 @@
       ]
     },
     {
-      "order": 64,
+      "order": 65,
       "path": "/pending-work",
       "guard": "authenticated",
       "target": "PendingWork",
@@ -1291,7 +1314,7 @@
       ]
     },
     {
-      "order": 65,
+      "order": 66,
       "path": "/sync-agent/mac",
       "guard": "authenticated",
       "target": "MacSyncAvailability",
@@ -1314,7 +1337,7 @@
       ]
     },
     {
-      "order": 66,
+      "order": 67,
       "path": "/feature-access",
       "guard": "authenticated",
       "target": "FeatureAccessInspector",
@@ -1337,7 +1360,7 @@
       ]
     },
     {
-      "order": 67,
+      "order": 68,
       "path": "/feature-catalog",
       "guard": "authenticated",
       "target": "FeatureCatalog",
@@ -1360,7 +1383,7 @@
       ]
     },
     {
-      "order": 68,
+      "order": 69,
       "path": "/feature-policies",
       "guard": "authenticated",
       "target": "FeaturePolicyWorkspace",
@@ -1383,7 +1406,7 @@
       ]
     },
     {
-      "order": 69,
+      "order": 70,
       "path": "/feature-preferences",
       "guard": "authenticated",
       "target": "FeaturePreferences",
@@ -1406,7 +1429,7 @@
       ]
     },
     {
-      "order": 70,
+      "order": 71,
       "path": "/telegram-operations",
       "guard": "authenticated",
       "target": "TelegramOperations",
@@ -1429,7 +1452,7 @@
       ]
     },
     {
-      "order": 71,
+      "order": 72,
       "path": "/master-catalogs",
       "guard": "authenticated",
       "target": "MasterCatalogBrowser",
@@ -1452,7 +1475,7 @@
       ]
     },
     {
-      "order": 72,
+      "order": 73,
       "path": "/my-ai-usage",
       "guard": "authenticated",
       "target": "MyAiUsage",
@@ -1475,7 +1498,7 @@
       ]
     },
     {
-      "order": 73,
+      "order": 74,
       "path": "/my-connected-files",
       "guard": "authenticated",
       "target": "MyConnectionFiles",
@@ -1498,7 +1521,7 @@
       ]
     },
     {
-      "order": 74,
+      "order": 75,
       "path": "/my-setup",
       "guard": "authenticated",
       "target": "MySetup",
@@ -1521,7 +1544,7 @@
       ]
     },
     {
-      "order": 75,
+      "order": 76,
       "path": "/project-agent-review",
       "guard": "authenticated",
       "target": "ProjectAgentReview",
@@ -1544,7 +1567,7 @@
       ]
     },
     {
-      "order": 76,
+      "order": 77,
       "path": "/project-insights-review",
       "guard": "authenticated",
       "target": "ProjectInsightsReview",
@@ -1567,7 +1590,7 @@
       ]
     },
     {
-      "order": 77,
+      "order": 78,
       "path": "/intake-agent-preview",
       "guard": "authenticated",
       "target": "IntakeAgentPreview",
@@ -1590,7 +1613,7 @@
       ]
     },
     {
-      "order": 78,
+      "order": 79,
       "path": "/folder-wizard-workspace",
       "guard": "authenticated",
       "target": "FolderWizardWorkspace",
@@ -1613,7 +1636,7 @@
       ]
     },
     {
-      "order": 79,
+      "order": 80,
       "path": "/project-links",
       "guard": "authenticated",
       "target": "ProjectLinksWorkspace",
@@ -1636,7 +1659,7 @@
       ]
     },
     {
-      "order": 80,
+      "order": 81,
       "path": "/plugin-project-directory",
       "guard": "authenticated",
       "target": "PluginProjectDirectory",
@@ -1659,7 +1682,7 @@
       ]
     },
     {
-      "order": 81,
+      "order": 82,
       "path": "/project-user-assignment",
       "guard": "authenticated",
       "target": "ProjectUserAssignment",
@@ -1682,7 +1705,7 @@
       ]
     },
     {
-      "order": 82,
+      "order": 83,
       "path": "/project-briefing-review",
       "guard": "authenticated",
       "target": "ProjectBriefingReview",
@@ -1705,7 +1728,7 @@
       ]
     },
     {
-      "order": 83,
+      "order": 84,
       "path": "/lens-import-plan",
       "guard": "authenticated",
       "target": "LensImportPlan",
@@ -1728,7 +1751,7 @@
       ]
     },
     {
-      "order": 84,
+      "order": 85,
       "path": "/lens-import-context",
       "guard": "authenticated",
       "target": "LensImportContext",
@@ -1751,7 +1774,7 @@
       ]
     },
     {
-      "order": 85,
+      "order": 86,
       "path": "/lens-sequence-status",
       "guard": "authenticated",
       "target": "LensSequenceStatus",
@@ -1774,11 +1797,11 @@
       ]
     },
     {
-      "order": 86,
-      "path": "/lens-sync-review",
+      "order": 87,
+      "path": "/lens-next-snapshot-replay",
       "guard": "authenticated",
       "target": "LensSyncReview",
-      "samplePath": "/lens-sync-review",
+      "samplePath": "/lens-next-snapshot-replay",
       "routeKind": "customer-surface",
       "themes": [
         "light",
@@ -1797,7 +1820,7 @@
       ]
     },
     {
-      "order": 87,
+      "order": 88,
       "path": "/plugin-pull-review",
       "guard": "authenticated",
       "target": "PluginPullReview",
@@ -1820,7 +1843,7 @@
       ]
     },
     {
-      "order": 88,
+      "order": 89,
       "path": "/find-original-clash",
       "guard": "authenticated",
       "target": "FindOriginalClash",
@@ -1843,7 +1866,7 @@
       ]
     },
     {
-      "order": 89,
+      "order": 90,
       "path": "/procore-connection-status",
       "guard": "authenticated",
       "target": "ProcoreConnectionStatus",
@@ -1866,7 +1889,7 @@
       ]
     },
     {
-      "order": 90,
+      "order": 91,
       "path": "/coordination-operations",
       "guard": "authenticated",
       "target": "CoordinationOperations",
@@ -1889,7 +1912,7 @@
       ]
     },
     {
-      "order": 91,
+      "order": 92,
       "path": "/meeting-link-actions",
       "guard": "authenticated",
       "target": "MeetingLinkActions",
@@ -1912,7 +1935,7 @@
       ]
     },
     {
-      "order": 92,
+      "order": 93,
       "path": "/project-document-search",
       "guard": "authenticated",
       "target": "ProjectDocumentSearch",
@@ -1935,7 +1958,7 @@
       ]
     },
     {
-      "order": 93,
+      "order": 94,
       "path": "/edt-activation",
       "guard": "authenticated",
       "target": "EdtActivation",
@@ -1958,7 +1981,7 @@
       ]
     },
     {
-      "order": 94,
+      "order": 95,
       "path": "/edt-permissions",
       "guard": "authenticated",
       "target": "EdtCapabilities",
@@ -1981,7 +2004,7 @@
       ]
     },
     {
-      "order": 95,
+      "order": 96,
       "path": "/edt-changes",
       "guard": "authenticated",
       "target": "EdtChanges",
@@ -2004,7 +2027,7 @@
       ]
     },
     {
-      "order": 96,
+      "order": 97,
       "path": "/edt-intake-previews",
       "guard": "authenticated",
       "target": "EdtIntakePreviews",
@@ -2027,7 +2050,7 @@
       ]
     },
     {
-      "order": 97,
+      "order": 98,
       "path": "/edt-qc-review",
       "guard": "authenticated",
       "target": "EdtQcReview",
@@ -2050,7 +2073,7 @@
       ]
     },
     {
-      "order": 98,
+      "order": 99,
       "path": "/edt-director-authority",
       "guard": "authenticated",
       "target": "EdtDirectorAuthority",
@@ -2073,7 +2096,7 @@
       ]
     },
     {
-      "order": 99,
+      "order": 100,
       "path": "/edt-time-review",
       "guard": "authenticated",
       "target": "EdtTimeReview",
@@ -2096,7 +2119,7 @@
       ]
     },
     {
-      "order": 100,
+      "order": 101,
       "path": "/edt-issuances",
       "guard": "authenticated",
       "target": "EdtIssuances",
@@ -2119,7 +2142,7 @@
       ]
     },
     {
-      "order": 101,
+      "order": 102,
       "path": "/file-custody-review",
       "guard": "authenticated",
       "target": "FileCustodyReview",
@@ -2142,7 +2165,7 @@
       ]
     },
     {
-      "order": 102,
+      "order": 103,
       "path": "/manual-bonus-review",
       "guard": "authenticated",
       "target": "ManualBonusReview",
@@ -2165,7 +2188,7 @@
       ]
     },
     {
-      "order": 103,
+      "order": 104,
       "path": "/budget-decision-review",
       "guard": "authenticated",
       "target": "BudgetDecisionReview",
@@ -2188,7 +2211,7 @@
       ]
     },
     {
-      "order": 104,
+      "order": 105,
       "path": "/apu-budget-review",
       "guard": "authenticated",
       "target": "ApuBudgetReview",
@@ -2211,7 +2234,7 @@
       ]
     },
     {
-      "order": 105,
+      "order": 106,
       "path": "/plugin-sync-review",
       "guard": "authenticated",
       "target": "PluginSyncReview",
@@ -2234,7 +2257,7 @@
       ]
     },
     {
-      "order": 106,
+      "order": 107,
       "path": "/admin",
       "guard": "access",
       "target": "AdminPanel",
@@ -2257,7 +2280,7 @@
       ]
     },
     {
-      "order": 107,
+      "order": 108,
       "path": "/feedback",
       "guard": "authenticated",
       "target": "Dashboard",
@@ -2280,7 +2303,7 @@
       ]
     },
     {
-      "order": 108,
+      "order": 109,
       "path": "/total-control",
       "guard": "access",
       "target": "TotalControl",
@@ -2303,7 +2326,7 @@
       ]
     },
     {
-      "order": 109,
+      "order": 110,
       "path": "/admin/project-company-bindings",
       "guard": "access",
       "target": "ProjectCompanyBindings",
@@ -2326,7 +2349,7 @@
       ]
     },
     {
-      "order": 110,
+      "order": 111,
       "path": "/admin/fix-specific-link",
       "guard": "access",
       "target": "FixSpecificLink",
@@ -2349,7 +2372,7 @@
       ]
     },
     {
-      "order": 111,
+      "order": 112,
       "path": "/admin/launch-configuration",
       "guard": "access",
       "target": "LaunchConfiguration",
@@ -2372,7 +2395,7 @@
       ]
     },
     {
-      "order": 112,
+      "order": 113,
       "path": "/admin/master-catalogs",
       "guard": "access",
       "target": "AdminMasterCatalogs",
@@ -2395,7 +2418,7 @@
       ]
     },
     {
-      "order": 113,
+      "order": 114,
       "path": "/admin/overview",
       "guard": "access",
       "target": "AdminOverview",
@@ -2418,7 +2441,7 @@
       ]
     },
     {
-      "order": 114,
+      "order": 115,
       "path": "/admin/platform-capabilities",
       "guard": "access",
       "target": "AdminPlatformCapabilities",
@@ -2441,7 +2464,7 @@
       ]
     },
     {
-      "order": 115,
+      "order": 116,
       "path": "/admin/platform-stats",
       "guard": "access",
       "target": "AdminPlatformStats",
@@ -2464,7 +2487,7 @@
       ]
     },
     {
-      "order": 116,
+      "order": 117,
       "path": "/admin/projects-list",
       "guard": "access",
       "target": "AdminProjectsList",
@@ -2487,7 +2510,7 @@
       ]
     },
     {
-      "order": 117,
+      "order": 118,
       "path": "/admin/support-operations",
       "guard": "access",
       "target": "AdminSupport",
@@ -2510,7 +2533,7 @@
       ]
     },
     {
-      "order": 118,
+      "order": 119,
       "path": "/ai-control/budgets",
       "guard": "authenticated",
       "target": "AiControlBudgets",
@@ -2533,7 +2556,7 @@
       ]
     },
     {
-      "order": 119,
+      "order": 120,
       "path": "/ai-control/companies",
       "guard": "access",
       "target": "AiControlCompanies",
@@ -2556,7 +2579,7 @@
       ]
     },
     {
-      "order": 120,
+      "order": 121,
       "path": "/ai-control/company-ai-administrators",
       "guard": "access",
       "target": "AiControlCompanyAdministrators",
@@ -2579,7 +2602,7 @@
       ]
     },
     {
-      "order": 121,
+      "order": 122,
       "path": "/ai-control/company-users",
       "guard": "authenticated",
       "target": "AiControlCompanyUsers",
@@ -2602,7 +2625,7 @@
       ]
     },
     {
-      "order": 122,
+      "order": 123,
       "path": "/ai-control/entitlements",
       "guard": "authenticated",
       "target": "AiControlEntitlements",
@@ -2625,7 +2648,7 @@
       ]
     },
     {
-      "order": 123,
+      "order": 124,
       "path": "/ai-control/estimates",
       "guard": "authenticated",
       "target": "AiControlEstimates",
@@ -2648,7 +2671,7 @@
       ]
     },
     {
-      "order": 124,
+      "order": 125,
       "path": "/ai-control/prices",
       "guard": "access",
       "target": "AiControlPrices",
@@ -2671,7 +2694,7 @@
       ]
     },
     {
-      "order": 125,
+      "order": 126,
       "path": "/ai-control/provider-connections",
       "guard": "authenticated",
       "target": "AiControlProviderConnections",
@@ -2694,7 +2717,7 @@
       ]
     },
     {
-      "order": 126,
+      "order": 127,
       "path": "/ai-control/runs",
       "guard": "authenticated",
       "target": "AiControlRuns",
@@ -2717,7 +2740,7 @@
       ]
     },
     {
-      "order": 127,
+      "order": 128,
       "path": "/ai-control/status",
       "guard": "authenticated",
       "target": "AiControlStatus",
@@ -2740,7 +2763,7 @@
       ]
     },
     {
-      "order": 128,
+      "order": 129,
       "path": "/ai-control/usage",
       "guard": "authenticated",
       "target": "AiControlUsage",
@@ -2763,7 +2786,7 @@
       ]
     },
     {
-      "order": 129,
+      "order": 130,
       "path": "/auth/launch-step-up",
       "guard": "access",
       "target": "AuthLaunchStepUp",
@@ -2786,7 +2809,7 @@
       ]
     },
     {
-      "order": 130,
+      "order": 131,
       "path": "/living-brief",
       "guard": "access",
       "target": "LivingBrief",
@@ -2809,7 +2832,7 @@
       ]
     },
     {
-      "order": 131,
+      "order": 132,
       "path": "/pricing",
       "guard": "public",
       "target": "Pricing",
@@ -2832,7 +2855,7 @@
       ]
     },
     {
-      "order": 132,
+      "order": 133,
       "path": "/features",
       "guard": "public",
       "target": "Features",
@@ -2855,7 +2878,7 @@
       ]
     },
     {
-      "order": 133,
+      "order": 134,
       "path": "/about",
       "guard": "public",
       "target": "About",
@@ -2878,7 +2901,7 @@
       ]
     },
     {
-      "order": 134,
+      "order": 135,
       "path": "/contact",
       "guard": "public",
       "target": "Contact",
