@@ -6,11 +6,11 @@
     "ungovernedProviderClientProhibited": true,
     "autonomousApprovalOrCertificationProhibited": true
   },
-  "count": 45,
+  "count": 46,
   "entries": [
     {
       "file": "artifacts/api-server/src/agents/briefing-agent.ts",
-      "line": 65,
+      "line": 66,
       "provider": "anthropic",
       "acquisition": "getAgentAnthropicClient",
       "sourceContext": "project-scoped agent context",
@@ -40,7 +40,7 @@
     },
     {
       "file": "artifacts/api-server/src/lib/import-intelligence.ts",
-      "line": 42,
+      "line": 43,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -59,8 +59,8 @@
       "storedOutput": "route-specific persistence or ephemeral response; never autonomous approval/certification"
     },
     {
-      "file": "artifacts/api-server/src/routes/change_orders.ts",
-      "line": 401,
+      "file": "artifacts/api-server/src/routes/agents.ts",
+      "line": 115,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -70,7 +70,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/change_orders.ts",
-      "line": 478,
+      "line": 410,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -80,7 +80,17 @@
     },
     {
       "file": "artifacts/api-server/src/routes/change_orders.ts",
-      "line": 499,
+      "line": 488,
+      "provider": "anthropic",
+      "acquisition": "getAnthropicClientForUser",
+      "sourceContext": "authenticated route or project-scoped import context",
+      "costControl": "AI usage entitlement, limit, and provider selection enforced by governed client acquisition",
+      "outputAuthority": "draft_or_extraction_only; downstream mutation requires separate authenticated route authority",
+      "storedOutput": "route-specific persistence or ephemeral response; never autonomous approval/certification"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/change_orders.ts",
+      "line": 510,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -90,7 +100,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/clash_reports.ts",
-      "line": 361,
+      "line": 382,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -100,7 +110,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/clash_reports.ts",
-      "line": 409,
+      "line": 432,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -110,7 +120,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/clash_reports.ts",
-      "line": 442,
+      "line": 467,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -120,7 +130,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/clash_reports.ts",
-      "line": 525,
+      "line": 558,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -160,7 +170,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/coordination.ts",
-      "line": 227,
+      "line": 223,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -170,7 +180,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/documents.ts",
-      "line": 191,
+      "line": 200,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -180,7 +190,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/files.ts",
-      "line": 309,
+      "line": 310,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -190,7 +200,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/files.ts",
-      "line": 1138,
+      "line": 1143,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -200,7 +210,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/files.ts",
-      "line": 1184,
+      "line": 1189,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -210,7 +220,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/meeting_minutes.ts",
-      "line": 3381,
+      "line": 3428,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -220,7 +230,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/meeting_minutes.ts",
-      "line": 3614,
+      "line": 3684,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -230,7 +240,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/meeting_minutes.ts",
-      "line": 3678,
+      "line": 3749,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -240,7 +250,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/project_directory.ts",
-      "line": 1359,
+      "line": 1361,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
