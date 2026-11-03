@@ -49,6 +49,46 @@ import { inviteOrAddProjectMember } from "../lib/project-invitation-service";
 
 const router: IRouter = Router();
 
+// Every project-team read and mutation is bound to the project's current
+// company. Historical membership alone must not expose people or permissions.
+router.use("/projects/:projectId/members", authMiddleware, async (req, res, next) => {
+  const projectId = Number(req.params.projectId);
+  if (!Number.isSafeInteger(projectId) || projectId <= 0) {
+    res.status(400).json({ error: "invalid_project_id" });
+    return;
+  }
+  try {
+    const result = await db.execute(sql`
+      SELECT (
+        actor.is_super_admin OR (
+          actor.company_id = COALESCE(
+            (SELECT company_id FROM project_company_binding_versions WHERE project_id = project.id ORDER BY version DESC LIMIT 1),
+            creator.company_id
+          )
+          AND EXISTS (
+            SELECT 1 FROM project_members member
+            WHERE member.project_id = project.id
+              AND member.user_id = actor.id
+              AND member.status = 'active'
+          )
+        )
+      ) AS allowed
+      FROM projects project
+      JOIN users creator ON creator.id = project.created_by_id
+      JOIN users actor ON actor.id = ${req.user!.userId}
+      WHERE project.id = ${projectId} AND project.status <> 'archived'
+    `);
+    if (result.rows[0]?.allowed !== true) {
+      res.status(403).json({ error: "current_project_company_access_required" });
+      return;
+    }
+    res.set({ "Cache-Control": "private, no-store", "X-BIMLog-Project-Id": String(projectId) });
+    next();
+  } catch {
+    res.status(503).json({ error: "project_member_authority_unavailable" });
+  }
+});
+
 router.get(
   "/projects/:projectId/members/eligible",
   authMiddleware,
