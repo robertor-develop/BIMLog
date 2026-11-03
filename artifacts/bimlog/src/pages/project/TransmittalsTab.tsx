@@ -144,6 +144,13 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
     await load();
   };
 
+  const cancel = async (id: number) => {
+    if (!confirm(t("Cancel this transmittal and retain its audit trail?", "¿Cancelar esta transmisión y conservar su historial de auditoría?"))) return;
+    const r = await fetch(`${API}/projects/${projectId}/transmittals/${id}/cancel`, { method: "POST", headers });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.error || t("Cancellation failed", "No se pudo cancelar")); return; }
+    await load();
+  };
+
   const exportPdf = async (id: number) => {
     if (!token) return;
     try {
@@ -208,7 +215,7 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
   };
 
   const statusColor: Record<string, string> = {
-    draft: "#6B7280", sent: "#2563EB", acknowledged: "#16A34A",
+    draft: "#6B7280", sent: "#2563EB", acknowledged: "#16A34A", cancelled: "#B91C1C",
   };
 
   const recipientText = (tx: Transmittal) =>
@@ -466,6 +473,9 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
                   )}
                   {tx.status === "sent" && canWrite && (
                     <button className="btn btn-sm btn-outline" onClick={() => acknowledge(tx.id)}>{t("Acknowledge", "Acusar")}</button>
+                  )}
+                  {canWrite && !["acknowledged", "cancelled"].includes(tx.status) && (
+                    <button className="btn btn-sm btn-outline" onClick={() => cancel(tx.id)}>{t("Cancel and retain", "Cancelar y conservar")}</button>
                   )}
                   <button className="btn btn-sm btn-outline" title={t("Download this individual transmittal report as PDF", "Descargar este reporte individual de transmisión en PDF")} onClick={() => exportPdf(tx.id)}>{t("Individual Transmittal PDF", "PDF individual de transmisión")}</button>
                   {canWrite && (
