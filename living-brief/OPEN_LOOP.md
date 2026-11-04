@@ -6874,3 +6874,9 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [ ] Pass the exact-head complete pre-push gate, push normally and verify every focused commit plus exact local/remote equality.
 - [ ] Publish the exact P201-P210 candidate through the established Replit Shell/Publish path, verify deployed commit/version/schema/health, then pass three consecutive authenticated production rounds and independent acceptance.
 - [x] Correct the independent P210 super-admin/no-project finding at `f6030d897`: project tools now require real project context, expose `requires-project` without an empty URL, and retain explicit negative regression coverage.
+## Block 43 release gates — 2026-11-04
+
+- P211–P215 implementation and focused acceptance are complete at local source `3a7889eb984d1d486044e84cf3326ed6bedeedc7`.
+- Remaining gates are exact-head build tail, normal push and remote equality, Replit Shell publication, deployed commit/version/health verification, and three authenticated production rounds.
+- Real provider-connected Procore acceptance remains truthful: no email credential request, no Ruben-account interference, no bypass of OAuth/MFA, and no automatic import. If the established authorized session cannot reach a configured Procore application, preserve that exact live-provider hold while verifying all independent BIMLog behavior.
+- Do not begin P216 or consume another queued block until these gates close.
