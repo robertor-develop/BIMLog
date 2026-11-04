@@ -16,6 +16,12 @@ const admin = resolveCapabilityDirectory(profile(["dashboard", "project_workspac
 assert.ok(["project-admin", "catalogs", "workflows", "governance", "pricing-templates"].every(id => admin.some(entry => entry.id === id)));
 const zeroProject = resolveCapabilityDirectory(profile(["dashboard"], []));
 assert.ok(!zeroProject.some(({ projectRequired }) => projectRequired));
+const zeroProjectSuperAdmin = profile(["dashboard", "total_control"], []);
+zeroProjectSuperAdmin.facts.isSuperAdmin = true;
+assert.ok(!resolveCapabilityDirectory(zeroProjectSuperAdmin).some(({ audience }) => audience === "project"));
+const zeroProjectSuperAdminTeam = resolveCapabilityDirectoryViews(zeroProjectSuperAdmin).find(entry => entry.id === "team-performance");
+assert.equal(zeroProjectSuperAdminTeam?.availability, "requires-project");
+assert.equal(zeroProjectSuperAdminTeam?.href, undefined);
 assert.deepEqual(searchCapabilities(admin, "governance", "en").map(entry => entry.id), ["edt-activation", "feature-catalog", "governance"]);
 assert.ok(searchCapabilities(admin, "aprobados", "es").some(entry => entry.id === "governance"));
 assert.ok(searchCapabilities(member, "exports", "en").some(entry => entry.id === "rfis"));
