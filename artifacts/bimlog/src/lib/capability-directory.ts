@@ -228,7 +228,7 @@ export function resolveCapabilityDirectory(profile: AccessProfile): CapabilityDi
   const projectId = profile.facts.activeProjects[0]?.id;
   return capabilityDirectory.filter((entry) => {
     if (entry.audience === "authenticated") return profile.facts.authenticated;
-    if (entry.audience === "project") return profile.facts.isSuperAdmin || Boolean(projectId);
+    if (entry.audience === "project") return Boolean(projectId);
     return profile.decisions[entry.audience]?.allow === true;
   }).map((entry) => addGuidance({ ...entry, href: entry.href.replace(":projectId", String(projectId ?? "")) }));
 }
@@ -238,8 +238,8 @@ export function resolveCapabilityDirectoryViews(profile: AccessProfile): Capabil
   return capabilityDirectory.map(entry => {
     const guided = addGuidance(entry);
     if (entry.audience === "authenticated") return { ...guided, availability: "available" as const };
-    if (entry.audience === "project") return projectId || profile.facts.isSuperAdmin
-      ? { ...guided, href: entry.href.replace(":projectId", String(projectId ?? "")), availability: "available" as const }
+    if (entry.audience === "project") return projectId
+      ? { ...guided, href: entry.href.replace(":projectId", String(projectId)), availability: "available" as const }
       : { ...guided, href: undefined, availability: "requires-project" as const };
     return profile.decisions[entry.audience]?.allow
       ? { ...guided, availability: "available" as const }
