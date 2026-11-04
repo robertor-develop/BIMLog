@@ -82132,6 +82132,254 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ba63befecaf7de7df24e998029a38ca10f93ab422e8dd97ddcceea416e06e079"
+    },
+    {
+      "taskId": "bimlog-parity-block43-p211-p215-20261104",
+      "reviewedThroughCommit": "3a7889eb984d1d486044e84cf3326ed6bedeedc7",
+      "reviewedAt": "2026-11-04T08:19:01.651Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "Implement, test, reconcile, push, publish and verify P211-P215 through the authorized release path"
+        ],
+        "operatorOnly": [
+          "External OAuth or MFA action only if the established authorized production session cannot be recovered"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Work remains inside BIMLog project integration and release authority."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "The Block 43 guided-intake and release invariants are durable."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing positive, negative, authorization, isolation, persistence and live gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The integration is more discoverable and operable without reducing capability."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Questionnaire, persistence, MCP proposal and explicit-import boundaries are recorded."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge, installer, package or Navisworks-facing source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report, PDF, workbook or export layout changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, citation or governed interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Five builds, corrections, tests and remaining release gates are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Push, publication, deployed identity and live acceptance remain explicit."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Implementation, fixture recovery, security boundaries and unverified external gates are recorded."
+        }
+      ],
+      "reason": "Reconcile accepted P211-P215 before normal push, controlled publication and authenticated production acceptance.",
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "68bde8aecabe482fc53fe08f5e9940925a7097f995c9f593f1d5d4a1effb2f36"
+    },
+    {
+      "taskId": "bimlog-block43-live-procore-approval-correction-20261104",
+      "reviewedThroughCommit": "e9903fe12a9777012de58ec68fb6be8e95a1cb90",
+      "reviewedAt": "2026-11-04T08:52:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "Correct, test, push, publish and verify the owner-authorized BIMCorp Procore approval mapping"
+        ],
+        "operatorOnly": [
+          "Supply missing Procore OAuth application values only if no existing authorized secret source can be recovered"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction remains inside BIMLog provider governance and changes no ecosystem ownership."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "The internal-company approval boundary and separation from OAuth configuration are recorded."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing positive, negative, authorization, isolation and live acceptance gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction restores intended internal access without reducing discoverability or operational power."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, data model or capability contract changed; only the approved internal-company selector was corrected."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, installer or packaged plugin behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, workbook, export or governed presentation changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, citation or governed interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The live defect, correction commit, verification and remaining configuration gate are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Corrective republish and restarted live acceptance remain explicit release gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "The observed production state, narrow correction and preserved denials are recorded."
+        }
+      ],
+      "reason": "Reconcile the authenticated Block 43 BIMCorp Procore approval defect and focused correction before republishing.",
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e9e68012839cf828cb1d96fc33b69760dc4c5478668c1c2cdd9862cdffd80cd7"
+    },
+    {
+      "taskId": "bimlog-main04-06-non-procore-completion-audit-20261104",
+      "reviewedThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
+      "reviewedAt": "2026-11-04T11:50:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "Audit and reconcile all remaining internally executable non-Procore BIMLog rows and gates"
+        ],
+        "operatorOnly": [
+          "Supply the authorized production Procore OAuth application values and perform Ruben's physical Navisworks 2025 confirmation"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The audit changes no ecosystem ownership or cross-product authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing implementation and release operating boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Current platform, type, build, security and evidence gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No capability, navigation, workflow or progressive-disclosure behavior changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, service, schema, data model or product capability changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, installer or package source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, export, PDF, workbook or presentation contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, citation or governed interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The complete non-Procore audit results and final external holds are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The stale September marker is replaced by the two truthful final external holds."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Exact gate evidence and the obsolete historical checker diagnosis are recorded."
+        }
+      ],
+      "reason": "Reconcile the complete non-Procore audit, remove stale current-authority bookkeeping, and isolate the final external Procore and Navisworks holds without inventing new builds.",
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "749c5b4a5eb28ceec80de35a66028729d0d6992538069fae70b697349d4ac7e5"
     }
   ]
 }

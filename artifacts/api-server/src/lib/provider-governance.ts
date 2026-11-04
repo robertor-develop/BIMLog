@@ -192,9 +192,11 @@ async function ensureCompanyProviderApprovalSchema(): Promise<void> {
     CREATE OR REPLACE FUNCTION reject_company_provider_approval_history_mutation() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'company provider approval history is append-only'; END $$;
     DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='company_provider_approval_events_immutable' AND tgrelid='company_provider_approval_events'::regclass) THEN CREATE TRIGGER company_provider_approval_events_immutable BEFORE UPDATE OR DELETE ON company_provider_approval_events FOR EACH ROW EXECUTE FUNCTION reject_company_provider_approval_history_mutation(); END IF; END $$;`);
     await client.query(`INSERT INTO company_provider_approval_events(event_key,company_id,provider_key,operation,enabled,reason,actor_user_id,source)
-      SELECT 'owner-approved-company-31-procore-all-operations',id,'procore','*',true,
-      'Owner instruction: BIMLog internal Procore connector approval for current and future members of active BIMTECH CORP company 31. Procore account consent and source permissions remain required.',NULL,'owner_instruction'
-      FROM companies WHERE id=31 AND retired_at IS NULL AND retired_into_company_id IS NULL
+      SELECT 'owner-approved-internal-procore-all-operations-20261104-' || id,id,'procore','*',true,
+      'Owner instruction: Procore connector approval for current and future members of active BIMTECH CORP and BIMCorp Inc internal companies. Procore account consent and source permissions remain required.',NULL,'owner_instruction'
+      FROM companies
+      WHERE (id=31 OR upper(btrim(name)) IN ('BIMTECH CORP','BIMCORP INC'))
+        AND retired_at IS NULL AND retired_into_company_id IS NULL
       ON CONFLICT(event_key) DO NOTHING`);
     const result = await client.query(`SELECT DISTINCT ON(e.company_id) e.company_id,e.enabled
       FROM company_provider_approval_events e JOIN companies c ON c.id=e.company_id
