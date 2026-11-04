@@ -1,3 +1,10 @@
+## Current open-loop authority — final external holds — 2026-11-04 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
+
+The complete non-Procore source audit at `edcf79e80a1d840e0419c186119ccfafdda91db9` found no remaining internally executable product row: the blocking platform audit reports `P0=0 P1=0 P2=0`, current-state and Living Brief contracts pass, TypeScript passes, and the deterministic production build passes. Builds 223–225 remain authoritative for closure of prior provider/current-state work. Do not invent P216–P220 or reopen accepted rows without a new reproduced defect.
+
+- [ ] Activate the already-implemented Procore flow only after the authorized production `PROCORE_CLIENT_ID` and `PROCORE_CLIENT_SECRET` are available; keep this final configuration gate isolated from completed BIMLog product work and do not request email credentials or contact Ruben.
+- [ ] Preserve Ruben's deferred physical Navisworks 2025 confirmation as post-closure field evidence; it does not reopen accepted Platform builds and no physical 2025 success is claimed on this workstation.
+
 ## Committed aggregate release handoff — 2026-10-30
 
 - Accepted local integration5df676cc1d6f121250bbd69aa9f2a9facc5be433 normally preserves canonical4981c0e2fa232884552ad2458887ecf0767f489a and incoming33ba6abaa22b4f35613253794dd18512a3f16225. Root/branch remain F:/BIMLog/Worktrees/bimlog-parity-p001-p005-20261028 / codex/bimlog-parity-p001-p005-20261028. Worktree was clean after the merge commit; this follow-up is only the authority/status seal. No Native/installer or lockfile change, no history rewrite, no unrelated work removed.
@@ -902,7 +909,7 @@ C019 current-view Spanish header/footer defect now repaired with opt-in shared P
 
 C019 rendered regression now proves financial authority/provenance text, empty state and all250 synthetic rows through the actual PDF HTTP renderer; all14 multi-page pages inspected. This is not authenticated live export parity. Shared Spanish PDF chrome retains some English labels. C017 economic-plan public resolver and executable governed actions remain missing; C018 individual allocation needs explicit approved semantics, never infer payout authority from a saved Intake amount. C020 clean-source gate/publication/full live acceptance remain open. No complete-block claim; Lens Next unchanged.
 
-## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
+## Historical open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26
 
 Current release checkpoint: `2e2d249b288b01577c59d6246aac69fe7f9bc2aa` is published as `v1.05.N18-P37`, package `bimlog-2e2d249b288b0157-472fa32c6e6d06fe`, with migration identity `schema-af1a3df01ae67e1393054434`; authenticated smoke, refresh/reopen, and clean reentry passed under acceptance record `QA-B04-1028-0745`. Every unchecked item is governed by `OPEN_LOOP_DISPOSITIONS.json`; historical candidate statements below are not current release truth. Proceed with existing in-scope authorization through diagnosis, repair and retest; no repeat approval or magic phrase. Preserve Lens Next and all real security, migration, destructive and customer-data boundaries. Documentation-only continuity corrections are verification/push-only, not another production publication.
 
