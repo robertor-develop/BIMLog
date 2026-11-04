@@ -3,7 +3,8 @@ import { createRequire } from "node:module";
 import { randomUUID } from "node:crypto";
 const { Client } = createRequire(import.meta.url)("pg");
 const schema = `ux_search_${randomUUID().replaceAll("-", "")}`;
-const fixture = new Client({host:"127.0.0.1",port:55469,user:"postgres",database:"bimlog_rfi_test",connectionTimeoutMillis:3000});
+const fixtureDatabaseUrl = process.env.BIMLOG_UX_SEARCH_DATABASE_URL ?? "postgresql://postgres@127.0.0.1:55469/bimlog_rfi_test";
+const fixture = new Client({connectionString:fixtureDatabaseUrl,connectionTimeoutMillis:3000});
 await fixture.connect();
 await fixture.query(`CREATE SCHEMA ${schema}`);
 await fixture.query(`SET search_path TO ${schema}`);
@@ -11,7 +12,9 @@ for (const table of ["companies","users","projects","project_members","project_d
   await fixture.query(`CREATE TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
 }
 await fixture.query("ALTER TABLE companies ADD COLUMN IF NOT EXISTS retired_into_company_id integer, ADD COLUMN IF NOT EXISTS retired_at timestamptz");
-process.env.PROD_DATABASE_URL = `postgresql://postgres@127.0.0.1:55469/bimlog_rfi_test?options=${encodeURIComponent('-csearch_path='+schema)}`;
+const scopedDatabaseUrl = new URL(fixtureDatabaseUrl);
+scopedDatabaseUrl.searchParams.set("options", `-csearch_path=${schema}`);
+process.env.PROD_DATABASE_URL = scopedDatabaseUrl.toString();
 delete process.env.SENDGRID_API_KEY;
 const {pool} = await import("@workspace/db");
 const {default:express} = await import("express");
