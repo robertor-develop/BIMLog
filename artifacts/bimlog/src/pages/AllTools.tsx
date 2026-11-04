@@ -36,7 +36,7 @@ export function AllTools() {
   return (
     <div className="app-shell">
       <MasterSidebar />
-      <main id="main-content" tabIndex={-1} className="all-tools-page" style={{ flex: 1, minWidth: 0, overflow: "auto", padding: "28px clamp(18px, 4vw, 48px)" }}>
+      <main id="main-content" tabIndex={-1} data-capability-directory="complete-project-tools" className="all-tools-page" style={{ flex: 1, minWidth: 0, overflow: "auto", padding: "28px clamp(18px, 4vw, 48px)" }}>
         <header style={{ maxWidth: 1120, margin: "0 auto 28px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}><Grid3X3 aria-hidden style={{ width: 24, height: 24, color: "#2563EB" }} /><h1 style={{ margin: 0, fontSize: 28 }}>{tt("All Tools", "Todas las herramientas")}</h1></div>
           <p style={{ color: "hsl(var(--muted-foreground))", maxWidth: 760 }}>{tt("Use daily navigation for routine work, or open any authorized BIMLog capability directly here.", "Use la navegación diaria para el trabajo habitual o abra directamente aquí cualquier capacidad autorizada de BIMLog.")}</p>

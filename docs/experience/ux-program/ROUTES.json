@@ -261,6 +261,13 @@
       "verification": "source route binding; runtime findings in audit/COVERAGE.md"
     },
     {
+      "route": "/projects/:id/submittal-reports",
+      "owner": "ProjectsSubmittalReports",
+      "availability": "gated",
+      "boundary": "authenticated project membership; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
       "route": "/projects/:id/:tab?",
       "owner": "ProjectDetail",
       "availability": "gated",
@@ -541,7 +548,7 @@
       "verification": "source route binding; runtime findings in audit/COVERAGE.md"
     },
     {
-      "route": "/lens-sync-review",
+      "route": "/lens-next-snapshot-replay",
       "owner": "LensSyncReview",
       "availability": "gated",
       "boundary": "authenticated; feature checks still apply",

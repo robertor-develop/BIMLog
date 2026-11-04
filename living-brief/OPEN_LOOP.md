@@ -6857,3 +6857,19 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [ ] Push the complete Block 40 candidate normally and verify exact remote equality.
 - [ ] Publish the exact ten-build Block 39/40 candidate through existing Replit Shell/Publish with schema action `NONE`; verify deployed commit/version/health/schema identity and three consecutive authenticated production rounds.
 - [ ] Continue with P201-P205 only after release acceptance. Ten authorized builds remain across Blocks 41-42; Block 41 is the next push-only boundary.
+
+## Parity Block 41 - P201-P205 - 2026-11-03
+
+- [x] Accept P201 RFI parity at `296d0be33`, P202 schedule parity at `aa85f5a12`, P203 submittal-report operations at `c685a1aa6`, P204 transmittal cancellation at `be4d7507c`, and P205 atomic workspace-state parity at `d57df5659`.
+- [x] Correct responsive submittal-report reflow and reconcile the governed route inventory, deterministic route graph and accessibility matrix through `87c58bd64`.
+- [x] Restore and additively prepare only the F-rooted disposable PostgreSQL proof fixture; no production data or schema was changed.
+- [ ] Push the complete Block 41 candidate normally and verify exact local/remote equality and every focused commit ancestry.
+- [ ] Continue with P206-P210 after Block 41 acceptance; publication and three authenticated production rounds are due after P210.
+
+## Parity Block 42 - P206-P210 release boundary - 2026-11-03
+
+- [x] Verify Block 41 exact local/remote equality at `414b6600cc52ff130bf934c579be8f12222735aa` and retain its five focused commits as ancestors.
+- [x] Accept P206 repair-execution bridge parity at `722ae24fb`, P207 support-conversation parity at `45b3ff959`, P208 signed Telegram webhook parity at `d50f76b18`, P209 closed-case satisfaction parity at `f8373b367`, and P210 final PUT-route parity plus Team Performance discovery at `b2c82c467`.
+- [x] Pass P206-P210 together, API/frontend TypeScript, frozen 796-route/495-gap inventory and the 11-gate principal workflow-continuity regression. The P208 local-browser retry used an isolated task-owned headless profile and passed desktop/mobile behavior with zero runtime errors.
+- [ ] Pass the exact-head complete pre-push gate, push normally and verify every focused commit plus exact local/remote equality.
+- [ ] Publish the exact P201-P210 candidate through the established Replit Shell/Publish path, verify deployed commit/version/schema/health, then pass three consecutive authenticated production rounds and independent acceptance.

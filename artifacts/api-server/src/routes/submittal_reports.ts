@@ -298,6 +298,7 @@ router.patch("/projects/:projectId/submittal-reports/:reportId/rename", authMidd
 
 // PATCH update item
 router.patch("/projects/:projectId/submittal-reports/:reportId/items/:itemId", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
   const reportId = Number(req.params.reportId);
   const itemId = Number(req.params.itemId);
   try {
@@ -307,7 +308,7 @@ router.patch("/projects/:projectId/submittal-reports/:reportId/items/:itemId", a
       if (req.body[f] !== undefined) allowed[f] = req.body[f];
     }
     const [updated] = await db.update(submittalItemsTable).set(allowed)
-      .where(and(eq(submittalItemsTable.id, itemId), eq(submittalItemsTable.reportId, reportId)))
+      .where(and(eq(submittalItemsTable.id, itemId), eq(submittalItemsTable.reportId, reportId), eq(submittalItemsTable.projectId, projectId)))
       .returning();
     if (!updated) { res.status(404).json({ error: "not_found" }); return; }
     res.json(updated);
@@ -321,7 +322,8 @@ router.post("/projects/:projectId/submittal-reports/:reportId/items", authMiddle
   const projectId = Number(req.params.projectId);
   const reportId = Number(req.params.reportId);
   try {
-    const [report] = await db.select().from(submittalReportsTable).where(eq(submittalReportsTable.id, reportId));
+    const [report] = await db.select().from(submittalReportsTable)
+      .where(and(eq(submittalReportsTable.id, reportId), eq(submittalReportsTable.projectId, projectId)));
     if (!report) { res.status(404).json({ error: "not_found" }); return; }
     const [item] = await db.insert(submittalItemsTable).values({
       reportId, projectId,
@@ -369,10 +371,11 @@ router.delete("/projects/:projectId/submittal-reports/:reportId", authMiddleware
 
 // DELETE item
 router.delete("/projects/:projectId/submittal-reports/:reportId/items/:itemId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
   const itemId = Number(req.params.itemId);
   const reportId = Number(req.params.reportId);
   try {
-    await db.delete(submittalItemsTable).where(and(eq(submittalItemsTable.id, itemId), eq(submittalItemsTable.reportId, reportId)));
+    await db.delete(submittalItemsTable).where(and(eq(submittalItemsTable.id, itemId), eq(submittalItemsTable.reportId, reportId), eq(submittalItemsTable.projectId, projectId)));
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
