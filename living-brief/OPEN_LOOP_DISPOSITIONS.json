@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "5a5fd8d63682195c922afce1c858d790579c32a16d4d34180932d4b2af0b2625",
-  "itemCount": 568,
+  "sourceSha256": "6b6d6797d4909f71f89cb66a8f1939853b39561563b6f8f45843044b57564346",
+  "itemCount": 569,
   "counts": {
-    "ACTIVE": 509,
+    "ACTIVE": 510,
     "SUPERSEDED": 47,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -12,7 +12,7 @@
   "dispositionCounts": {
     "ACTIVE_DEFECT": 398,
     "VALID_FUTURE_ROADMAP": 11,
-    "EXTERNAL_OWNER_INPUT": 100,
+    "EXTERNAL_OWNER_INPUT": 101,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 47,
     "CLOSED_WITH_EVIDENCE": 9
@@ -10897,6 +10897,25 @@
       "evidence": [
         "OPEN_LOOP.md:6875",
         "Parity Block 42 - P206-P210 release boundary - 2026-11-03"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "5f58205471725275",
+      "sourceLine": 6884,
+      "heading": "Block 43 release gates — 2026-11-04",
+      "statement": "Republish the corrected exact source and restart live acceptance at Round 1. The guided intake may proceed only after the existing Procore OAuth application variables are restored in the deployment; email credentials are neither required nor accepted.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6884",
+        "Block 43 release gates — 2026-11-04"
       ],
       "currentAuthority": false
     }

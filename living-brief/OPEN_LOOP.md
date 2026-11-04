@@ -6880,3 +6880,5 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - Remaining gates are exact-head build tail, normal push and remote equality, Replit Shell publication, deployed commit/version/health verification, and three authenticated production rounds.
 - Real provider-connected Procore acceptance remains truthful: no email credential request, no Ruben-account interference, no bypass of OAuth/MFA, and no automatic import. If the established authorized session cannot reach a configured Procore application, preserve that exact live-provider hold while verifying all independent BIMLog behavior.
 - Do not begin P216 or consume another queued block until these gates close.
+- [x] Correct the authenticated live BIMCorp approval mismatch at `e9903fe12` without granting unrelated tenants or bypassing Procore consent.
+- [ ] Republish the corrected exact source and restart live acceptance at Round 1. The guided intake may proceed only after the existing Procore OAuth application variables are restored in the deployment; email credentials are neither required nor accepted.
