@@ -6873,3 +6873,4 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [x] Pass P206-P210 together, API/frontend TypeScript, frozen 796-route/495-gap inventory and the 11-gate principal workflow-continuity regression. The P208 local-browser retry used an isolated task-owned headless profile and passed desktop/mobile behavior with zero runtime errors.
 - [ ] Pass the exact-head complete pre-push gate, push normally and verify every focused commit plus exact local/remote equality.
 - [ ] Publish the exact P201-P210 candidate through the established Replit Shell/Publish path, verify deployed commit/version/schema/health, then pass three consecutive authenticated production rounds and independent acceptance.
+- [x] Correct the independent P210 super-admin/no-project finding at `f6030d897`: project tools now require real project context, expose `requires-project` without an empty URL, and retain explicit negative regression coverage.

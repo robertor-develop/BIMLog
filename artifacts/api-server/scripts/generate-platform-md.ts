@@ -556,6 +556,7 @@ Activated Intake with a canonical contract displays authoritative saved setup in
 - Telegram provider webhook secrets never enter browser surfaces. Connection status and delivery operations remain visible, explicit-confirmation governed, duplicate safe and supported by an attributable operations trail.
 - Launch configuration, company service-delivery workflow, Lens knowledge classification/resolution, feature preferences, capacity profiles, Intake jobs and meeting drafts remain distinct capabilities with their existing authorization boundaries.
 - Team Performance and Resource Scheduling are directly discoverable in All Tools at the existing project-scoped commercial workspace; the directory entry grants no additional permission.
+- Project-audience tools require an actual project identifier for every role, including super administrators. Without one, All Tools reports that a project is required and emits no empty-project URL.
 - P210 is the P201–P210 publication boundary. Exact push, controlled Replit Shell/Publish, deployed identity, three authenticated production rounds and independent acceptance remain required external release gates.
 
 ## Browser performance and lazy-loading integrity — Build 205

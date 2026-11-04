@@ -82047,6 +82047,91 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "8a063e033e2f355253bae03857778b278f25ff6cc6698a4d922c2d11b4deb0a5"
+    },
+    {
+      "taskId": "bimlog-parity-block42-independent-correction-20261103",
+      "reviewedThroughCommit": "f6030d897559ad51480d6fda0f8d822e4cb432fe",
+      "reviewedAt": "2026-11-03T23:58:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "Correct, test, reconcile, push, publish and verify the independently identified P210 navigation defect"
+        ],
+        "operatorOnly": [
+          "External MFA or account-owner action only if the established authenticated production session cannot be recovered"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction remains inside BIMLog navigation and release authority."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "The project-context navigation invariant is now explicit and durable."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing positive, negative, authorization and isolation gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The capability remains visible while invalid empty-project navigation is prevented."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated platform authority now records the no-empty-project rule."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native bridge, installer, package or Navisworks-facing source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report, PDF, workbook or export layout changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, citation or governed interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The independent finding, corrective commit and remaining gates are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The correction is closed while exact-head release gates remain explicit."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "The reproduced defect, scope, correction and negative proof are recorded."
+        }
+      ],
+      "reason": "Reconcile the independent Block 42 P210 no-project navigation finding and accepted correction before the exact-head release gate.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ba63befecaf7de7df24e998029a38ca10f93ab422e8dd97ddcceea416e06e079"
     }
   ]
 }
