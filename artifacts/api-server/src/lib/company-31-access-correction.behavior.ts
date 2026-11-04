@@ -6,7 +6,7 @@ import {
   type ProviderOperation,
 } from "./provider-governance";
 
-const approved = new Set([31]);
+const approved = new Set([31, 44]);
 assert.equal(companyFullCommercialGrantApplies({ userCompanyId: 31, grantCompanyId: 31, companyActive: true, enabled: true }), true, "current member receives the company grant");
 assert.equal(companyFullCommercialGrantApplies({ userCompanyId: 31, grantCompanyId: 31, companyActive: true, enabled: true }), true, "future members assigned to the canonical company receive the same grant");
 assert.equal(companyFullCommercialGrantApplies({ userCompanyId: 38, grantCompanyId: 31, companyActive: true, enabled: true }), false, "separate Bimtech company is excluded");
@@ -15,6 +15,7 @@ assert.equal(companyFullCommercialGrantApplies({ userCompanyId: 38, grantCompany
 
 for (const operation of ["catalog", "authorize", "callback", "browse", "import", "disconnect"] as ProviderOperation[]) {
   assert.equal(providerOperationAllowedWithCompanyGrant({ provider: "procore", companyId: 31, operation, approvedCompanyIds: approved, rawApprovals: "" }), true, `company 31 receives Procore ${operation} approval`);
+  assert.equal(providerOperationAllowedWithCompanyGrant({ provider: "procore", companyId: 44, operation, approvedCompanyIds: approved, rawApprovals: "" }), true, `the active BIMCorp Inc company receives Procore ${operation} approval`);
   assert.equal(providerOperationAllowedWithCompanyGrant({ provider: "procore", companyId: 38, operation, approvedCompanyIds: approved, rawApprovals: "" }), false, `company 38 does not receive Procore ${operation} approval`);
 }
 assert.equal(providerOperationAllowedWithCompanyGrant({ provider: "procore", companyId: null, operation: "browse", approvedCompanyIds: approved, rawApprovals: "" }), false, "unscoped actor is not approved");
