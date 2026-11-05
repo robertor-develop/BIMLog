@@ -10,7 +10,7 @@ from docx.enum.style import WD_STYLE_TYPE
 
 ROOT = Path(r"F:\BIMLog\Worktrees\bimlog-user-manual-20261105")
 SHOTS = Path(r"C:\Users\soporte\Documents\Codex\2026-10-27\bimlog-main-04-06\outputs")
-OUT = ROOT / "docs" / "user-manual" / "BIMLog-Manual-de-Usuario-ES.docx"
+OUT = ROOT / "docs" / "user-manual" / "BIMLog-Manual-de-Usuario-ES-v2.docx"
 
 NAVY = "12304A"
 BLUE = "146C94"
@@ -53,6 +53,20 @@ def body(text, bold_lead=None):
         p.add_run(bold_lead).bold = True
         p.add_run(text[len(bold_lead):])
     else: p.add_run(text)
+    return p
+
+def hyperlink(paragraph, text, url):
+    part = paragraph.part
+    rid = part.relate_to(url, "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink", is_external=True)
+    link = OxmlElement("w:hyperlink"); link.set(qn("r:id"), rid)
+    run = OxmlElement("w:r"); props = OxmlElement("w:rPr")
+    color = OxmlElement("w:color"); color.set(qn("w:val"), BLUE); props.append(color)
+    underline = OxmlElement("w:u"); underline.set(qn("w:val"), "single"); props.append(underline)
+    run.append(props); node = OxmlElement("w:t"); node.text = text; run.append(node); link.append(run); paragraph._p.append(link)
+
+def route_link(label, path):
+    p = doc.add_paragraph(); p.paragraph_format.space_after = Pt(4)
+    hyperlink(p, label, f"https://bimlog.app{path}")
     return p
 
 def bullets(items):
@@ -122,6 +136,26 @@ toc = ["1. Acceso, navegación y roles","2. Sede, proyectos e ingreso de trabajo
 bullets(toc)
 heading("Convenciones",2)
 bullets(["Las capturas son ejemplos reales; los datos visibles pueden variar por proyecto.","Los botones de crear, aprobar, emitir, sincronizar o exportar requieren permisos aplicables.","Una acción queda completa cuando el registro persiste después de guardar, actualizar y volver a abrir.","La IA ayuda a preparar y clasificar; la autoridad y aprobación permanecen en el usuario autorizado."])
+
+page(); heading("Recorridos por rol")
+body("Use estos recorridos como punto de entrada. El directorio Todas las herramientas conserva acceso visible a todas las capacidades autorizadas.")
+roles = [
+    ("Usuario de proyecto", "Sede, proyecto, archivos, RFIs, entregables y reuniones", "/all-tools"),
+    ("Coordinador", "Centro de mando, coordinación, reuniones, Lens e informes", "/help?view=guides&topic=command-center"),
+    ("Administrador de proyecto", "Equipo, permisos, directorio, flujos y configuración", "/help?view=guides&topic=directory-administration"),
+    ("Administrador de empresa", "Catálogos, gobierno, conexiones e integraciones", "/help?view=guides&topic=integrations"),
+    ("Usuario financiero", "Estructura de costos, presupuesto, contratos, APU y evidencia", "/help?view=guides&topic=commercial-overview"),
+]
+t=doc.add_table(rows=1,cols=3); t.alignment=WD_TABLE_ALIGNMENT.CENTER
+for i,v in enumerate(["Rol","Recorrido recomendado","Abrir en BIMLog"]): shade(t.cell(0,i),NAVY); cell_text(t.cell(0,i),v,True,"FFFFFF")
+for role, journey, path in roles:
+    c=t.add_row().cells; cell_text(c[0],role,True); cell_text(c[1],journey); cell_text(c[2],"Enlace directo")
+    hyperlink(c[2].paragraphs[0], " Abrir", f"https://bimlog.app{path}")
+heading("Accesos rápidos",2)
+route_link("Abrir el Centro de ayuda interactivo", "/help")
+route_link("Abrir Todas las herramientas", "/all-tools")
+route_link("Reportar un problema o sugerencia", "/feedback")
+tip("Uso en pantalla", "Los enlaces azules abren la ruta correspondiente en BIMLog. Inicie sesión y confirme el proyecto antes de ejecutar una acción.")
 
 page(); heading("1. Acceso, navegación y roles")
 body("Al ingresar, BIMLog presenta la Sede y las herramientas correspondientes al usuario. La navegación principal favorece el trabajo diario; Todas las herramientas conserva acceso visible al catálogo completo autorizado.")
