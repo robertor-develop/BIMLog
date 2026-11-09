@@ -1,0 +1,15 @@
+# BIMLog
+
+> BIMLog is an accountable construction-coordination platform for AEC teams. It connects controlled project records, RFIs, submittals, transmittals, change orders, files, reports, and Navisworks viewpoints in one traceable project history.
+
+## Public product information
+
+- [Product overview](https://bimlog.app/)
+- [Features](https://bimlog.app/features)
+- [Pricing](https://bimlog.app/pricing)
+- [About BIMLog](https://bimlog.app/about)
+- [Contact](https://bimlog.app/contact)
+
+## Security and agent access
+
+BIMLog customer, company, project, document, and job data is private. It is not public crawl content and must not be inferred from this file. Authenticated integrations and agent tools require a current BIMLog user session, company and project authorization, applicable role permissions, provider approval, and server-side audit controls. This file documents public product information only; it is not an API credential, authorization grant, tool manifest, or proof of indexing.

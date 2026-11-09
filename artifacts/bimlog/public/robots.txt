@@ -4,3 +4,5 @@ Disallow: /api/
 Disallow: /admin
 Disallow: /profile
 Disallow: /settings/
+
+Sitemap: https://bimlog.app/sitemap.xml
