@@ -82665,6 +82665,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d661e8899a2e68f5a1bfb71ee7fb065ee4b156bb9f532f9b4024088183c7879e"
+    },
+    {
+      "taskId": "ROADMAP_V11_BM12_PUBLIC_PROOF_PRIVACY_20261110",
+      "reviewedAt": "2026-11-10T16:50:00.000Z",
+      "reviewedThroughCommit": "62e38884e93632b40d70872bffe5f499699287ad",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem boundary or capability graph changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No repository operating instruction changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Public proof now removes private identifiers while preserving truthful product evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product promise or user journey changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, schema, authorization, session, export, provider or customer-data boundary changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, installer or package source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export payload contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or governed interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The BM12 public-proof privacy defect and bounded correction are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Private identifiers are removed from the public proof assets and originals are no longer bundled publicly."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The blocking platform audit remains independently enforced."
+        }
+      ],
+      "reason": "Remove private account, company, project and live-record text from BM12 public product proof while preserving real UI evidence and bilingual disclosure.",
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/public/images/product-proof/project-controls-sanitized.png",
+        "artifacts/bimlog/public/images/product-proof/project-controls.png",
+        "artifacts/bimlog/public/images/product-proof/project-dashboard-sanitized.png",
+        "artifacts/bimlog/public/images/product-proof/project-dashboard.png",
+        "artifacts/bimlog/src/lib/landing-story.behavior.ts",
+        "artifacts/bimlog/src/pages/Landing.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ea7adb0a8839c97b547a06f10de5b341607d86aeccb0240ef3553cd55be9103f"
     }
   ]
 }

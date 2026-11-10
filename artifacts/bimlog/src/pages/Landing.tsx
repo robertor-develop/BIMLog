@@ -107,12 +107,12 @@ export function Landing() {
           </ol>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6" aria-label={tt("Actual BIMLog product screens", "Pantallas reales del producto BIMLog")}>
             <figure className="card overflow-hidden">
-              <img src="/images/product-proof/project-dashboard.png" alt={tt("BIMLog project dashboard showing connected project workspaces", "Panel de proyecto BIMLog mostrando espacios de trabajo conectados")} className="w-full aspect-video object-cover object-top" loading="lazy" />
-              <figcaption className="p-4 text-sm text-muted-foreground">{tt("Actual product screen: open a project and move between its governed workspaces.", "Pantalla real del producto: abra un proyecto y navegue entre sus espacios controlados.")}</figcaption>
+              <img src="/images/product-proof/project-dashboard-sanitized.png" alt={tt("Redacted BIMLog project dashboard showing connected project workspaces", "Panel de proyecto BIMLog redactado mostrando espacios de trabajo conectados")} className="w-full aspect-video object-cover object-top" loading="lazy" />
+              <figcaption className="p-4 text-sm text-muted-foreground">{tt("Redacted actual product screen: open a project and move between its governed workspaces. Account and project identifiers are removed from this public preview.", "Pantalla real redactada del producto: abra un proyecto y navegue entre sus espacios controlados. Los identificadores de cuenta y proyecto se eliminaron de esta vista pública.")}</figcaption>
             </figure>
             <figure className="card overflow-hidden">
-              <img src="/images/product-proof/project-controls.png" alt={tt("BIMLog project controls with status and progress records", "Controles de proyecto BIMLog con registros de estado y avance")} className="w-full aspect-video object-cover object-top" loading="lazy" />
-              <figcaption className="p-4 text-sm text-muted-foreground">{tt("Actual product screen: review status, responsibility, and the next project action.", "Pantalla real del producto: revise estado, responsabilidad y la próxima acción del proyecto.")}</figcaption>
+              <img src="/images/product-proof/project-controls-sanitized.png" alt={tt("Redacted BIMLog project controls with status and progress records", "Controles de proyecto BIMLog redactados con registros de estado y avance")} className="w-full aspect-video object-cover object-top" loading="lazy" />
+              <figcaption className="p-4 text-sm text-muted-foreground">{tt("Redacted actual product screen: review status, responsibility, and the next project action. Live record details are excluded from this public preview.", "Pantalla real redactada del producto: revise estado, responsabilidad y la próxima acción del proyecto. Los detalles de registros activos se excluyen de esta vista pública.")}</figcaption>
             </figure>
           </div>
           <Link href="/features" className="inline-flex min-h-11 items-center gap-2 mt-6 font-semibold text-primary hover:underline underline-offset-4">
