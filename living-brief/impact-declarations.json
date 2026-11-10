@@ -82450,6 +82450,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6954a3a6c0860b26816d3559507063406aaac74784171f2f383af700bca75930"
+    },
+    {
+      "taskId": "bimlog-final-non-procore-row-reconciliation-20261110",
+      "reviewedThroughCommit": "f359f944753d7b5d7e32cded7ec979772ef93f0e",
+      "reviewedAt": "2026-11-10T15:30:00.000Z",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership or cross-product boundary changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No repository operating instruction or agent responsibility changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing authorization, privacy, evidence and release gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Full capability remains visible; authenticated marketing actions now continue into the product instead of restarting registration."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, schema, service, credential, provider or customer-data boundary changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, installer or package source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or governed interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The three previously flagged rows and the bounded authenticated Landing correction are reconciled with exact test evidence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Revision/action and privacy rows are evidence-bound, the marketing CTA defect is corrected, and Procore remains the final external gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction arose from the requested targeted reconciliation; no broader platform-audit severity is reclassified."
+        }
+      ],
+      "reason": "Reconcile the final internally executable non-Procore rows, correct authenticated Landing calls to action, and preserve Procore production approval as the final external gate.",
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/lib/landing-story.behavior.ts",
+        "artifacts/bimlog/src/pages/Landing.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "471ff455a8e00d85eb191313afccf8d74198f185780f4a1c70882a0ad09b906f"
     }
   ]
 }

@@ -322,12 +322,12 @@ export function Landing() {
             <div className="text-sm text-muted-foreground">{tt("Create an account, follow the guided setup, and start your first controlled project.", "Crea una cuenta, sigue la configuración guiada e inicia tu primer proyecto controlado.")}</div>
           </div>
           <div className="flex gap-3 flex-shrink-0">
-            <Link href="/login">
+            {!user && <Link href="/login">
               <Button variant="outline" className="text-sm px-5">{tt("Sign In", "Iniciar Sesión")}</Button>
-            </Link>
-            <Link href="/register">
+            </Link>}
+            <Link href={user ? "/dashboard" : "/register"}>
               <Button className="gap-2 text-sm px-5">
-                {tt("Create Account", "Crear Cuenta")}
+                {user ? tt("Open Dashboard", "Abrir panel") : tt("Create Account", "Crear Cuenta")}
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
@@ -397,9 +397,9 @@ export function Landing() {
           : availability
             ? tt(`The current free offer supports ${availability.freeOffer.projectLimit} active project and up to ${availability.freeOffer.memberLimit} members. Email verification is required before project setup. No evaluation duration is promised unless your entitlement or agreement states one.`, `La oferta gratuita actual admite ${availability.freeOffer.projectLimit} proyecto activo y hasta ${availability.freeOffer.memberLimit} miembros. Se requiere verificar el correo antes de configurar proyectos. No se promete una duración de evaluación salvo que su habilitación o acuerdo la establezca.`)
             : tt("Checking the current free offer…", "Verificando la oferta gratuita actual…")}</p>
-        <Link href="/register">
+        <Link href={user ? "/dashboard" : "/register"}>
           <Button size="lg" className="gap-2 text-base px-8">
-            {tt("Start for free", "Empieza gratis")}
+            {user ? tt("Continue to your projects", "Continuar a sus proyectos") : tt("Start for free", "Empieza gratis")}
             <ArrowRight className="w-4 h-4" />
           </Button>
         </Link>

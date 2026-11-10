@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 
 const page = readFileSync(new URL("../pages/Landing.tsx", import.meta.url), "utf8");
-assert.match(page, /user \? "\/dashboard" : "\/register"/);
+assert.equal((page.match(/user \? "\/dashboard" : "\/register"/g) ?? []).length, 3);
+assert.match(page, /!user && <Link href="\/login">/);
+assert.match(page, /user \? tt\("Open Dashboard", "Abrir panel"\) : tt\("Create Account", "Crear Cuenta"\)/);
+assert.match(page, /user \? tt\("Continue to your projects", "Continuar a sus proyectos"\) : tt\("Start for free", "Empieza gratis"\)/);
 assert.match(page, /Actual product screen/);
 for (const file of ["project-dashboard.png", "project-controls.png"]) {
   assert.equal(existsSync(new URL(`../../public/images/product-proof/${file}`, import.meta.url)), true);
