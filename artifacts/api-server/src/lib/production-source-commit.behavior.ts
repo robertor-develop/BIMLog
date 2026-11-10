@@ -1,9 +1,14 @@
 import assert from "node:assert/strict";
-import { resolveProductionSourceCommit, selectUniqueRemoteTreeMatch, unwrapReplitPublishChain } from "./production-source-commit";
+import { resolveProductionSourceCommit, selectUniqueRemoteTreeMatch, unwrapReplitPublishChain, verifyReplitDeploymentCommit } from "./production-source-commit";
 
 const head = "a".repeat(40);
 const remote = "b".repeat(40);
 const tree = "c".repeat(40);
+
+assert.equal(verifyReplitDeploymentCommit(head, tree, { commit: head, tree, subject: "Release" }), head);
+assert.throws(() => verifyReplitDeploymentCommit("short", tree, { commit: head, tree, subject: "Release" }), /full Git commit/);
+assert.throws(() => verifyReplitDeploymentCommit(remote, tree, { commit: head, tree, subject: "Release" }), /differs/);
+assert.throws(() => verifyReplitDeploymentCommit(head, "d".repeat(40), { commit: head, tree, subject: "Release" }), /changes/);
 
 assert.equal(resolveProductionSourceCommit({ headCommit: head, headTree: tree, replitEnvironment: false }), head);
 assert.equal(resolveProductionSourceCommit({ headCommit: head, headTree: tree, headSubject: "Published your App", parentCommit: remote, parentTree: tree, replitEnvironment: false }), remote);
