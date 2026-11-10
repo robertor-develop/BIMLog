@@ -83022,6 +83022,76 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "90cffdcae7be1101e9f1e29a6a4b64df90add452d0ba7eccf6dc2ce4e045481e"
+    },
+    {
+      "taskId": "REPLIT_CHECKED_OUT_SOURCE_VERIFICATION_20261110",
+      "reviewedAt": "2026-11-10T22:38:00.000Z",
+      "reviewedThroughCommit": "f766df624f8258e22638fe808e42e0d1cae301ef",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Only exact deployment-source verification changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No repository operating instruction changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The checked-out Replit source remains commit- and tree-verified with focused regression and type evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No user-facing product objective changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime capability, schema or authorization boundary changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks bridge, installer or package source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The checked-out-source verification and current release state are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Final push, republish, deployed identity and live acceptance remain explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent audit and live acceptance requirements remain unchanged."
+        }
+      ],
+      "reason": "Verify the exact checked-out Replit publication source even when the builder omits its optional commit environment variable.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1f4935664eb7a4d10c0e2dedee279f9400d83134e64c77171d181b76e13c125d"
     }
   ]
 }

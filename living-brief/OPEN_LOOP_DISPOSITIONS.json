@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "8e9bd2e79ffd385f69c32f28d60592a143cd9f19b3dacf0cba68e6a2f7c64f8b",
+  "sourceSha256": "1e4fd3b2773e7b2c76103f07dbb1b488338db228cb2def1ba69bab3542529eb9",
   "itemCount": 574,
   "counts": {
     "ACTIVE": 515,
@@ -10993,10 +10993,10 @@
       "currentAuthority": false
     },
     {
-      "id": "c80fa70ff97caab7",
+      "id": "88f47c3c9dddf747",
       "sourceLine": 6923,
       "heading": "2026-11-10 — Replit deployment-source verification correction",
-      "statement": "Reconcile this release receipt, rebuild in the existing Replit Shell, publish the exact reconciled commit, verify deployed identity/version/health and complete non-mutating authenticated Lens UI acceptance.",
+      "statement": "Reconcile and push this final corrective source, rebuild in the existing Replit Shell, publish the exact reconciled commit, verify deployed identity/version/health and complete non-mutating authenticated Lens UI acceptance.",
       "classification": "ACTIVE",
       "dispositionCategory": "ACTIVE_DEFECT",
       "workClass": "PROVIDER_EVIDENCE",
