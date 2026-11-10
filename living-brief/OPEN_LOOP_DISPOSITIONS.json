@@ -1,17 +1,17 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "65bbc7ec9823548bab4f40e306c17e68b7b2d0889b657e6afcb8a2f4f5531d38",
-  "itemCount": 570,
+  "sourceSha256": "50d6a2256b85d369099a418e9c7a14ea9296775d6b5299b3b00e0d582357a82a",
+  "itemCount": 572,
   "counts": {
-    "ACTIVE": 511,
+    "ACTIVE": 513,
     "SUPERSEDED": 47,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 398,
-    "VALID_FUTURE_ROADMAP": 11,
+    "ACTIVE_DEFECT": 399,
+    "VALID_FUTURE_ROADMAP": 12,
     "EXTERNAL_OWNER_INPUT": 102,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 47,
@@ -10932,6 +10932,44 @@
       "evidence": [
         "OPEN_LOOP.md:6895",
         "Block 43 release gates — 2026-11-04"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "3cdaac9c810994c6",
+      "sourceLine": 6902,
+      "heading": "Lens saved-issue recovery closure - 2026-11-10",
+      "statement": "After normal push and publication cadence, perform non-mutating live confirmation that the deployed UI loads cleanly. Do not recreate or alter real issue `#1079` merely to prove recovery.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6902",
+        "Lens saved-issue recovery closure - 2026-11-10"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "156e5570350d14c6",
+      "sourceLine": 6903,
+      "heading": "Lens saved-issue recovery closure - 2026-11-10",
+      "statement": "Procore production OAuth activation remains the final separate external-provider gate and is intentionally deferred until all independent work is complete.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "VALID_FUTURE_ROADMAP",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6903",
+        "Lens saved-issue recovery closure - 2026-11-10"
       ],
       "currentAuthority": false
     }

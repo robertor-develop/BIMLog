@@ -6893,3 +6893,11 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - Do not begin P216 or consume another queued block until these gates close.
 - [x] Correct the authenticated live BIMCorp approval mismatch at `e9903fe12` without granting unrelated tenants or bypassing Procore consent.
 - [ ] Republish the corrected exact source and restart live acceptance at Round 1. The guided intake may proceed only after the existing Procore OAuth application variables are restored in the deployment; email credentials are neither required nor accepted.
+
+## Lens saved-issue recovery closure - 2026-11-10
+
+- [x] Persist and validate the minimal saved-creation receipt across a Lens panel reload so an unchanged retry reopens the exact issue without recapture or duplicate creation.
+- [x] Deny edited-draft creation while a different saved receipt remains pending, preserve project/model/session isolation, omit tokens and customer content from recovery storage, and report storage fallback without a silent catch.
+- [x] Pass the exact synthetic `#1079` recovery regression, connected Lens acceptance, frontend typecheck, production build, blocking platform audit, tracked-secret scan and database-safety gates without mutating the real issue or production data.
+- [ ] After normal push and publication cadence, perform non-mutating live confirmation that the deployed UI loads cleanly. Do not recreate or alter real issue `#1079` merely to prove recovery.
+- [ ] Procore production OAuth activation remains the final separate external-provider gate and is intentionally deferred until all independent work is complete.
