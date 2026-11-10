@@ -6915,3 +6915,10 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [x] Push exact product source `570434f7d40b40972def40a6873075b7c975245c` to canonical `main` and verify remote equality.
 - [ ] Publish the reconciled exact source through the existing Replit Shell/Publish path, verify deployed identity and health, and complete non-mutating authenticated live UI acceptance. Do not alter a real customer assignment solely to prove the control.
 
+## 2026-11-10 — Replit deployment-source verification correction
+
+- [x] Diagnose the failed Replit publication from the exact builder log: the isolated builder contained the checked-out source commit but no matching `origin/*` ref, so the generic remote-ref guard found zero matches.
+- [x] Accept `REPLIT_GIT_COMMIT_SHA` only inside the Replit publication boundary after verifying the local commit, exact checked-out tree and optional accepted-source identity; preserve the existing remote-match guard everywhere else.
+- [x] Pass focused deployment-source behavior, API TypeScript and deterministic production API build checks; push exact corrective source `31a6ce1ffde5fe058ad1f382291b947997372342` normally and verify canonical remote equality.
+- [ ] Reconcile this release receipt, rebuild in the existing Replit Shell, publish the exact reconciled commit, verify deployed identity/version/health and complete non-mutating authenticated Lens UI acceptance.
+

@@ -82952,6 +82952,76 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "1ab336b7d0e4618d6fe5f6421b4b5bfabb674658260aa266174849d61e666fda"
+    },
+    {
+      "taskId": "REPLIT_DEPLOYMENT_COMMIT_VERIFICATION_20261110",
+      "reviewedAt": "2026-11-10T22:17:29.950Z",
+      "reviewedThroughCommit": "31a6ce1ffde5fe058ad1f382291b947997372342",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction changes only deployment-source verification and preserves BIMLog product ownership and capability boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No repository operating instruction changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction strengthens exact-source publication proof and is covered by focused behavior, type and deterministic production-build checks."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No user-facing product objective or workflow changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Only the Replit deployment-source identity boundary changed; runtime, schema, authorization and provider boundaries are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks bridge, installer or package source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export payload contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or governed interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The diagnosed publication failure, exact correction, evidence and remaining release gates are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Rebuild, republish, deployed identity and non-mutating live acceptance remain explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing independent audit and release-acceptance requirements remain unchanged."
+        }
+      ],
+      "reason": "Allow exact Replit publication-source verification when the isolated builder lacks remote refs, without weakening generic publication identity checks.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "90cffdcae7be1101e9f1e29a6a4b64df90add452d0ba7eccf6dc2ce4e045481e"
     }
   ]
 }
