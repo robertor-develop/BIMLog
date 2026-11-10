@@ -1,12 +1,11 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
+  "reconciledThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "c55cc69132d2765a5a11822835f060de3edefc25afd3f9f6740beff15941e8bc",
+  "bundleSha256": "fe48f684b0a173c37d23f9a6cd53f5d144537f001c458f56619416714b731243",
   "impact": {
-    "baselineCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
+    "baselineCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
     "changedPaths": [
-      "living-brief/AUDIT.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/STATUS.md",
@@ -25,11 +24,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewedThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewTask": "bimlog-main04-06-non-procore-completion-audit-20261104",
+      "reconciledThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewedThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewTask": "bimlog-help-release-field-gate-reconciliation-20261110",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-04T11:50:00.000Z"
+      "semanticReviewedAt": "2026-11-10T15:20:00.000Z"
     },
     {
       "key": "claude",
@@ -37,11 +36,11 @@
       "sha256": "493032a5cbf9da05e5a0f1259e2e53e774ee47ad3194adf49329c390a31506d2",
       "sourceChangedAt": "2026-11-04T03:54:58-05:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewedThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewTask": "bimlog-main04-06-non-procore-completion-audit-20261104",
+      "reconciledThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewedThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewTask": "bimlog-help-release-field-gate-reconciliation-20261110",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-04T11:50:00.000Z"
+      "semanticReviewedAt": "2026-11-10T15:20:00.000Z"
     },
     {
       "key": "quality",
@@ -49,11 +48,11 @@
       "sha256": "900bfcd8248689706c40a71cdb086a804613b01d93e4d91b24a97b0c1a4fdbe3",
       "sourceChangedAt": "2026-11-03T12:49:15-05:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewedThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewTask": "bimlog-main04-06-non-procore-completion-audit-20261104",
+      "reconciledThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewedThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewTask": "bimlog-help-release-field-gate-reconciliation-20261110",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-04T11:50:00.000Z"
+      "semanticReviewedAt": "2026-11-10T15:20:00.000Z"
     },
     {
       "key": "vision",
@@ -61,11 +60,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewedThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewTask": "bimlog-main04-06-non-procore-completion-audit-20261104",
+      "reconciledThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewedThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewTask": "bimlog-help-release-field-gate-reconciliation-20261110",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-04T11:50:00.000Z"
+      "semanticReviewedAt": "2026-11-10T15:20:00.000Z"
     },
     {
       "key": "platform",
@@ -73,11 +72,11 @@
       "sha256": "1e379c51dc06550799655eda2c8a020fc61d47ca4d18bc2ecbccda38c24de8e9",
       "sourceChangedAt": "2026-11-03T22:08:03-05:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewedThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewTask": "bimlog-main04-06-non-procore-completion-audit-20261104",
+      "reconciledThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewedThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewTask": "bimlog-help-release-field-gate-reconciliation-20261110",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-04T11:50:00.000Z"
+      "semanticReviewedAt": "2026-11-10T15:20:00.000Z"
     },
     {
       "key": "plugin",
@@ -85,11 +84,11 @@
       "sha256": "1cd283c3a412062addee3585b24026866574bd50d72624af9044b8a89069af00",
       "sourceChangedAt": "2026-11-03T12:39:34-05:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewedThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewTask": "bimlog-main04-06-non-procore-completion-audit-20261104",
+      "reconciledThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewedThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewTask": "bimlog-help-release-field-gate-reconciliation-20261110",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-04T11:50:00.000Z"
+      "semanticReviewedAt": "2026-11-10T15:20:00.000Z"
     },
     {
       "key": "report_design_system",
@@ -97,11 +96,11 @@
       "sha256": "0f0a304204fb53a6d7e6e0259c21015b9473c130f753a2e30335604e9fa74b0f",
       "sourceChangedAt": "2026-11-03T17:16:18-05:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewedThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewTask": "bimlog-main04-06-non-procore-completion-audit-20261104",
+      "reconciledThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewedThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewTask": "bimlog-help-release-field-gate-reconciliation-20261110",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-04T11:50:00.000Z"
+      "semanticReviewedAt": "2026-11-10T15:20:00.000Z"
     },
     {
       "key": "standards_register",
@@ -109,47 +108,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewedThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewTask": "bimlog-main04-06-non-procore-completion-audit-20261104",
+      "reconciledThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewedThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewTask": "bimlog-help-release-field-gate-reconciliation-20261110",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-04T11:50:00.000Z"
+      "semanticReviewedAt": "2026-11-10T15:20:00.000Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "9a0ef2780edc43188c1f53a0f40358ee94153e37cc3ee0fa18397358988cc2eb",
-      "sourceChangedAt": "2026-11-04T11:50:00.000Z",
+      "sha256": "1d83311357ef1c00261b03aab5b6a8338963bc15a59ce01423d7cf55a199c372",
+      "sourceChangedAt": "2026-11-10T15:20:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewedThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewTask": "bimlog-main04-06-non-procore-completion-audit-20261104",
+      "reconciledThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewedThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewTask": "bimlog-help-release-field-gate-reconciliation-20261110",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-11-04T11:50:00.000Z"
+      "semanticReviewedAt": "2026-11-10T15:20:00.000Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "e5b9e09ac1581beb9c1ba0fbb0d943f6075c17e9427cbd2ebe0ca42f29fe0461",
-      "sourceChangedAt": "2026-11-04T11:50:00.000Z",
+      "sha256": "bb40724821172d7890b606b5a73964b2055a4bd47a611db5fdafbdc01bb28f5b",
+      "sourceChangedAt": "2026-11-10T15:20:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewedThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewTask": "bimlog-main04-06-non-procore-completion-audit-20261104",
+      "reconciledThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewedThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewTask": "bimlog-help-release-field-gate-reconciliation-20261110",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-11-04T11:50:00.000Z"
+      "semanticReviewedAt": "2026-11-10T15:20:00.000Z"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
       "sha256": "c58e64b3001d9f9ff189d76ecd9ee354f76c6f0431deaa2234c75227b5a4a7ec",
-      "sourceChangedAt": "2026-11-04T11:50:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewedThroughCommit": "edcf79e80a1d840e0419c186119ccfafdda91db9",
-      "semanticReviewTask": "bimlog-main04-06-non-procore-completion-audit-20261104",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-11-04T11:50:00.000Z"
+      "sourceChangedAt": "2026-11-04T06:55:09-05:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewedThroughCommit": "ff6572f16a6a2b98060d7bb87b6d7ecab8c5d961",
+      "semanticReviewTask": "bimlog-help-release-field-gate-reconciliation-20261110",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-11-10T15:20:00.000Z"
     }
   ]
 }

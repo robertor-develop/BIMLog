@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "e5b9e09ac1581beb9c1ba0fbb0d943f6075c17e9427cbd2ebe0ca42f29fe0461",
-  "itemCount": 571,
+  "sourceSha256": "bb40724821172d7890b606b5a73964b2055a4bd47a611db5fdafbdc01bb28f5b",
+  "itemCount": 570,
   "counts": {
-    "ACTIVE": 512,
+    "ACTIVE": 511,
     "SUPERSEDED": 47,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -12,7 +12,7 @@
   "dispositionCounts": {
     "ACTIVE_DEFECT": 398,
     "VALID_FUTURE_ROADMAP": 11,
-    "EXTERNAL_OWNER_INPUT": 103,
+    "EXTERNAL_OWNER_INPUT": 102,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 47,
     "CLOSED_WITH_EVIDENCE": 9
@@ -39,10 +39,9 @@
   ],
   "currentAuthority": {
     "marker": "CURRENT_OPEN_LOOP_AUTHORITY",
-    "heading": "Current open-loop authority — final external holds — 2026-11-04",
+    "heading": "Current open-loop authority — final external hold — 2026-11-10",
     "uncheckedItems": [
-      "07a7bd4d813513eb",
-      "3d4d6578c885e2d6"
+      "4df35da1d7fbbe2d"
     ]
   },
   "duplicateStatements": [],
@@ -98,10 +97,10 @@
   ],
   "items": [
     {
-      "id": "07a7bd4d813513eb",
+      "id": "4df35da1d7fbbe2d",
       "sourceLine": 5,
-      "heading": "Current open-loop authority — final external holds — 2026-11-04 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->",
-      "statement": "Activate the already-implemented Procore flow only after the authorized production `PROCORE_CLIENT_ID` and `PROCORE_CLIENT_SECRET` are available; keep this final configuration gate isolated from completed BIMLog product work and do not request email credentials or contact Ruben.",
+      "heading": "Current open-loop authority — final external hold — 2026-11-10 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->",
+      "statement": "Complete Procore production activation after Procore approves the developer organization and enables production promotion for the existing BIMLog app. The production `PROCORE_CLIENT_ID` and `PROCORE_CLIENT_SECRET` are present, but live OAuth correctly remains unaccepted while the app has only Sandbox Version 0.1.0. Keep this external-provider gate isolated from completed BIMLog product work and do not request email credentials or contact Ruben.",
       "classification": "ACTIVE",
       "dispositionCategory": "EXTERNAL_OWNER_INPUT",
       "workClass": "FIELD_EVIDENCE",
@@ -112,26 +111,7 @@
       },
       "evidence": [
         "OPEN_LOOP.md:5",
-        "Current open-loop authority — final external holds — 2026-11-04 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->"
-      ],
-      "currentAuthority": true
-    },
-    {
-      "id": "3d4d6578c885e2d6",
-      "sourceLine": 6,
-      "heading": "Current open-loop authority — final external holds — 2026-11-04 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->",
-      "statement": "Preserve Ruben's deferred physical Navisworks 2025 confirmation as post-closure field evidence; it does not reopen accepted Platform builds and no physical 2025 success is claimed on this workstation.",
-      "classification": "ACTIVE",
-      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
-      "workClass": "FIELD_EVIDENCE",
-      "ownership": {
-        "owner": "Field acceptance",
-        "route": null,
-        "module": "evidence/field-acceptance"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:6",
-        "Current open-loop authority — final external holds — 2026-11-04 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->"
+        "Current open-loop authority — final external hold — 2026-11-10 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->"
       ],
       "currentAuthority": true
     },

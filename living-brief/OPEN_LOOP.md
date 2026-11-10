@@ -1,9 +1,9 @@
-## Current open-loop authority — final external holds — 2026-11-04 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
+## Current open-loop authority — final external hold — 2026-11-10 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
 The complete non-Procore source audit at `edcf79e80a1d840e0419c186119ccfafdda91db9` found no remaining internally executable product row: the blocking platform audit reports `P0=0 P1=0 P2=0`, current-state and Living Brief contracts pass, TypeScript passes, and the deterministic production build passes. Builds 223–225 remain authoritative for closure of prior provider/current-state work. Do not invent P216–P220 or reopen accepted rows without a new reproduced defect.
 
-- [ ] Activate the already-implemented Procore flow only after the authorized production `PROCORE_CLIENT_ID` and `PROCORE_CLIENT_SECRET` are available; keep this final configuration gate isolated from completed BIMLog product work and do not request email credentials or contact Ruben.
-- [ ] Preserve Ruben's deferred physical Navisworks 2025 confirmation as post-closure field evidence; it does not reopen accepted Platform builds and no physical 2025 success is claimed on this workstation.
+- [ ] Complete Procore production activation after Procore approves the developer organization and enables production promotion for the existing BIMLog app. The production `PROCORE_CLIENT_ID` and `PROCORE_CLIENT_SECRET` are present, but live OAuth correctly remains unaccepted while the app has only Sandbox Version 0.1.0. Keep this external-provider gate isolated from completed BIMLog product work and do not request email credentials or contact Ruben.
+- [x] Roberto confirmed physical Navisworks 2025 acceptance on 2026-11-10. This closes the deferred post-closure field-evidence gate without reopening accepted Platform builds or changing Native binaries.
 
 ## Committed aggregate release handoff — 2026-10-30
 
