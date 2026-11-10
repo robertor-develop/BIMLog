@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "1863f3a966c7c119cc6f9cbc7db6a55c51a2f486b7f52f077d305f4ae70baba5",
-  "itemCount": 572,
+  "sourceSha256": "a03c1737d99f51d9b8fb223e75671072a2fc41467cf3f0ca6abd6f65022b79a4",
+  "itemCount": 573,
   "counts": {
-    "ACTIVE": 513,
+    "ACTIVE": 514,
     "SUPERSEDED": 47,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 399,
+    "ACTIVE_DEFECT": 400,
     "VALID_FUTURE_ROADMAP": 12,
     "EXTERNAL_OWNER_INPUT": 102,
     "ACCEPTED_LIMITATION": 3,
@@ -10970,6 +10970,25 @@
       "evidence": [
         "OPEN_LOOP.md:6903",
         "Lens saved-issue recovery closure - 2026-11-10"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "3c75342312323d1b",
+      "sourceLine": 6916,
+      "heading": "2026-11-10 — Lens quick responsible-company assignment release",
+      "statement": "Publish the reconciled exact source through the existing Replit Shell/Publish path, verify deployed identity and health, and complete non-mutating authenticated live UI acceptance. Do not alter a real customer assignment solely to prove the control.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6916",
+        "2026-11-10 — Lens quick responsible-company assignment release"
       ],
       "currentAuthority": false
     }

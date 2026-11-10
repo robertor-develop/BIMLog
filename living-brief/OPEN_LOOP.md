@@ -6907,3 +6907,11 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - External activation still required: verify the Procore developer organization, promote a Data Connector version, receive production OAuth credentials, install/configure them in the authorized deployment secret scope, then complete Ruben's genuine production authorization and company/project/document acceptance.
 - Safe resume: do not retry the old authorization URL or reuse its state. After production credentials are present, start a fresh BIMLog Procore connection, verify the registered HTTPS callback exactly, then browse only the authenticated user's permitted companies/projects and preserve explicit import confirmation.
 
+## 2026-11-10 — Lens quick responsible-company assignment release
+
+- [x] Add the card-level responsible-company selector and Assign action without removing or replacing the existing issue-detail workflow.
+- [x] Enforce current-project authorization and company-catalog membership, preserve idempotency/concurrency, and emit an immutable assignment-change audit event.
+- [x] Preserve issue evidence and browser list context; pass focused positive, negative, authorization, responsive, scale, TypeScript and production frontend build gates.
+- [x] Push exact product source `570434f7d40b40972def40a6873075b7c975245c` to canonical `main` and verify remote equality.
+- [ ] Publish the reconciled exact source through the existing Replit Shell/Publish path, verify deployed identity and health, and complete non-mutating authenticated live UI acceptance. Do not alter a real customer assignment solely to prove the control.
+
