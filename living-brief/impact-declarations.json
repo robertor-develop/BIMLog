@@ -82522,6 +82522,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "471ff455a8e00d85eb191313afccf8d74198f185780f4a1c70882a0ad09b906f"
+    },
+    {
+      "taskId": "BM11_ACCESS_PRIVACY_RECONCILIATION_20261110",
+      "reviewedAt": "2026-11-10T00:00:00.000Z",
+      "reviewedThroughCommit": "3dfe4a344ee546e9c4572a05bcc6f287b04685e1",
+      "authorities": [
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The blocking platform audit remains clean at P0=0, P1=0 and P2=0."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "BM11 contractor, revocation, direct-denial, public-discovery and export privacy checks are reconciled as complete."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, authorization, schema, session, shared-link, export, provider or customer-data boundary changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, installer or package source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export payload contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed external standard or interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The BM11 matrix and bounded bilingual contractor-guidance correction are recorded."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The corrected text preserves the approved contractor capability boundary without adding or removing capability."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Privacy, isolation and truthful-guidance requirements remain unchanged and now have focused evidence."
+        },
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No contractor marketplace, dispatch, qualification or external-network behavior changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The change only aligns visible role guidance with the existing canonical policy and does not alter repository operating instructions."
+        }
+      ],
+      "reason": "Reconcile BM11 access and privacy evidence and correct one stale contractor role description without changing authority.",
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/lib/roles.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "148fc462cfdd15f3cf01f260646bca994937ba747419a6e4ce887870a365d7f5"
     }
   ]
 }
