@@ -15,6 +15,14 @@ export type ProductionSourceCandidate = {
 
 export type ProductionCommitIdentity = { commit: string; tree: string; subject: string };
 
+export function resolveReplitBuildCommit(
+  deploymentCommit: string | undefined,
+  canonicalHead: ProductionCommitIdentity,
+): string {
+  const candidate = deploymentCommit?.trim() || canonicalHead.commit;
+  return verifyReplitDeploymentCommit(candidate, canonicalHead.tree, canonicalHead);
+}
+
 export function verifyReplitDeploymentCommit(
   deploymentCommit: string,
   deploymentTree: string,

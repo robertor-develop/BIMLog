@@ -22,7 +22,7 @@ import {
   writeFile,
 } from "fs/promises";
 import { generatePlatformMd } from "./scripts/generate-platform-md";
-import { resolveProductionSourceCommit, selectUniqueRemoteTreeMatch, unwrapReplitPublishChain, verifyReplitDeploymentCommit } from "./src/lib/production-source-commit";
+import { resolveProductionSourceCommit, resolveReplitBuildCommit, selectUniqueRemoteTreeMatch, unwrapReplitPublishChain } from "./src/lib/production-source-commit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -154,9 +154,12 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
   const canonicalHead = unwrapReplitPublishChain(localHistory);
   const replitEnvironment = Boolean(process.env.REPL_ID || process.env.REPL_SLUG);
   const replitDeploymentCommit = process.env.REPLIT_GIT_COMMIT_SHA?.trim().toLowerCase();
-  if (replitEnvironment && replitDeploymentCommit) {
-    const deploymentTree = git("show", "-s", "--format=%T", replitDeploymentCommit);
-    const sourceCommit = verifyReplitDeploymentCommit(replitDeploymentCommit, deploymentTree, canonicalHead);
+  if (replitEnvironment) {
+    const sourceCommit = resolveReplitBuildCommit(replitDeploymentCommit, canonicalHead);
+    const deploymentTree = git("show", "-s", "--format=%T", sourceCommit);
+    if (deploymentTree !== canonicalHead.tree) {
+      throw new Error("Replit build commit changes the canonical source tree.");
+    }
     const acceptedCommit = process.env.BIMLOG_ACCEPTED_COMMIT?.trim().toLowerCase();
     if (acceptedCommit && acceptedCommit !== sourceCommit) {
       throw new Error("Accepted production commit differs from the verified Replit deployment commit.");
