@@ -22,4 +22,16 @@ await assert.rejects(()=>executeLensNextCreation(changedContextHolder,input,{...
 console.log("Pre-submission capture/context failure releases only unsent attempts; edited retry succeeds without duplicate PASS");
 
 const legacyUnknown:{current:LensNextCreationAttempt|null}={current:{fingerprint:JSON.stringify([input.projectId,input.modelFingerprint,input.authorityKey,input.draft,input.reason]),viewpointId:"legacy-unknown",navigation:{ContractVersion:"lens-next-navigation.v1"}}};
-await assert.rejects(()=>executeLensNextCreation(legacyUnknown,input,{...operations,isCurrent:()=>false}),/previous creation outcome remains pending/);assert.equal(legacyUnknown.current?.viewpointId,"legacy-unknown");
+await assert.rejects(()=>executeLensNextCreation(legacyUnknown,input,{...operations,isCurrent:()=>false}),/previous creation outcome/);assert.equal(legacyUnknown.current?.viewpointId,"legacy-unknown");
+
+let persisted:LensNextCreationAttempt|null=null;let durableCreates=0,durableCaptures=0,durableReopens=0;
+const durableHolder={current:null as LensNextCreationAttempt|null,load:()=>persisted,save:(attempt:LensNextCreationAttempt|null)=>{persisted=attempt?JSON.parse(JSON.stringify(attempt)):null;}};
+await assert.rejects(()=>executeLensNextCreation(durableHolder,input,{...operations,isCurrent:()=>true,capture:async()=>{durableCaptures++;return{ContractVersion:"lens-next-navigation.v1"};},create:async viewpointId=>{durableCreates++;return{serverId:1079,viewpointId,displayId:"EL-1079",displayCode:"EL-1079",visualStateDigest:"c".repeat(64),revisionNumber:1,lifecycleStatus:"active"};},reopen:async()=>{durableReopens++;return false;}}),/Issue #1079 was saved/);
+assert.equal(durableCreates,1);assert.equal(persisted?.receipt?.serverId,1079);
+const editedReloadHolder={...durableHolder,current:null as LensNextCreationAttempt|null};
+await assert.rejects(()=>executeLensNextCreation(editedReloadHolder,{...input,draft:{...input.draft,instruction:"Edited after save"}},{...operations,isCurrent:()=>true,capture:async()=>{durableCaptures++;throw Error("edited recovery must not recapture");},create:async()=>{durableCreates++;throw Error("edited recovery must not create");}}),/previous creation outcome is pending/);
+assert.equal(durableCreates,1);assert.equal(durableCaptures,1);assert.equal(persisted?.receipt?.serverId,1079);
+const reloadedHolder={...durableHolder,current:null as LensNextCreationAttempt|null};
+const reopened=await executeLensNextCreation(reloadedHolder,input,{...operations,isCurrent:()=>true,capture:async()=>{durableCaptures++;throw Error("saved receipt recovery must not recapture");},create:async()=>{durableCreates++;throw Error("saved receipt recovery must not create");},reopen:async receipt=>{durableReopens++;return receipt.serverId===1079;}});
+assert.equal(reopened.serverId,1079);assert.equal(durableCreates,1);assert.equal(durableCaptures,1);assert.equal(durableReopens,2);assert.equal(persisted,null);
+console.log("Durable saved receipt survives panel reload, reopens issue 1079 without recapture or duplicate creation PASS");
