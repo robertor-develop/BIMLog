@@ -210,6 +210,7 @@ export function LensNextPanel({
   const [referenceAttachmentsError, setReferenceAttachmentsError] = useState<string | null>(null);
   const refreshSequence = useRef(0);
   const publishAttempt = useRef<{ fingerprint: string; idempotencyKey: string } | null>(null);
+  const quickAssignmentAttempts = useRef(new Map<number, { fingerprint: string; idempotencyKey: string }>());
   const [publishState, setPublishState] = useState<"idle" | "publishing" | "published" | "error">("idle");
   const [publishMessage, setPublishMessage] = useState<string | null>(null);
   const [localUploadState, setLocalUploadState] = useState<"idle" | "capturing" | "uploading" | "success" | "error">("idle");
@@ -791,6 +792,29 @@ export function LensNextPanel({
     }
   }, [apiClient, bridgeContext?.modelFingerprint, selectedIssue]);
 
+  const quickAssignResponsibleCompany = useCallback(async (issue: LensNextIssue, responsibleCompany: string) => {
+    if (!apiClient || !issue.publishingAllowed) throw new Error("Your current project role cannot assign responsible companies.");
+    const action: LensNextPublishAction = { type: "assignment", responsibleCompany };
+    const reason = "Quick assignment from Lens Next Issue Browser";
+    const fingerprint = JSON.stringify({ serverId: issue.identity.serverId, mutationVersion: issue.mutationVersion, action, reason });
+    const pending = quickAssignmentAttempts.current.get(issue.identity.serverId);
+    const attempt = pending?.fingerprint === fingerprint ? pending : { fingerprint, idempotencyKey: `lens-next-ui-${crypto.randomUUID()}` };
+    quickAssignmentAttempts.current.set(issue.identity.serverId, attempt);
+    try {
+      const result = await apiClient.publishAction(issue, action, reason, attempt.idempotencyKey, bridgeContext?.modelFingerprint ?? null);
+      setIssues(current => current.map(currentIssue => currentIssue.identity.serverId === result.issue.serverId ? {
+        ...currentIssue,
+        mutationVersion: result.issue.mutationVersion,
+        status: result.issue.status,
+        responsibleCompany: result.issue.responsibleCompany,
+      } : currentIssue));
+      quickAssignmentAttempts.current.delete(issue.identity.serverId);
+      setHistory(null);
+    } catch (error) {
+      throw error instanceof Error ? error : new Error("Responsible company assignment failed.");
+    }
+  }, [apiClient, bridgeContext?.modelFingerprint]);
+
   const uploadLocalViewpoint = useCallback(async (viewpoint: LensNextLocalViewpoint) => {
     if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || uploadInFlight.current) return;
     if (viewpoint.projectId !== authorizedProjectId || bridgeContext.projectId !== authorizedProjectId) { setLocalUploadState("error"); setLocalUploadMessage("Project/model identity mismatch; upload refused."); return; }
@@ -1120,6 +1144,7 @@ export function LensNextPanel({
       publishState={publishState}
       publishMessage={publishMessage}
       onPublishAction={(action, reason) => void publishAction(action, reason)}
+      onQuickAssignResponsibleCompany={quickAssignResponsibleCompany}
     />
   );
 }

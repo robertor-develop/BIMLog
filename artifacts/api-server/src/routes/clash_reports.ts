@@ -2601,6 +2601,17 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/:id/publish",
     const id = Number(req.params.id);
     try {
       const request = parseLensNextPublishRequest(req.body, projectId, id);
+      if (request.action.type === "assignment" && request.action.responsibleCompany) {
+        const choices = await loadProjectCompanyChoices(projectId);
+        try {
+          request.action.responsibleCompany = assertCatalogLabel(request.action.responsibleCompany, choices.companies, "responsibleCompany");
+        } catch (error) {
+          if (error instanceof Error && error.message.startsWith("LENS_ISSUE_CATALOG_VALUE_FORBIDDEN")) {
+            throw new LensNextPublishError(422, "LENS_NEXT_ASSIGNMENT_FORBIDDEN", "That responsible company is not authorized for this project. Refresh the governed catalog and try again.");
+          }
+          throw error;
+        }
+      }
       const [currentUser] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
       const roleMeta = req.memberRole ? await getConfigOptionMeta("member_role", req.memberRole) : null;
       const response = await publishLensNextAction(pool, {

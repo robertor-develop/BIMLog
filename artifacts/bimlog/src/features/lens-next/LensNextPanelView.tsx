@@ -163,42 +163,72 @@ const IssueCard = React.memo(function IssueCard({
   issue,
   selected,
   onSelect,
+  responsibleCompanies,
+  catalogCurrent,
+  onAssignResponsibleCompany,
+  labels,
 }: {
   issue: LensNextIssue;
   selected: boolean;
   onSelect(): void;
+  responsibleCompanies: readonly string[];
+  catalogCurrent: boolean;
+  onAssignResponsibleCompany(issue: LensNextIssue, responsibleCompany: string): Promise<void>;
+  labels: { responsibleCompany: string; unassigned: string; assign: string; saving: string; saved: string; unavailable: string };
 }) {
-  const cardRef=React.useRef<HTMLButtonElement|null>(null);
+  const cardRef=React.useRef<HTMLElement|null>(null);
+  const persistedCompany = issue.responsibleCompany ?? "";
+  const [draftCompany, setDraftCompany] = React.useState(persistedCompany);
+  const [assignmentState, setAssignmentState] = React.useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [assignmentError, setAssignmentError] = React.useState<string | null>(null);
+  React.useEffect(() => { setDraftCompany(persistedCompany); setAssignmentState("idle"); setAssignmentError(null); }, [persistedCompany, issue.mutationVersion]);
   React.useEffect(()=>{if(selected)cardRef.current?.scrollIntoView({block:"nearest",inline:"nearest"});},[selected]);
+  const assign = async () => {
+    if (assignmentState === "saving" || draftCompany === persistedCompany || !catalogCurrent || !issue.publishingAllowed) return;
+    setAssignmentState("saving");
+    setAssignmentError(null);
+    try {
+      await onAssignResponsibleCompany(issue, draftCompany);
+      setAssignmentState("saved");
+    } catch (error) {
+      setAssignmentState("error");
+      setAssignmentError(error instanceof Error ? error.message : "Assignment failed.");
+    }
+  };
   return (
-    <button
+    <article
       ref={cardRef}
-      type="button"
       className={`lens-next__issue-card${selected ? " lens-next__issue-card--selected" : ""}`}
-      onClick={onSelect}
-      aria-pressed={selected}
-      aria-label={lensNextIssueAccessibleLabel(issue)}
       data-priority={issue.priority ?? "none"}
       data-status={issue.status}
     >
-      <Thumbnail issue={issue} />
-      <span className="lens-next__issue-summary">
-        <span className="lens-next__issue-title">
-          <strong>{displayCode(issue)}</strong>
-          <span className={`lens-next__priority lens-next__priority--${issue.priority ?? "none"}`}>
-            {lensNextPriorityLabel(issue.priority)}
+      <button type="button" className="lens-next__issue-open" onClick={onSelect} aria-pressed={selected} aria-label={lensNextIssueAccessibleLabel(issue)}>
+        <Thumbnail issue={issue} />
+        <span className="lens-next__issue-summary">
+          <span className="lens-next__issue-title">
+            <strong>{displayCode(issue)}</strong>
+            <span className={`lens-next__priority lens-next__priority--${issue.priority ?? "none"}`}>
+              {lensNextPriorityLabel(issue.priority)}
+            </span>
+          </span>
+          <span className="lens-next__issue-note">{lensNextIssueDescription(issue)}</span>
+          <span className="lens-next__issue-meta">
+            <span className={`lens-next__status lens-next__status--${issue.status}`}>
+              {STATUS_LABELS[issue.status]}
+            </span>
+            <span>{issue.trade ?? "Trade not recorded"}</span>
+            <span>{issue.floor ?? "Floor not recorded"}</span>
           </span>
         </span>
-        <span className="lens-next__issue-note">{lensNextIssueDescription(issue)}</span>
-        <span className="lens-next__issue-meta">
-          <span className={`lens-next__status lens-next__status--${issue.status}`}>
-            {STATUS_LABELS[issue.status]}
-          </span>
-          <span>{issue.trade ?? "Trade not recorded"}</span>
-          <span>{issue.floor ?? "Floor not recorded"}</span>
-        </span>
-      </span>
-    </button>
+      </button>
+      <div className="lens-next__quick-assignment" onClick={event => event.stopPropagation()}>
+        <label><span>{labels.responsibleCompany}</span><select aria-label={`${labels.responsibleCompany} ${displayCode(issue)}`} value={draftCompany} disabled={!catalogCurrent || assignmentState === "saving" || !issue.publishingAllowed} onChange={event => { setDraftCompany(event.target.value); setAssignmentState("idle"); setAssignmentError(null); }}><option value="">{labels.unassigned}</option>{persistedCompany && !responsibleCompanies.includes(persistedCompany) && <option value={persistedCompany}>{persistedCompany} · historical</option>}{responsibleCompanies.map(company => <option key={company} value={company}>{company}</option>)}</select></label>
+        <button type="button" onClick={() => void assign()} disabled={!catalogCurrent || !issue.publishingAllowed || assignmentState === "saving" || draftCompany === persistedCompany}>{assignmentState === "saving" ? labels.saving : labels.assign}</button>
+        {assignmentState === "saved" && <small role="status">{labels.saved}</small>}
+        {assignmentState === "error" && <small role="alert">{assignmentError}</small>}
+        {!catalogCurrent && <small role="status">{labels.unavailable}</small>}
+      </div>
+    </article>
   );
 });
 
@@ -206,11 +236,19 @@ function IssueGroups({
   groups,
   selectedServerId,
   onSelectIssue,
+  responsibleCompanies,
+  catalogCurrent,
+  onAssignResponsibleCompany,
+  labels,
   depth = 0,
 }: {
   groups: readonly LensNextIssueGroupNode[];
   selectedServerId: number | null;
   onSelectIssue(serverId: number): void;
+  responsibleCompanies: readonly string[];
+  catalogCurrent: boolean;
+  onAssignResponsibleCompany(issue: LensNextIssue, responsibleCompany: string): Promise<void>;
+  labels: { responsibleCompany: string; unassigned: string; assign: string; saving: string; saved: string; unavailable: string };
   depth?: number;
 }) {
   return (
@@ -225,6 +263,10 @@ function IssueGroups({
               groups={group.children}
               selectedServerId={selectedServerId}
               onSelectIssue={onSelectIssue}
+              responsibleCompanies={responsibleCompanies}
+              catalogCurrent={catalogCurrent}
+              onAssignResponsibleCompany={onAssignResponsibleCompany}
+              labels={labels}
               depth={depth + 1}
             />
           ) : (
@@ -234,6 +276,10 @@ function IssueGroups({
                 issue={issue}
                 selected={issue.identity.serverId === selectedServerId}
                 onSelect={() => onSelectIssue(issue.identity.serverId)}
+                responsibleCompanies={responsibleCompanies}
+                catalogCurrent={catalogCurrent}
+                onAssignResponsibleCompany={onAssignResponsibleCompany}
+                labels={labels}
               />
             ))
           )}
@@ -441,6 +487,7 @@ export interface LensNextPanelViewProps {
   publishState: "idle" | "publishing" | "published" | "error";
   publishMessage: string | null;
   onPublishAction(action: LensNextPublishAction, reason: string): void;
+  onQuickAssignResponsibleCompany(issue: LensNextIssue, responsibleCompany: string): Promise<void>;
 }
 
 export function LensNextPanelView({
@@ -544,6 +591,7 @@ export function LensNextPanelView({
   publishState,
   publishMessage,
   onPublishAction,
+  onQuickAssignResponsibleCompany,
 }: LensNextPanelViewProps) {
   const { language } = useI18n();
   const [lensLanguage, setLensLanguage] = React.useState<"en" | "es" | "pt">(() => {
@@ -591,6 +639,12 @@ export function LensNextPanelView({
   const helpCloseRef = React.useRef<HTMLButtonElement | null>(null);
   const lensRootRef = React.useRef<HTMLElement | null>(null);
   const [availableWidth, setAvailableWidth] = React.useState(0);
+  const quickAssignResponsibleCompany = React.useCallback(async (issue: LensNextIssue, responsibleCompany: string) => {
+    const scrollTop = issueListRef.current?.scrollTop ?? listScrollTop.current;
+    await onQuickAssignResponsibleCompany(issue, responsibleCompany);
+    listScrollTop.current = scrollTop;
+    window.requestAnimationFrame(() => { if (issueListRef.current) issueListRef.current.scrollTop = scrollTop; });
+  }, [onQuickAssignResponsibleCompany]);
   const dockWidth = lensNextDockWidth(availableWidth);
   React.useLayoutEffect(() => {
     const root = lensRootRef.current;
@@ -1158,6 +1212,10 @@ export function LensNextPanelView({
             groups={issueGroups}
             selectedServerId={selectedServerId}
             onSelectIssue={selectIssue}
+            responsibleCompanies={createResponsibleCompanies}
+            catalogCurrent={catalogState === "current"}
+            onAssignResponsibleCompany={quickAssignResponsibleCompany}
+            labels={{ responsibleCompany: tt("Responsible company", "Empresa responsable", "Empresa responsável"), unassigned: tt("Unassigned", "Sin asignar", "Não atribuído"), assign: tt("Assign", "Asignar", "Atribuir"), saving: tt("Saving…", "Guardando…", "Salvando…"), saved: tt("Assigned", "Asignado", "Atribuído"), unavailable: tt("Refresh the governed catalog", "Actualice el catálogo autorizado", "Atualize o catálogo autorizado") }}
           />
         ) : (
           <IssueTable issues={visibleIssues} selectedServerId={selectedServerId} onSelectIssue={selectIssue} />
