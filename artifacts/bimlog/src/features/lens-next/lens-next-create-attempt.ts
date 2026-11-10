@@ -18,7 +18,14 @@ export async function executeLensNextCreation(
 ){
  const fingerprint=await creationFingerprint(input);
  if(!holder.current&&holder.load)holder.current=holder.load(fingerprint);
- if(holder.current&&holder.current.fingerprint!==fingerprint)throw new Error("A previous creation outcome is pending. Inspect that project and retry the unchanged draft before starting another creation.");
+ if(holder.current&&holder.current.fingerprint!==fingerprint){
+  const previous=holder.current;
+  if(previous.receipt&&operations.isCurrent()&&await operations.reopen(previous.receipt)){
+   holder.current=null;holder.save?.(null);
+   throw new Error(`Recovered and reopened previously saved issue #${previous.receipt.serverId}. Its recovery lock is cleared; review this new draft and submit it again.`);
+  }
+  throw new Error("A previous creation outcome is pending. Inspect that project and retry the unchanged draft before starting another creation.");
+ }
  const attempt=holder.current??{fingerprint,viewpointId:operations.newIdentity(),submitted:false};holder.current=attempt;holder.save?.(attempt);
  if(!attempt.receipt&&!attempt.navigation){
   try{attempt.navigation=await operations.capture(attempt.viewpointId);}
