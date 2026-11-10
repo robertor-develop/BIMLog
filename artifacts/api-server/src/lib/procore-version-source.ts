@@ -1,6 +1,7 @@
 import {createHash} from "node:crypto";
 import {getValidAccessToken} from "./oauth";
 import {downloadProcoreFileBytes} from "./procore-file-download";
+import {procoreApiUrl} from "./procore-environment";
 
 type ExactSourceSelection={companyId:string;ref:string;versionId:string;name:string};
 /** Exact project document/version lookup; never substitute the latest version.
@@ -13,7 +14,7 @@ export async function downloadExactProcoreSource(userId:number, selected:ExactSo
  const token=await (dependencies.token??getValidAccessToken)(userId,"procore");
  const request=dependencies.fetch??fetch;
  const metadata=async(path:string)=>{
-  const response=await request(`https://api.procore.com/rest/v1.0/${path}?project_id=${projectId}`,{redirect:"error",signal:AbortSignal.timeout(30_000),headers:{Authorization:`Bearer ${token}`,"Procore-Company-Id":selected.companyId}});
+  const response=await request(procoreApiUrl(`/rest/v1.0/${path}?project_id=${projectId}`),{redirect:"error",signal:AbortSignal.timeout(30_000),headers:{Authorization:`Bearer ${token}`,"Procore-Company-Id":selected.companyId}});
   if(!response.ok)throw Error(`PROCORE_SOURCE_HTTP_${response.status}`);
   const body:unknown=await response.json();
   if(!body||typeof body!=="object"||Array.isArray(body))throw Error("PROCORE_SOURCE_METADATA_INVALID");
