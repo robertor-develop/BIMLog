@@ -812,7 +812,7 @@ export function LensNextPanel({
     setCreatedIssueServerId(null);
     setCreateMessage(null); setCreateState("capturing");
     try {
-      const receipt=await executeLensNextCreation(pendingCreation,{projectId:authorizedProjectId,modelFingerprint:bridgeContext.modelFingerprint,authorityKey:authToken,draft,reason:auditReason},{newIdentity:()=>crypto.randomUUID(),isCurrent:()=>current===creationContextScope.current,capture:viewpointId=>bridgeClient.captureNewIssueNavigationView(viewpointId,bridgeContext),create:(viewpointId,navigationView)=>{setCreateState("creating");return apiClient.createIssue(authorizedProjectId,viewpointId,bridgeContext.modelFingerprint,navigationView,draft,auditReason);},reopen:receipt=>loadIssues("refresh",undefined,receipt)});
+      const receipt=await executeLensNextCreation(pendingCreation.current,{projectId:authorizedProjectId,modelFingerprint:bridgeContext.modelFingerprint,authorityKey:authToken,draft,reason:auditReason},{newIdentity:()=>crypto.randomUUID(),isCurrent:()=>current===creationContextScope.current,capture:viewpointId=>bridgeClient.captureNewIssueNavigationView(viewpointId,bridgeContext),create:(viewpointId,navigationView)=>{setCreateState("creating");return apiClient.createIssue(authorizedProjectId,viewpointId,bridgeContext.modelFingerprint,navigationView,draft,auditReason);},reopen:receipt=>loadIssues("refresh",undefined,receipt)});
       if(current!==creationContextScope.current)return;
       setSelectedServerId(receipt.serverId);
       setCreatedIssueServerId(receipt.serverId);
