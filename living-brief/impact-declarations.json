@@ -82811,6 +82811,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d96a37b2ac79424e1d2a532dc0e92234e2c27e9acca22ea7681f01a14fb7ccfb"
+    },
+    {
+      "taskId": "PROCORE_ENVIRONMENT_GUARD_20261110",
+      "reviewedAt": "2026-11-10T19:16:53.936Z",
+      "reviewedThroughCommit": "8f1c35c4fff024a2dbb6e2862270859d9ac06e0b",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing per-user Procore connector remains one governed platform capability."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No repository operating instruction changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Fail-closed environment validation and sanitized diagnostics strengthen the existing release gate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Users still connect their own Procore account and retain provider-defined permissions."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The connector now enforces the documented sandbox or production endpoint family without changing authorization or data boundaries."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks bridge, installer or package source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export payload contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation follows the already-governed Procore OAuth environment separation."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The fail-closed Procore environment guard and verified source evidence are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "External production activation and genuine user authorization remain explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Blocking platform and tracked-secret audits remain independently enforced and pass."
+        }
+      ],
+      "reason": "Prevent sandbox Procore credentials from reaching production endpoints and distinguish external production activation from user-password or company-permission failures.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9f47ee30781c7e96cf1003819e8796d544fe85783a1a69685fa41ffff81b9f34"
     }
   ]
 }

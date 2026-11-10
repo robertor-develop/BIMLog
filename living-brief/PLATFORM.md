@@ -1311,6 +1311,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/procore-current-provider-approval.behavior.ts
 - artifacts/api-server/src/lib/procore-document-import-http.behavior.ts
 - artifacts/api-server/src/lib/procore-document-real-files-route.behavior.ts
+- artifacts/api-server/src/lib/procore-environment.behavior.ts
+- artifacts/api-server/src/lib/procore-environment.ts
 - artifacts/api-server/src/lib/procore-file-download-dispatch.behavior.ts
 - artifacts/api-server/src/lib/procore-file-download.behavior.ts
 - artifacts/api-server/src/lib/procore-file-download.ts

@@ -6901,3 +6901,9 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [x] Pass the exact synthetic `#1079` recovery regression, connected Lens acceptance, frontend typecheck, production build, blocking platform audit, tracked-secret scan and database-safety gates without mutating the real issue or production data.
 - [ ] After normal push and publication cadence, perform non-mutating live confirmation that the deployed UI loads cleanly. Do not recreate or alter real issue `#1079` merely to prove recovery.
 - [ ] Procore production OAuth activation remains the final separate external-provider gate and is intentionally deferred until all independent work is complete.
+## 2026-11-10 — Procore production activation remains external
+
+- Closed in source at `b25010a68`: sandbox and production Procore OAuth/API endpoint families can no longer be mixed silently; missing or invalid environment configuration fails closed with sanitized diagnostics.
+- External activation still required: verify the Procore developer organization, promote a Data Connector version, receive production OAuth credentials, install/configure them in the authorized deployment secret scope, then complete Ruben's genuine production authorization and company/project/document acceptance.
+- Safe resume: do not retry the old authorization URL or reuse its state. After production credentials are present, start a fresh BIMLog Procore connection, verify the registered HTTPS callback exactly, then browse only the authenticated user's permitted companies/projects and preserve explicit import confirmation.
+
