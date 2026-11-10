@@ -5,4 +5,9 @@ assert.match(source,/\/next-action/);assert.match(source,/expectedUpdatedAt:sele
 assert.match(source,/selected\.assignedToCurrentUser&&selected\.status!=="closed"/);
 assert.match(source,/Only the current owner can schedule/);assert.match(source,/Solo el responsable actual puede programar/);
 assert.match(source,/type="datetime-local"/);assert.match(source,/nextActionType&&selected\.nextActionDueAt/);
+assert.match(source,/response\.status===409/);assert.match(source,/await load\(\)/);
+assert.match(source,/response\.status===403/);assert.match(source,/Only the current owner can schedule/);
+assert.match(source,/next_action_failed/);assert.match(source,/role="alert"/);assert.match(source,/copy\.retry/);
+assert.match(source,/overflowX:"auto"/);assert.match(source,/minWidth:880/);
+assert.match(source,/width:"min\(680px,100%\)"/);assert.match(source,/maxHeight:"85vh"/);
 console.log("B135 bilingual owned sales next-action workspace: PASS");

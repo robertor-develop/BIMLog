@@ -82593,6 +82593,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "148fc462cfdd15f3cf01f260646bca994937ba747419a6e4ce887870a365d7f5"
+    },
+    {
+      "taskId": "ROADMAP_V11_BM10_BM12_ACCEPTANCE_20261110",
+      "reviewedAt": "2026-11-10T16:40:00.000Z",
+      "reviewedThroughCommit": "98430e29c27ca9fa2d619420458b63ce848df65a",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem product boundary or capability graph changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No repository operating instruction changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The acceptance assertions strengthen existing revision, denial, recovery and responsive requirements without weakening criteria."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product capability, role or journey was removed or redefined."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, schema, authorization, provider or customer-data boundary changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, installer or package source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export payload contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or governed interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Roadmap v11 BM10–BM12 acceptance evidence and exact non-deployment boundary are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "BM10 and BM12 are closed with executable evidence alongside the accepted BM11 slice."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The blocking platform audit remains clean; no severity is reclassified."
+        }
+      ],
+      "reason": "Seal the authorized roadmap v11 BM10–BM12 acceptance slice with revision-safe action, revocation/privacy, permissioned-story, recovery and responsive evidence.",
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/admin/SalesInquiryQueue.next-action.behavior.ts",
+        "artifacts/bimlog/src/lib/landing-story.behavior.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "d661e8899a2e68f5a1bfb71ee7fb065ee4b156bb9f532f9b4024088183c7879e"
     }
   ]
 }
