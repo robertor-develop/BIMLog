@@ -75,13 +75,18 @@ function pendingCreationStorage(): Pick<LensNextCreationHolder,"load"|"save"> {
         const receipt=value.receipt;
         if(receipt&&(!Number.isSafeInteger(receipt.serverId)||receipt.serverId<=0||receipt.viewpointId!==value.viewpointId||!receipt.displayId||!receipt.displayCode||receipt.displayId!==receipt.displayCode||receipt.revisionNumber!==1||receipt.lifecycleStatus!=="active"||!/^[a-f0-9]{64}$/i.test(receipt.visualStateDigest)))return null;
         return {fingerprint:value.fingerprint,viewpointId:value.viewpointId,submitted:value.submitted===true,receipt};
-      } catch { return null; }
+      } catch (error) {
+        console.warn("Lens issue recovery state could not be read; in-memory recovery remains active.",error instanceof Error?error.name:"StorageError");
+        return null;
+      }
     },
     save(attempt) {
       try {
         if(!attempt){sessionStorage.removeItem(LENS_NEXT_PENDING_CREATION_KEY);return;}
         sessionStorage.setItem(LENS_NEXT_PENDING_CREATION_KEY,JSON.stringify({fingerprint:attempt.fingerprint,viewpointId:attempt.viewpointId,submitted:attempt.submitted===true,receipt:attempt.receipt}));
-      } catch { /* In-memory recovery remains authoritative when storage is unavailable. */ }
+      } catch (error) {
+        console.warn("Lens issue recovery state could not be persisted; in-memory recovery remains active.",error instanceof Error?error.name:"StorageError");
+      }
     },
   };
 }
