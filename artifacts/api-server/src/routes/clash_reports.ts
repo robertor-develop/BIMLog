@@ -37,6 +37,7 @@ import { classifyVisualPackageTruth, presentLensReferenceAttachment } from "../l
 import { resolveLensCompanyDirectoryReference, type CompanyDirectoryCandidate } from "../lib/company-directory-resolution";
 import { lensIssueFieldAuthorities, lensResponsibleCompanyAvailability, lensSameProjectHistoricalCompanyAvailability, uniqueLensResponsibleCompanyOptions, type LensResponsibleCompanyOption } from "../lib/lens-issue-field-authority";
 import { assertCatalogLabel, assertLensIssueStatusTransition, normalizeGovernedLabel, LENS_ISSUE_BASE_TRADES, LENS_ISSUE_REPORT_TYPES } from "../lib/lens-issue-edit-policy";
+import { selectLensReportImage, type LensReportImageEvidence } from "../lib/lens-report-image";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -3430,6 +3431,35 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       ].find(result => result !== 0) ?? 0);
       const pOrder = (priority: number | null | undefined) => priority ?? 99;
 
+      const reportImageEvidence = new Map<number, LensReportImageEvidence>();
+      for (const viewpoint of vps) {
+        if (!viewpoint.visualStateJson || !viewpoint.visualStateDigest) {
+          reportImageEvidence.set(viewpoint.id, selectLensReportImage(null));
+          continue;
+        }
+        try {
+          const verified = validatePersistedLensNextVisualState(
+            viewpoint.visualStateJson,
+            viewpoint.visualStateDigest,
+            {
+              projectId,
+              serverId: viewpoint.id,
+              viewpointId: viewpoint.viewpointId,
+              lifecycleStatus: viewpoint.lifecycleStatus ?? "active",
+              revisionNumber: viewpoint.revisionNumber ?? 1,
+            },
+          );
+          reportImageEvidence.set(viewpoint.id, selectLensReportImage(verified.state));
+        } catch {
+          reportImageEvidence.set(viewpoint.id, {
+            kind: "unavailable",
+            dataUrl: null,
+            hasRedlines: false,
+            message: "Verified Lens capture unavailable; the stored visual package did not pass integrity validation.",
+          });
+        }
+      }
+
       if (vps.length === 0) {
         res.status(400).json({ error: "no_viewpoints", message: "No viewpoints match the selected filters." });
         return;
@@ -3484,6 +3514,11 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         revisionNumber: v.revisionNumber, lifecycleStatus: v.lifecycleStatus,
         supersedesId: v.supersedesId, issueGroupId: v.issueGroupId,
         hasLinkedRfi: linkedRfiVpIds.has(v.id),
+        imageEvidence: {
+          kind: reportImageEvidence.get(v.id)?.kind ?? "unavailable",
+          hasRedlines: reportImageEvidence.get(v.id)?.hasRedlines ?? false,
+          visualStateDigest: v.visualStateDigest ?? null,
+        },
       }));
 
       // -- Sequential report number (<CODE>-LV-001) + persist, made
@@ -3767,6 +3802,43 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
           },
         });
         doc.y = endY;
+
+        // -- VERIFIED CAPTURE APPENDIX ---------------------------------------
+        // Each page is bound to the exact issue visual-state digest included in
+        // the report fingerprint. When redlines exist but a verified marked
+        // capture does not, the report states that explicitly and never falls
+        // back to an unrelated/unmarked thumbnail.
+        for (const viewpoint of vps) {
+          const evidence = reportImageEvidence.get(viewpoint.id) ?? selectLensReportImage(null);
+          doc.y = addLensContinuationPage(`Lens capture — ${idText(viewpoint)}`);
+          doc.fontSize(14).font("Helvetica-Bold").fillColor("#111827")
+            .text(`Lens Capture: ${idText(viewpoint)}`, M, doc.y, { width: CW });
+          doc.moveDown(0.35);
+          doc.fontSize(8).font("Helvetica").fillColor("#475569")
+            .text(`${viewpoint.trade || "-"}  |  ${viewpoint.floor || "-"}  |  ${statusLabel(viewpoint.status)}  |  ${viewpoint.responsibleCompany || "Unassigned"}`, M, doc.y, { width: CW });
+          doc.moveDown(0.2);
+          doc.fontSize(7).font("Helvetica").fillColor("#64748B")
+            .text(`Visual package: ${viewpoint.visualStateDigest || "unavailable"}`, M, doc.y, { width: CW });
+          doc.moveDown(0.6);
+
+          if (evidence.dataUrl) {
+            const imageBytes = Buffer.from(evidence.dataUrl.slice(evidence.dataUrl.indexOf(",") + 1), "base64");
+            const imageTop = doc.y;
+            const imageHeight = PAGE_BOTTOM - imageTop - 42;
+            doc.image(imageBytes, M, imageTop, { fit: [CW, imageHeight], align: "center", valign: "center" });
+            doc.y = PAGE_BOTTOM - 32;
+          } else {
+            const unavailableTop = doc.y + 34;
+            doc.rect(M, unavailableTop, CW, 150).fillAndStroke("#F8FAFC", "#CBD5E1");
+            doc.fontSize(13).font("Helvetica-Bold").fillColor("#334155")
+              .text("Capture unavailable", M + 20, unavailableTop + 48, { width: CW - 40, align: "center" });
+            doc.fontSize(9).font("Helvetica").fillColor("#475569")
+              .text(evidence.message, M + 40, unavailableTop + 78, { width: CW - 80, align: "center" });
+            doc.y = unavailableTop + 165;
+          }
+          doc.fontSize(8).font("Helvetica-Bold").fillColor("#334155")
+            .text(evidence.kind === "annotated" ? "ANNOTATED CAPTURE" : evidence.kind === "capture" ? "CAPTURE — NO MARKUPS RECORDED" : "CAPTURE EVIDENCE UNAVAILABLE", M, Math.min(doc.y + 8, PAGE_BOTTOM - 18), { width: CW, align: "center" });
+        }
 
         // Keep sign-off with revision history when it exists, avoiding a
         // dedicated near-empty page between two small controlled sections.
