@@ -83237,7 +83237,7 @@
     {
       "taskId": "LENS_THREE_FEATURE_BLOCKS03_04_20261113",
       "reviewedAt": "2026-11-13T20:40:00Z",
-      "reviewedThroughCommit": "6f885a1e734c09afbed1cc830a4d015f343dec84",
+      "reviewedThroughCommit": "ff32dbe5abb266e85d5cb913b2b5cded0e8f915e",
       "authorities": [
         {
           "key": "ecosystem_doctrine",
@@ -83297,10 +83297,10 @@
       ],
       "reason": "Close the three requested Lens workflows without guessing Autodesk coordinates or claiming unperformed physical validation.",
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/routes/clash_reports.ts",
+        "artifacts/api-server/src/lib/lens-next-refresh-responsiveness.behavior.ts",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "4919ee13bb805e85213231bc2d7de5a31586692c01aad691a6db92db1fb5a372"
+      "reviewedChangeSha256": "6de5dfcdff37a330e2fd89457a0c94ac4127e2e34b75f32d933eabd18e05d6aa"
     }
   ]
 }

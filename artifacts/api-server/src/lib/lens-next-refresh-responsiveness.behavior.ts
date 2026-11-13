@@ -24,7 +24,8 @@ assert.match(
   "the next refresh must be scheduled only after the current refresh settles",
 );
 assert.match(panel, /controller\?\.abort\(\)/, "an in-flight refresh must be cancelled when its context unmounts");
-assert.match(panel, /sequence !== refreshSequence\.current \|\| signal\?\.aborted/, "stale refresh responses must remain rejected");
+assert.match(panel, /\(!expected && sequence !== refreshSequence\.current\)/, "stale automatic refresh responses must remain rejected");
+assert.match(panel, /signal\?\.aborted/, "aborted refresh responses must remain rejected");
 assert.doesNotMatch(
   workspace,
   /setInterval\([\s\S]{0,160}(probe|loadProjectContext|loadLocalInventory)/,
