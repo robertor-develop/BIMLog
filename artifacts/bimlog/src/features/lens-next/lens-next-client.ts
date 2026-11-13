@@ -984,7 +984,7 @@ export function createLensNextBridgeClient(
       const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/capture-visual-state`, {
         method: "POST",
         headers: { ...headers, "X-Request-Id": request.requestId },
-        body: JSON.stringify({ ...request, command: "capture-visual-state", fields: { ...request.fields, includeScreenshot: "false" } }),
+        body: JSON.stringify({ ...request, command: "capture-visual-state", fields: { ...request.fields, includeScreenshot: "true" } }),
         signal,
       });
       const raw = await jsonBody(response, "Lens Next capture-visual-state");
