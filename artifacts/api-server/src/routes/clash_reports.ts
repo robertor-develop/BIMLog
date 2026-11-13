@@ -26,6 +26,7 @@ import { serializeLensNextCreateFailure } from "../lib/lens-next-create-failure-
 import { storage } from "../lib/storage-adapter";
 import { reportOperationalFailure } from "../lib/operational-failure";
 import { LENS_REFERENCE_MAX_BYTES, validateLensReferenceFile } from "../lib/lens-next-reference-attachment";
+import { createRevitNavigationRequest, validateRevitNavigationTarget } from "../lib/lens-next-revit-navigation";
 import {
   chunkClashSource, clashImportFormat, clashStatusPresentation, deduplicateClashRows,
   emptyClashColumnMapping, mapClashSpreadsheetRows, nextClashReportNumber,
@@ -825,6 +826,35 @@ const validPositiveId = (value: unknown): number | null => {
 };
 
 const lensReferenceUpload = singleFileUpload({ fileSize: LENS_REFERENCE_MAX_BYTES, files: 1, fields: 0, parts: 1 });
+
+router.post("/projects/:projectId/clash-reports/lens-next/issues/:serverId/revit-navigation", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = validPositiveId(req.params.projectId), issueId = validPositiveId(req.params.serverId);
+  if (!projectId || !issueId) { res.status(400).json({ error: "invalid_identifier" }); return; }
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const issueResult = await client.query(`SELECT id,viewpoint_id,visual_state_digest FROM lens_viewpoints WHERE id=$1 AND project_id=$2 AND lifecycle_status='active' FOR SHARE`, [issueId, projectId]);
+    const issue = issueResult.rows[0];
+    if (!issue?.visual_state_digest) throw Object.assign(new Error("The exact active Lens visual package is unavailable."), { status: 409, code: "revit_visual_state_unavailable" });
+    const validated = validateRevitNavigationTarget(req.body?.target, { projectId, issueId, viewpointId: String(issue.viewpoint_id), visualStateDigest: String(issue.visual_state_digest) });
+    const created = await createRevitNavigationRequest(client, { projectId, issueId, userId: req.user!.userId, target: validated.target, digest: validated.digest });
+    await client.query("COMMIT");
+    res.status(201).json({ success: true, contractVersion: validated.target.contractVersion, ...created, targetDigest: validated.digest, target: validated.target });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    const safe = error as { status?: number; code?: string; message?: string };
+    res.status(safe.status ?? 500).json({ error: safe.code ?? "revit_navigation_request_failed", message: safe.message ?? "Revit navigation request failed." });
+  } finally { client.release(); }
+});
+
+router.post("/projects/:projectId/clash-reports/lens-next/issues/:serverId/revit-navigation/:requestId/receipt", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = validPositiveId(req.params.projectId), issueId = validPositiveId(req.params.serverId), requestId = String(req.params.requestId ?? "");
+  const receipt = req.body?.receipt;
+  if (!projectId || !issueId || !/^[0-9a-f-]{36}$/i.test(requestId) || !receipt || receipt.requestId !== requestId || receipt.projectId !== projectId || receipt.issueId !== issueId || !["opened","already-opened","blocked"].includes(receipt.outcome)) { res.status(422).json({ error: "revit_receipt_invalid" }); return; }
+  const updated = await pool.query(`UPDATE lens_next_revit_navigation_events SET outcome=$1,receipt_json=$2::jsonb,completed_at=NOW() WHERE project_id=$3 AND lens_viewpoint_id=$4 AND request_id=$5 AND requested_by_id=$6 AND outcome='requested' AND expires_at>NOW() AND target_digest=$7 RETURNING request_id,outcome,completed_at`, [receipt.outcome,JSON.stringify(receipt),projectId,issueId,requestId,req.user!.userId,String(receipt.targetDigest ?? "")]);
+  if (!updated.rowCount) { res.status(409).json({ error: "revit_receipt_conflict", message: "The request is missing, expired, already completed, or belongs to another identity." }); return; }
+  res.json({ success: true, contractVersion: "lens-next-revit-navigation.v1", receipt: updated.rows[0] });
+});
 
 async function readLensReferenceAttachments(projectId: number, serverId: number) {
   const links = await db.select({ linkId: linkedItemsTable.id, fileId: filesTable.id, fileName: filesTable.fileName, fileSize: filesTable.fileSizeBytes, mimeType: filesTable.fileType, createdAt: filesTable.createdAt })
