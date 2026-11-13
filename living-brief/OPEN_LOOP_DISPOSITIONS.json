@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "30f45c9d33dde0a34e7e663928ee017c7753dacee6b97d2852146b216556c5ab",
-  "itemCount": 581,
+  "sourceSha256": "3a92a6b307d8c4da6984f304e78ffb3d744a615a108451e2808586731b53f47c",
+  "itemCount": 583,
   "counts": {
-    "ACTIVE": 521,
+    "ACTIVE": 523,
     "SUPERSEDED": 48,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 405,
+    "ACTIVE_DEFECT": 407,
     "VALID_FUTURE_ROADMAP": 12,
     "EXTERNAL_OWNER_INPUT": 104,
     "ACCEPTED_LIMITATION": 3,
@@ -11141,6 +11141,44 @@
       "evidence": [
         "OPEN_LOOP.md:6945",
         "2026-11-13 — Lens contractor-response production correction"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "fd2641906419ab0b",
+      "sourceLine": 6952,
+      "heading": "Lens three-feature release gate — 2026-11-13",
+      "statement": "On a licensed Revit 2026 workstation, compile against the installed official Autodesk API assemblies, build the package, install it, configure the exact project/document/shared-coordinate binding, and navigate a real BIMLog issue to the expected model location. This is a physical validation gate; do not replace it with a fake SDK or a source-only claim.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Lens Next",
+        "route": "/lens-next",
+        "module": "artifacts/bimlog/src/features/lens-next"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6952",
+        "Lens three-feature release gate — 2026-11-13"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "35709747ea7fce20",
+      "sourceLine": 6953,
+      "heading": "Lens three-feature release gate — 2026-11-13",
+      "statement": "After that physical gate passes, rerun the full production build and security/regression suites, push the exact candidate, publish it, verify migrations and immutable deployment identity, then complete three authenticated visible Chrome rounds without mutating customer records beyond an explicitly identified test record.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6953",
+        "Lens three-feature release gate — 2026-11-13"
       ],
       "currentAuthority": false
     }

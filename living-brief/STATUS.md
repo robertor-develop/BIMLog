@@ -5130,3 +5130,9 @@ Production Round 1 after the Block 2 publication proved that the lifecycle was n
 
 This corrective release unit is accepted at `11ff93cd5b093f03427e781b7b0d96ede9c7ebbb`; generated Living Brief state and release receipts remain separate evidence changes.
 
+## 2026-11-13 — Lens three-feature 20-build release candidate
+
+Two five-build implementation blocks complete the marked-image report, contractor answered-but-open review lifecycle, and governed Open in Revit 2026 program. The Revit path preserves exact project, issue, viewpoint, visual digest, document, central-model, coordinate transform and element identities; uses explicit-origin localhost sessions, cryptographic bounded tokens, replay rejection and durable request/receipt evidence; and exposes a bilingual selected-issue action. The full build found and corrected one database-governance defect by replacing cascading deletion with retained audit evidence and adding the canonical Drizzle declaration.
+
+The web/API/core focused tests and TypeScript compilation pass. Publication is not yet authorized by evidence: this workstation has no licensed Revit 2026 installation or official `RevitAPI.dll`/`RevitAPIUI.dll`, so the real Autodesk adapter cannot yet compile, package, install, or pass physical model navigation. The adapter hard-fails rather than compiling against a fake SDK. No branch push, production deployment, schema application, or customer-data mutation is claimed by this candidate.
+

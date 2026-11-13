@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 805,
+    "apiRoutes": 807,
     "frontendApiReferences": 410,
     "routeOwnedTables": 76
   },
@@ -2204,6 +2204,42 @@
     {
       "method": "POST",
       "path": "/projects/:projectId/clash-reports/lens-next/issues/:serverId/local-viewpoint",
+      "owner": "artifacts/api-server/src/routes/clash_reports.ts",
+      "tables": [
+        "clashReportsTable",
+        "clashesTable",
+        "lensViewpointsTable",
+        "lensViewpointReportsTable",
+        "lensViewpointEventsTable",
+        "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensIssueResponsesTable",
+        "lensNextPublishReceiptsTable",
+        "filesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/clash-reports/lens-next/issues/:serverId/revit-navigation",
+      "owner": "artifacts/api-server/src/routes/clash_reports.ts",
+      "tables": [
+        "clashReportsTable",
+        "clashesTable",
+        "lensViewpointsTable",
+        "lensViewpointReportsTable",
+        "lensViewpointEventsTable",
+        "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensIssueResponsesTable",
+        "lensNextPublishReceiptsTable",
+        "filesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/clash-reports/lens-next/issues/:serverId/revit-navigation/:requestId/receipt",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
         "clashReportsTable",

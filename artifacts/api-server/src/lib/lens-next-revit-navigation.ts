@@ -1,9 +1,12 @@
-import type { Pool, PoolClient } from "pg";
 import { createHash, randomUUID } from "crypto";
+
+type RevitNavigationQueryClient = {
+  query(text: string, values?: readonly unknown[]): Promise<unknown>;
+};
 
 export const LENS_NEXT_REVIT_CONTRACT = "lens-next-revit-navigation.v1";
 
-export async function ensureLensNextRevitNavigationSchema(pool: Pool): Promise<void> {
+export async function ensureLensNextRevitNavigationSchema(pool: RevitNavigationQueryClient): Promise<void> {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS lens_next_revit_navigation_events (
       id BIGSERIAL PRIMARY KEY,
@@ -70,7 +73,7 @@ export function buildRevitNavigationTarget(input:{projectId:number;issueId:numbe
   return validateRevitNavigationTarget(target,{projectId:input.projectId,issueId:input.issueId,viewpointId:input.viewpointId,visualStateDigest:input.visualStateDigest});
 }
 
-export async function createRevitNavigationRequest(client: PoolClient, input: { projectId: number; issueId: number; userId: number; target: RevitNavigationTarget; digest: string; now?: Date }): Promise<{ requestId: string; expiresAt: string }> {
+export async function createRevitNavigationRequest(client: RevitNavigationQueryClient, input: { projectId: number; issueId: number; userId: number; target: RevitNavigationTarget; digest: string; now?: Date }): Promise<{ requestId: string; expiresAt: string }> {
   const requestId = randomUUID(), now = input.now ?? new Date(), expiresAt = new Date(now.getTime() + 5 * 60_000);
   await client.query(`INSERT INTO lens_next_revit_navigation_events(project_id,lens_viewpoint_id,request_id,requested_by_id,target_digest,target_json,requested_at,expires_at) VALUES($1,$2,$3,$4,$5,$6::jsonb,$7,$8)`, [input.projectId,input.issueId,requestId,input.userId,input.digest,JSON.stringify(input.target),now,expiresAt]);
   return { requestId, expiresAt: expiresAt.toISOString() };

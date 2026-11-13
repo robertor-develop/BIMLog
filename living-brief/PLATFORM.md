@@ -1175,6 +1175,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/lens-next-publishing.ts
 - artifacts/api-server/src/lib/lens-next-reference-attachment.ts
 - artifacts/api-server/src/lib/lens-next-refresh-responsiveness.behavior.ts
+- artifacts/api-server/src/lib/lens-next-revit-navigation.behavior.ts
+- artifacts/api-server/src/lib/lens-next-revit-navigation.ts
 - artifacts/api-server/src/lib/lens-next-visual-digest-v3.behavior.ts
 - artifacts/api-server/src/lib/lens-pdf-report-browser.behavior.ts
 - artifacts/api-server/src/lib/lens-pdf-report-http.behavior.ts
@@ -1694,6 +1696,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/lens-issue-viewpoints.ts
 - lib/db/src/schema/lens-next-model-bindings.ts
 - lib/db/src/schema/lens-next-publishing.ts
+- lib/db/src/schema/lens-next-revit-navigation.ts
 - lib/db/src/schema/lens-project-trades.ts
 - lib/db/src/schema/lens-viewpoint-reports.ts
 - lib/db/src/schema/lens-viewpoint-sequence-counters.ts

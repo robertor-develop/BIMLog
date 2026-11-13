@@ -6945,3 +6945,10 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [ ] Keep Block 3 Revit Builds 11–15 pending until this reopened Block 2 release gate is accepted.
 - [x] Bind the corrective Lens Next implementation to accepted source `11ff93cd5b093f03427e781b7b0d96ede9c7ebbb` before regenerating release evidence.
 
+## Lens three-feature release gate — 2026-11-13
+
+- [x] Complete the authorized 20-build source program for marked report captures, answered-but-open contractor review, and governed Revit 2026 navigation.
+- [x] Preserve authorization, tenant/project isolation, immutable visual identity, coordinate provenance, replay protection, durable receipts, installer rollback, and database audit evidence.
+- [ ] On a licensed Revit 2026 workstation, compile against the installed official Autodesk API assemblies, build the package, install it, configure the exact project/document/shared-coordinate binding, and navigate a real BIMLog issue to the expected model location. This is a physical validation gate; do not replace it with a fake SDK or a source-only claim.
+- [ ] After that physical gate passes, rerun the full production build and security/regression suites, push the exact candidate, publish it, verify migrations and immutable deployment identity, then complete three authenticated visible Chrome rounds without mutating customer records beyond an explicitly identified test record.
+

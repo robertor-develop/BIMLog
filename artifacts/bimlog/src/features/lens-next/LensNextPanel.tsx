@@ -244,16 +244,6 @@ export function LensNextPanel({
   const [resolutionEvidence,setResolutionEvidence]=useState<readonly LensNextResolutionEvidence[]|"loading">([]);
   const [lessonProposal,setLessonProposal]=useState<import("./lens-next-types").LensNextLessonProposal|"loading"|null>(null);
 
-  const openInRevit=useCallback(async()=>{
-    if(!selectedIssue||!selectedIssue.visualStateDigest||!authorizedProjectId)return;
-    setRevitOpenState("connecting");setRevitOpenMessage(null);
-    try{
-      setRevitOpenState("opening");
-      const result=await openLensIssueInRevit({apiBaseUrl,authToken,bridgeOrigin:DEFAULT_REVIT_BRIDGE_ORIGIN,projectId:authorizedProjectId,issueId:selectedIssue.identity.serverId,viewpointId:selectedIssue.identity.viewpointId,visualStateDigest:selectedIssue.visualStateDigest,fetchImpl});
-      setRevitOpenState("success");setRevitOpenMessage(`Opened the exact Revit 2026 location${result.elementsSelected?` and selected ${result.elementsSelected} element(s)`:""}.`);
-    }catch(error){setRevitOpenState("error");setRevitOpenMessage(error instanceof Error?error.message:"Open in Revit failed");}
-  },[apiBaseUrl,authToken,authorizedProjectId,fetchImpl,selectedIssue]);
-
   const authorizedProjectId = useMemo(() => {
     if (selectedProjectId === null) return null;
     try {
@@ -272,6 +262,15 @@ export function LensNextPanel({
       null,
     [issues, selectedServerId],
   );
+  const openInRevit=useCallback(async()=>{
+    if(!selectedIssue||!selectedIssue.visualStateDigest||!authorizedProjectId)return;
+    setRevitOpenState("connecting");setRevitOpenMessage(null);
+    try{
+      setRevitOpenState("opening");
+      const result=await openLensIssueInRevit({apiBaseUrl,authToken,bridgeOrigin:DEFAULT_REVIT_BRIDGE_ORIGIN,projectId:authorizedProjectId,issueId:selectedIssue.identity.serverId,viewpointId:selectedIssue.identity.viewpointId,visualStateDigest:selectedIssue.visualStateDigest,fetchImpl});
+      setRevitOpenState("success");setRevitOpenMessage(`Opened the exact Revit 2026 location${result.elementsSelected?` and selected ${result.elementsSelected} element(s)`:""}.`);
+    }catch(error){setRevitOpenState("error");setRevitOpenMessage(error instanceof Error?error.message:"Open in Revit failed");}
+  },[apiBaseUrl,authToken,authorizedProjectId,fetchImpl,selectedIssue]);
   const activeIssues = useMemo(() => activeLensNextIssues(issues), [issues]);
   const creationContextScope=useRef({client:apiClient,project:authorizedProjectId,bridge:bridgeContext});
   if(creationContextScope.current.client!==apiClient||creationContextScope.current.project!==authorizedProjectId||creationContextScope.current.bridge!==bridgeContext)creationContextScope.current={client:apiClient,project:authorizedProjectId,bridge:bridgeContext};
