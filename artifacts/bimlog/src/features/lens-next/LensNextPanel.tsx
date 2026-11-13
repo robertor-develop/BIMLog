@@ -268,7 +268,7 @@ export function LensNextPanel({
     try{
       setRevitOpenState("opening");
       const result=await openLensIssueInRevit({apiBaseUrl,authToken,bridgeOrigin:DEFAULT_REVIT_BRIDGE_ORIGIN,projectId:authorizedProjectId,issueId:selectedIssue.identity.serverId,viewpointId:selectedIssue.identity.viewpointId,visualStateDigest:selectedIssue.visualStateDigest,fetchImpl});
-      setRevitOpenState("success");setRevitOpenMessage(`Opened the exact Revit 2026 location${result.elementsSelected?` and selected ${result.elementsSelected} element(s)`:""}.`);
+      setRevitOpenState("success");setRevitOpenMessage(`Opened the exact Revit 2026.5+ location${result.elementsSelected?` and selected ${result.elementsSelected} element(s)`:""}.`);
     }catch(error){setRevitOpenState("error");setRevitOpenMessage(error instanceof Error?error.message:"Open in Revit failed");}
   },[apiBaseUrl,authToken,authorizedProjectId,fetchImpl,selectedIssue]);
   const activeIssues = useMemo(() => activeLensNextIssues(issues), [issues]);

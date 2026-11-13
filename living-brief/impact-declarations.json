@@ -83235,9 +83235,9 @@
       "reviewedChangeSha256": "ef365bc8ab7569b888f44a5d53f8d394527044efff728b6d7c3ae60ae87430ea"
     },
     {
-      "taskId": "LENS_THREE_FEATURE_BLOCKS03_04_20261113",
-      "reviewedAt": "2026-11-13T20:40:00Z",
-      "reviewedThroughCommit": "ff32dbe5abb266e85d5cb913b2b5cded0e8f915e",
+      "taskId": "LENS_THREE_FEATURE_REVIT_2026_5_CORRECTION_20261113",
+      "reviewedAt": "2026-11-13T21:15:00Z",
+      "reviewedThroughCommit": "f7dfb13083c4f5502a97edef5f18f2f4be0b8fb2",
       "authorities": [
         {
           "key": "ecosystem_doctrine",
@@ -83266,18 +83266,18 @@
         },
         {
           "key": "status",
-          "result": "reviewed_no_semantic_change",
-          "reason": "The existing candidate status already records the exact 20-build scope and truthful unreleased state."
+          "result": "updated",
+          "reason": "Records the verified web/API acceptance, latest-Revit compatibility correction and truthful unreleased state."
         },
         {
           "key": "open_loop",
-          "result": "reviewed_no_semantic_change",
-          "reason": "The existing open loop already keeps official compilation, physical validation, push, publication and live rounds open."
+          "result": "updated",
+          "reason": "Defines the exact .NET 10, official Autodesk API, physical navigation, push, publication and live acceptance gates."
         },
         {
           "key": "plugin",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Adds a Revit 2026 adapter, secure local bridge, manifest and guarded package lifecycle."
+          "result": "updated",
+          "reason": "Records the corrected Revit 2026.5+ .NET 10 adapter boundary and the outstanding official compile and physical validation gates."
         },
         {
           "key": "report_design_system",
@@ -83297,10 +83297,21 @@
       ],
       "reason": "Close the three requested Lens workflows without guessing Autodesk coordinates or claiming unperformed physical validation.",
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/lib/lens-next-refresh-responsiveness.behavior.ts",
-        "living-brief/impact-declarations.json"
+        "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-revit-ui.behavior.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/revit/2026/BIMLogLensNext.Revit2026.csproj",
+        "plugins/BIMLogLensNext/revit/2026/Build-Revit2026Package.ps1",
+        "plugins/BIMLogLensNext/revit/2026/Install-Revit2026.ps1",
+        "plugins/BIMLogLensNext/revit/2026/Test-Revit2026Package.ps1",
+        "plugins/BIMLogLensNext/revit/2026/Uninstall-Revit2026.ps1"
       ],
-      "reviewedChangeSha256": "6de5dfcdff37a330e2fd89457a0c94ac4127e2e34b75f32d933eabd18e05d6aa"
+      "reviewedChangeSha256": "b2346e8818e98daa7ca43971c31ef1a45da71b9074950db7235ee5f27cd9e234"
     }
   ]
 }

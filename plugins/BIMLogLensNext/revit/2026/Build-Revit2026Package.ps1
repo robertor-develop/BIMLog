@@ -6,7 +6,7 @@ foreach($dll in 'RevitAPI.dll','RevitAPIUI.dll'){if(-not(Test-Path -LiteralPath 
 $stage=Join-Path $root ".package\$Version";$output=Join-Path $root "BIMLog-Lens-Revit2026-$Version.zip"
 if(Test-Path -LiteralPath $stage){Remove-Item -LiteralPath $stage -Recurse -Force};New-Item -ItemType Directory -Path $stage|Out-Null
 dotnet publish $project -c Release -p:Platform=x64 -p:RevitInstallDir=$RevitInstallDir -o (Join-Path $stage 'BIMLogLensNext')
-if($LASTEXITCODE-ne 0){throw 'Official Revit 2026 adapter compilation failed.'}
+if($LASTEXITCODE-ne 0){throw 'Official Revit 2026.5+ .NET 10 adapter compilation failed.'}
 Copy-Item -LiteralPath (Join-Path $root 'BIMLogLensNext.Revit2026.addin') -Destination $stage
 Copy-Item -LiteralPath (Join-Path $root 'Install-Revit2026.ps1') -Destination $stage
 Copy-Item -LiteralPath (Join-Path $root 'Uninstall-Revit2026.ps1') -Destination $stage

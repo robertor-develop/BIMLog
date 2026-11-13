@@ -5136,3 +5136,9 @@ Two five-build implementation blocks complete the marked-image report, contracto
 
 The web/API/core focused tests and TypeScript compilation pass. Publication is not yet authorized by evidence: this workstation has no licensed Revit 2026 installation or official `RevitAPI.dll`/`RevitAPIUI.dll`, so the real Autodesk adapter cannot yet compile, package, install, or pass physical model navigation. The adapter hard-fails rather than compiling against a fake SDK. No branch push, production deployment, schema application, or customer-data mutation is claimed by this candidate.
 
+## 2026-11-13 — Lens three-feature 20-build candidate: latest-Revit correction and release hold
+
+The requested marked-report imagery and answered-but-open contractor response workflows pass focused, connected Lens Next, security/privacy/recovery, responsive/accessibility and full-system acceptance. The clean production build passes at the current corrective head. Autodesk's current Revit 2026.5+ requirement is .NET 10, so the Revit adapter and package contract now target `net10.0-windows` instead of the obsolete .NET 8 target and the customer guidance names Revit 2026.5 or later.
+
+This candidate is not released. The current workstation has only .NET SDK 9 and no licensed Revit 2026.5 installation or official `RevitAPI.dll`/`RevitAPIUI.dll`, so the official adapter cannot be compiled, packaged, installed or physically tested against an affected Revit model. The package contract, UI/API contract and frontend typecheck pass; push, publication and authenticated production acceptance remain withheld until the official compile and physical Revit navigation gate pass.
+

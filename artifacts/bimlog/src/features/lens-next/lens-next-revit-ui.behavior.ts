@@ -8,6 +8,6 @@ const view=readFileSync(new URL("./LensNextPanelView.tsx",import.meta.url),"utf8
 assert.match(panel,/openLensIssueInRevit/);
 assert.match(panel,/visualStateDigest/);
 assert.match(view,/Open in Revit/);
-assert.match(view,/Revit 2026/);
+assert.match(view,/Revit 2026\.5 or later/);
 assert.match(view,/revitOpenState/);
 console.log("Lens Next Revit discoverability: PASS");

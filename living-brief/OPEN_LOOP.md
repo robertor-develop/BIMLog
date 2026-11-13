@@ -6952,3 +6952,9 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [ ] On a licensed Revit 2026 workstation, compile against the installed official Autodesk API assemblies, build the package, install it, configure the exact project/document/shared-coordinate binding, and navigate a real BIMLog issue to the expected model location. This is a physical validation gate; do not replace it with a fake SDK or a source-only claim.
 - [ ] After that physical gate passes, rerun the full production build and security/regression suites, push the exact candidate, publish it, verify migrations and immutable deployment identity, then complete three authenticated visible Chrome rounds without mutating customer records beyond an explicitly identified test record.
 
+## Current Revit 2026.5+ release gate — 2026-11-13
+
+- [ ] On a controlled Windows workstation with .NET 10 SDK and licensed Revit 2026.5 or later, compile the adapter against the installed official `RevitAPI.dll` and `RevitAPIUI.dll`; do not substitute copied or fake SDK assemblies.
+- [ ] Build and checksum the guarded Revit package, install it for the test user, restart Revit, bind the exact BIMLog project/model transform, and prove one positive navigation plus wrong-model, expired-request, replay, cross-project and unauthorized negative cases on a non-customer test model.
+- [ ] Only after those native gates pass: rerun the clean repository build, push the complete 20-build candidate, publish through the established Replit Shell path without Replit Agents, verify exact deployment identity, and complete three authenticated Chrome rounds. No customer data may be used for destructive or synthetic validation.
+

@@ -1326,7 +1326,7 @@ export function LensNextPanelView({
             </button>
           </div>
           <p id="lens-next-revit-status" className={`lens-next__operation-message lens-next__operation-message--${revitOpenState}`} role="status">
-            {revitOpenMessage??tt("Requires BIMLog Lens for Revit 2026, the exact bound model, and an authorized BIMLog project.","Requiere BIMLog Lens para Revit 2026, el modelo exacto vinculado y un proyecto BIMLog autorizado.")}
+            {revitOpenMessage??tt("Requires BIMLog Lens for Revit 2026.5 or later, the exact bound model, and an authorized BIMLog project.","Requiere BIMLog Lens para Revit 2026.5 o posterior, el modelo exacto vinculado y un proyecto BIMLog autorizado.")}
           </p>
           <section className="lens-next__detail-panel lens-next__viewpoint-gallery" aria-label={tt("Issue viewpoints", "Puntos de vista de la incidencia", "Pontos de vista da ocorrência")}>
             <header><h3>{tt("Issue viewpoints", "Puntos de vista de la incidencia", "Pontos de vista da ocorrência")}</h3><span>{issueViewpoints.filter(item=>item.lifecycleStatus==="active").length} {tt("active", "activos", "ativos")}</span></header>

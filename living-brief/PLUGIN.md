@@ -1,5 +1,11 @@
 # PLUGIN.md — BIMLog Lens Navisworks Plugin Reference
 
+## Revit 2026.5+ governed navigation candidate — 2026-11-13
+
+The additive BIMLog Lens Revit adapter is a separate governed consumer of the Lens Next issue/viewpoint authority; it does not replace or merge the accepted Navisworks 2021/2025 products. Autodesk's current Revit 2026.5+ runtime requires .NET 10, so the candidate targets `net10.0-windows`, references only the installed official Revit API assemblies, validates exact project/document/model identity and a governed Navisworks-to-Revit transform, uses a bounded authenticated localhost bridge, and persists request/receipt evidence without allowing the browser to invent coordinates.
+
+Source, static package lifecycle, API/UI contracts and frontend typechecking pass. Official compilation, package creation, installation and physical navigation do not pass on the current workstation because it lacks both .NET 10 SDK and licensed Revit 2026.5 API assemblies. A web publication cannot imply native acceptance; the entire release remains withheld until the controlled official compile and physical positive/negative validation complete.
+
 ## Build 119 accepted installation topology — 2026-09-20
 
 The accepted Navisworks topology is one Pulse-only `BIMLog.bundle` plus the matching-year Lens Next bundle. Original/Legacy BIMLog Lens is retired and must not be restored by install, upgrade, rollback, or uninstall messaging. Connected Navisworks 2021 execution and the complete dependency tree passed; Ruben's physical Navisworks 2025 confirmation remains post-closure field evidence and is not an automated-field-pass claim.

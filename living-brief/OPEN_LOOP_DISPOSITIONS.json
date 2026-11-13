@@ -1,17 +1,17 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "3a92a6b307d8c4da6984f304e78ffb3d744a615a108451e2808586731b53f47c",
-  "itemCount": 583,
+  "sourceSha256": "95e46a1df9f533a3443f8918b3941d41d6316eeaf7ee688c41d70c8ab797d3dc",
+  "itemCount": 586,
   "counts": {
-    "ACTIVE": 523,
+    "ACTIVE": 526,
     "SUPERSEDED": 48,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 407,
-    "VALID_FUTURE_ROADMAP": 12,
+    "ACTIVE_DEFECT": 409,
+    "VALID_FUTURE_ROADMAP": 13,
     "EXTERNAL_OWNER_INPUT": 104,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 48,
@@ -11179,6 +11179,63 @@
       "evidence": [
         "OPEN_LOOP.md:6953",
         "Lens three-feature release gate — 2026-11-13"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "26f55744a7cebea7",
+      "sourceLine": 6957,
+      "heading": "Current Revit 2026.5+ release gate — 2026-11-13",
+      "statement": "On a controlled Windows workstation with .NET 10 SDK and licensed Revit 2026.5 or later, compile the adapter against the installed official `RevitAPI.dll` and `RevitAPIUI.dll`; do not substitute copied or fake SDK assemblies.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "VALID_FUTURE_ROADMAP",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6957",
+        "Current Revit 2026.5+ release gate — 2026-11-13"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "666ecd2265f08445",
+      "sourceLine": 6958,
+      "heading": "Current Revit 2026.5+ release gate — 2026-11-13",
+      "statement": "Build and checksum the guarded Revit package, install it for the test user, restart Revit, bind the exact BIMLog project/model transform, and prove one positive navigation plus wrong-model, expired-request, replay, cross-project and unauthorized negative cases on a non-customer test model.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6958",
+        "Current Revit 2026.5+ release gate — 2026-11-13"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "cc6387180355b114",
+      "sourceLine": 6959,
+      "heading": "Current Revit 2026.5+ release gate — 2026-11-13",
+      "statement": "Only after those native gates pass: rerun the clean repository build, push the complete 20-build candidate, publish through the established Replit Shell path without Replit Agents, verify exact deployment identity, and complete three authenticated Chrome rounds. No customer data may be used for destructive or synthetic validation.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6959",
+        "Current Revit 2026.5+ release gate — 2026-11-13"
       ],
       "currentAuthority": false
     }
