@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { validateRevitBridgeOrigin } from "./lens-next-revit-client";
+assert.equal(validateRevitBridgeOrigin("http://127.0.0.1:8876"),"http://127.0.0.1:8876");
+assert.throws(()=>validateRevitBridgeOrigin("https://evil.example:8876"),/approved 127/);
+const panel=readFileSync(new URL("./LensNextPanel.tsx",import.meta.url),"utf8");
+const view=readFileSync(new URL("./LensNextPanelView.tsx",import.meta.url),"utf8");
+assert.match(panel,/openLensIssueInRevit/);
+assert.match(panel,/visualStateDigest/);
+assert.match(view,/Open in Revit/);
+assert.match(view,/Revit 2026/);
+assert.match(view,/revitOpenState/);
+console.log("Lens Next Revit discoverability: PASS");

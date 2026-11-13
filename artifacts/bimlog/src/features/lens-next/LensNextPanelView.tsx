@@ -475,6 +475,10 @@ export interface LensNextPanelViewProps {
   bridgeOpenEnabled: boolean;
   workingViewState: "idle" | "opening" | "success" | "error";
   workingViewUnavailable: boolean;
+  revitOpenEnabled:boolean;
+  revitOpenState:"idle"|"connecting"|"opening"|"success"|"error";
+  revitOpenMessage:string|null;
+  onOpenInRevit():void;
   visualRepairState: "idle" | "repairing" | "success" | "error";
   visualRepairMessage: string | null;
   onRepairCurrentWorkingView(): void;
@@ -581,6 +585,7 @@ export function LensNextPanelView({
   bridgeOpenEnabled,
   workingViewState,
   workingViewUnavailable,
+  revitOpenEnabled,revitOpenState,revitOpenMessage,onOpenInRevit,
   visualRepairState,
   visualRepairMessage,
   onRepairCurrentWorkingView,
@@ -1310,6 +1315,9 @@ export function LensNextPanelView({
             >
               {workingViewState === "opening" ? tt("Opening Working View…", "Abriendo vista de trabajo…") : tt("Open Working View", "Abrir vista de trabajo")}
             </button>
+            <button type="button" disabled={!revitOpenEnabled} onClick={onOpenInRevit} aria-describedby="lens-next-revit-status">
+              {revitOpenState==="connecting"?tt("Connecting to Revit…","Conectando con Revit…"):revitOpenState==="opening"?tt("Opening in Revit…","Abriendo en Revit…"):tt("Open in Revit","Abrir en Revit")}
+            </button>
             <button type="button" onClick={() => { setDetailView("activity"); onLoadHistory(); }} disabled={history === "loading"}>
               {history === "loading" ? tt("Loading history…", "Cargando historial…") : tt("View history", "Ver historial")}
             </button>
@@ -1317,6 +1325,9 @@ export function LensNextPanelView({
               {tt("Link BIMLog item", "Vincular elemento BIMLog")}
             </button>
           </div>
+          <p id="lens-next-revit-status" className={`lens-next__operation-message lens-next__operation-message--${revitOpenState}`} role="status">
+            {revitOpenMessage??tt("Requires BIMLog Lens for Revit 2026, the exact bound model, and an authorized BIMLog project.","Requiere BIMLog Lens para Revit 2026, el modelo exacto vinculado y un proyecto BIMLog autorizado.")}
+          </p>
           <section className="lens-next__detail-panel lens-next__viewpoint-gallery" aria-label={tt("Issue viewpoints", "Puntos de vista de la incidencia", "Pontos de vista da ocorrência")}>
             <header><h3>{tt("Issue viewpoints", "Puntos de vista de la incidencia", "Pontos de vista da ocorrência")}</h3><span>{issueViewpoints.filter(item=>item.lifecycleStatus==="active").length} {tt("active", "activos", "ativos")}</span></header>
             {issueViewpointsState === "loading" && <p role="status">{tt("Loading viewpoints…", "Cargando puntos de vista…", "Carregando pontos de vista…")}</p>}

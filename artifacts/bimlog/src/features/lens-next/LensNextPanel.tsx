@@ -59,6 +59,7 @@ import "./lens-next-panel.css";
 import { openBimlogWorkingView, repairBimlogWorkingViewFromCurrent } from "./lens-next-working-view";
 import { loadExportableLensNextPackages, lensNextXmlSkippedSummary } from "./lens-next-xml-export-selection";
 import { mergeLensTradeOptions } from "./lens-trade-options";
+import { DEFAULT_REVIT_BRIDGE_ORIGIN, openLensIssueInRevit, type RevitOpenState } from "./lens-next-revit-client";
 
 const LENS_NEXT_REPORT_TYPE_OPTIONS = ["SHOP", "SLEEVE", "COORDINATION", "FIELD", "OTHER"] as const;
 const LENS_NEXT_FALLBACK_FLOORS = ["CELLAR", "1", "2", "3", "4", "5", "ROOF", "Other"] as const;
@@ -234,12 +235,24 @@ export function LensNextPanel({
   const [visualRepairMessage, setVisualRepairMessage] = useState<string | null>(null);
   const workingViewInFlight = useRef(false);
   const [workingViewState, setWorkingViewState] = useState<"idle" | "opening" | "success" | "error">("idle");
+  const [revitOpenState,setRevitOpenState]=useState<RevitOpenState>("idle");
+  const [revitOpenMessage,setRevitOpenMessage]=useState<string|null>(null);
   const [knowledgeContext,setKnowledgeContext]=useState<LensNextKnowledgeContext|"loading"|null>(null);
   const [knowledgeError,setKnowledgeError]=useState<string|null>(null);
   const [resolutionRecord,setResolutionRecord]=useState<LensNextResolutionRecord|"loading"|null>(null);
   const [resolutionError,setResolutionError]=useState<string|null>(null);
   const [resolutionEvidence,setResolutionEvidence]=useState<readonly LensNextResolutionEvidence[]|"loading">([]);
   const [lessonProposal,setLessonProposal]=useState<import("./lens-next-types").LensNextLessonProposal|"loading"|null>(null);
+
+  const openInRevit=useCallback(async()=>{
+    if(!selectedIssue||!selectedIssue.visualStateDigest||!authorizedProjectId)return;
+    setRevitOpenState("connecting");setRevitOpenMessage(null);
+    try{
+      setRevitOpenState("opening");
+      const result=await openLensIssueInRevit({apiBaseUrl,authToken,bridgeOrigin:DEFAULT_REVIT_BRIDGE_ORIGIN,projectId:authorizedProjectId,issueId:selectedIssue.identity.serverId,viewpointId:selectedIssue.identity.viewpointId,visualStateDigest:selectedIssue.visualStateDigest,fetchImpl});
+      setRevitOpenState("success");setRevitOpenMessage(`Opened the exact Revit 2026 location${result.elementsSelected?` and selected ${result.elementsSelected} element(s)`:""}.`);
+    }catch(error){setRevitOpenState("error");setRevitOpenMessage(error instanceof Error?error.message:"Open in Revit failed");}
+  },[apiBaseUrl,authToken,authorizedProjectId,fetchImpl,selectedIssue]);
 
   const authorizedProjectId = useMemo(() => {
     if (selectedProjectId === null) return null;
@@ -1133,6 +1146,10 @@ export function LensNextPanel({
         selectedIssue !== null &&
         (!selectedIssue.visualStateAvailable || !selectedIssue.visualStateDigest)
       }
+      revitOpenEnabled={apiState==="connected"&&Boolean(selectedIssue?.visualStateAvailable&&selectedIssue.visualStateDigest)&&revitOpenState!=="connecting"&&revitOpenState!=="opening"}
+      revitOpenState={revitOpenState}
+      revitOpenMessage={revitOpenMessage}
+      onOpenInRevit={()=>void openInRevit()}
       visualRepairState={visualRepairState}
       visualRepairMessage={visualRepairMessage}
       onRepairCurrentWorkingView={() => void repairCurrentWorkingView()}
