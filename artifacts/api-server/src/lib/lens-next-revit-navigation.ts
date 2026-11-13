@@ -7,10 +7,10 @@ export async function ensureLensNextRevitNavigationSchema(pool: Pool): Promise<v
   await pool.query(`
     CREATE TABLE IF NOT EXISTS lens_next_revit_navigation_events (
       id BIGSERIAL PRIMARY KEY,
-      project_id BIGINT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-      lens_viewpoint_id BIGINT NOT NULL REFERENCES lens_viewpoints(id) ON DELETE CASCADE,
+      project_id INTEGER NOT NULL REFERENCES projects(id),
+      lens_viewpoint_id INTEGER NOT NULL REFERENCES lens_viewpoints(id),
       request_id UUID NOT NULL UNIQUE,
-      requested_by_id BIGINT NOT NULL REFERENCES users(id),
+      requested_by_id INTEGER NOT NULL REFERENCES users(id),
       target_digest TEXT NOT NULL CHECK (target_digest ~ '^[a-f0-9]{64}$'),
       target_json JSONB NOT NULL,
       outcome TEXT NOT NULL DEFAULT 'requested' CHECK (outcome IN ('requested','opened','already-opened','blocked','expired')),

@@ -39,6 +39,7 @@ export * from "./lens-viewpoint-sequence-counters";
 export * from "./lens-project-trades";
 export * from "./lens-next-publishing";
 export * from "./lens-next-model-bindings";
+export * from "./lens-next-revit-navigation";
 export * from "./lens-imports";
 export * from "./submittal_reports";
 export * from "./linked-items";
