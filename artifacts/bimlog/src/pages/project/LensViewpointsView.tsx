@@ -216,6 +216,9 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const [responseModal, setResponseModal] = useState<{ v: LensViewpoint; outcome: "cannot_complete" | "recommend_reassignment" | "needs_information" | "completed_work"; response: string; recommendedCompany: string; clientRequestId: string } | null>(null);
   const [responsePhase, setResponsePhase] = useState<"input" | "submitting">("input");
   const [responseError, setResponseError] = useState("");
+  const [reviewModal, setReviewModal] = useState<{ v: LensViewpoint; responseId: number; decision: "resolve" | "follow_up" | "waiting_design" | "approve" | "reassign"; reason: string; responsibleCompany: string } | null>(null);
+  const [reviewPhase, setReviewPhase] = useState<"input" | "submitting">("input");
+  const [reviewError, setReviewError] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set());
   const [floorLevels, setFloorLevels] = useState<string[]>([]);
   const [floorCorrectionOpen, setFloorCorrectionOpen] = useState(false);
@@ -354,7 +357,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     }
   };
 
-  useEffect(() => {contextEpoch.current++;actionLock.current=false;exportLock.current=false;setExporting(false);setRepairing(false);setFloorCorrectionOpen(false);setResponsibleOpen(false);setFloorCorrectionPhase("input");setResponsiblePhase("input");setViewpoints([]);setSelectedIds(new Set());setHistoryData({});setHistoryOpen({});setActionModal(null);setActionError("");setActionPhase("input");setResponseModal(null);setResponseError("");setResponsePhase("input");void loadViewpoints();return()=>{contextEpoch.current++;}; }, [projectId,token]);
+  useEffect(() => {contextEpoch.current++;actionLock.current=false;exportLock.current=false;setExporting(false);setRepairing(false);setFloorCorrectionOpen(false);setResponsibleOpen(false);setFloorCorrectionPhase("input");setResponsiblePhase("input");setViewpoints([]);setSelectedIds(new Set());setHistoryData({});setHistoryOpen({});setActionModal(null);setActionError("");setActionPhase("input");setResponseModal(null);setResponseError("");setResponsePhase("input");setReviewModal(null);setReviewError("");setReviewPhase("input");void loadViewpoints();return()=>{contextEpoch.current++;}; }, [projectId,token]);
 
   // Silently refetch the viewpoint list (no loading spinner) so the table can
   // be refreshed on demand (manual refresh banner) without a loading flicker.
@@ -735,6 +738,35 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
       showToast(t("Response saved. The issue remains open for coordinator review.", "Respuesta guardada. La incidencia sigue abierta para revisión del coordinador."));
     } catch (error) {
       if (context === contextEpoch.current) { setResponsePhase("input"); setResponseError(error instanceof Error ? error.message : String(error)); }
+    } finally { if (context === contextEpoch.current) actionLock.current = false; }
+  };
+
+  const reviewIssueResponse = (v: LensViewpoint, responseId: number) => {
+    setReviewError(""); setReviewPhase("input");
+    setReviewModal({ v, responseId, decision: "follow_up", reason: "", responsibleCompany: "" });
+  };
+
+  const submitResponseReview = async () => {
+    if (!reviewModal || !canWrite || actionLock.current) return;
+    const context = contextEpoch.current, draft = reviewModal;
+    if (draft.reason.trim().length < 3) { setReviewError(t("Explain the coordinator decision.", "Explique la decisión del coordinador.")); return; }
+    if (draft.decision === "reassign" && !draft.responsibleCompany.trim()) { setReviewError(t("Choose the new responsible company.", "Seleccione la nueva empresa responsable.")); return; }
+    actionLock.current = true; setReviewPhase("submitting"); setReviewError("");
+    try {
+      const response = await fetch(`${API}/projects/${projectId}/clash-reports/lens-next/issues/${draft.v.id}/responses/review`, {
+        method: "POST", headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ contractVersion: "lens-issue-response-review.v1", responseId: draft.responseId, mutationVersion: draft.v.mutationVersion ?? 1, decision: draft.decision, reason: draft.reason, responsibleCompany: draft.decision === "reassign" ? draft.responsibleCompany : null }),
+      });
+      const receipt = await response.json().catch(() => ({}));
+      if (context !== contextEpoch.current) return;
+      if (!response.ok) throw new Error(receipt.message || receipt.error || t("The review could not be saved.", "No se pudo guardar la revisión."));
+      if (receipt.success !== true || receipt.issue?.serverId !== draft.v.id || receipt.issue?.status === "under_review") throw new Error(t("The server returned an invalid review receipt.", "El servidor devolvió una confirmación de revisión inválida."));
+      if (!await loadViewpoints(draft.v.id)) throw new Error(t("Review saved, but the issue could not be reopened.", "La revisión se guardó, pero no se pudo reabrir la incidencia."));
+      if (context !== contextEpoch.current) return;
+      setReviewModal(null); setReviewPhase("input");
+      showToast(t("Coordinator decision saved and verified.", "Decisión del coordinador guardada y verificada."));
+    } catch (error) {
+      if (context === contextEpoch.current) { setReviewPhase("input"); setReviewError(error instanceof Error ? error.message : String(error)); }
     } finally { if (context === contextEpoch.current) actionLock.current = false; }
   };
 
@@ -1530,6 +1562,9 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
                                       </div>
                                       <div style={{ marginTop: 5, color: "#1F2937", whiteSpace: "pre-wrap" }}>{response.response}</div>
                                       {response.recommendedCompany && <div style={{ marginTop: 5, color: "#475569" }}>{t("Recommended reassignment", "Reasignación recomendada")}: <strong>{response.recommendedCompany}</strong></div>}
+                                      {canWrite && response.reviewStatus === "pending_review" && v.status === "under_review" && (
+                                        <button className="btn btn-sm btn-primary" onClick={() => reviewIssueResponse(v, response.id)} style={{ marginTop: 8, fontSize: 11, padding: "4px 10px" }}>{t("Coordinator review", "Revisión del coordinador")}</button>
+                                      )}
                                     </div>
                                   ))}
                                 </div>
@@ -1771,6 +1806,34 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
                 {responsiblePhase === "submitting" ? <><RefreshCw size={14} /> {t("Saving...", "Guardando...")}</> : <><CheckCircle2 size={14} /> {t("Apply", "Aplicar")}</>}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {reviewModal && (
+        <div onClick={() => reviewPhase !== "submitting" && setReviewModal(null)} style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div onClick={event => event.stopPropagation()} role="dialog" aria-modal="true" aria-label={t("Coordinator response review", "Revisión de respuesta del coordinador")} style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 560, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+              <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>{t("Coordinator decision", "Decisión del coordinador")}</h3>
+              <button onClick={() => reviewPhase !== "submitting" && setReviewModal(null)} aria-label={t("Close", "Cerrar")} disabled={reviewPhase === "submitting"} style={{ background: "transparent", border: "none", color: "#6B7280", padding: 4 }}><X size={20} /></button>
+            </div>
+            <div style={{ marginTop: 12, background: "#F8FAFC", border: "1px solid #CBD5E1", borderRadius: 8, padding: "10px 12px", fontSize: 12.5, color: "#334155" }}>{t("Choose what happens next. Only Resolve closes the issue; every other decision keeps it active in the selected workflow state.", "Elija qué sucede después. Solo Resolver cierra la incidencia; cualquier otra decisión la mantiene activa en el estado seleccionado.")}</div>
+            <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
+              <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600 }}>
+                {t("Decision", "Decisión")}
+                <select value={reviewModal.decision} onChange={event => setReviewModal({ ...reviewModal, decision: event.target.value as typeof reviewModal.decision, responsibleCompany: event.target.value === "reassign" ? reviewModal.responsibleCompany : "" })} style={{ padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, background: "white" }}>
+                  <option value="follow_up">{t("Return for follow-up", "Devolver para seguimiento")}</option>
+                  <option value="waiting_design">{t("Wait for design", "Esperar diseño")}</option>
+                  <option value="approve">{t("Approve response", "Aprobar respuesta")}</option>
+                  <option value="reassign">{t("Reassign responsibility", "Reasignar responsabilidad")}</option>
+                  <option value="resolve">{t("Resolve and close", "Resolver y cerrar")}</option>
+                </select>
+              </label>
+              {reviewModal.decision === "reassign" && <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600 }}>{t("New responsible company", "Nueva empresa responsable")}<select value={reviewModal.responsibleCompany} onChange={event => setReviewModal({ ...reviewModal, responsibleCompany: event.target.value })} style={{ padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, background: "white" }}><option value="">{t("Select company", "Seleccione empresa")}</option>{responsibleCompanies.filter(company => company !== reviewModal.v.responsibleCompany).map(company => <option key={company} value={company}>{company}</option>)}</select></label>}
+              <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600 }}>{t("Decision reason", "Motivo de la decisión")}<textarea value={reviewModal.reason} onChange={event => setReviewModal({ ...reviewModal, reason: event.target.value })} rows={4} maxLength={2000} style={{ padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, resize: "vertical" }} /></label>
+            </div>
+            {reviewError && <div style={{ marginTop: 12, background: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C", padding: "8px 12px", borderRadius: 8, fontSize: 12.5, fontWeight: 600 }}>{reviewError}</div>}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 18 }}><button className="btn btn-sm btn-outline" onClick={() => setReviewModal(null)} disabled={reviewPhase === "submitting"}>{t("Cancel", "Cancelar")}</button><button className="btn btn-sm btn-primary" onClick={submitResponseReview} disabled={reviewPhase === "submitting"}>{reviewPhase === "submitting" ? t("Saving...", "Guardando...") : t("Save decision", "Guardar decisión")}</button></div>
           </div>
         </div>
       )}

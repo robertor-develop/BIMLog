@@ -2,9 +2,11 @@ import assert from "node:assert/strict";
 import {
   assertLensIssueCanReceiveResponse,
   lensIssueResponseFingerprint,
+  lensIssueReviewOutcome,
   LENS_ISSUE_RESPONSE_NEXT_STATUS,
   LensIssueResponseError,
   parseLensIssueResponseDraft,
+  parseLensIssueReviewDraft,
 } from "./lens-issue-response";
 
 const parsed = parseLensIssueResponseDraft({
@@ -26,6 +28,12 @@ assert.throws(
   () => parseLensIssueResponseDraft({ ...parsed, recommendedCompany: null }),
   (error: unknown) => error instanceof LensIssueResponseError && error.code === "LENS_ISSUE_RESPONSE_COMPANY_REQUIRED",
 );
+
+const review = parseLensIssueReviewDraft({ contractVersion: "lens-issue-response-review.v1", responseId: 9, mutationVersion: 8, decision: "reassign", reason: "Plumbing owns the available route.", responsibleCompany: "Plumbing Partner" });
+assert.deepEqual(lensIssueReviewOutcome(review.decision), { issueStatus: "follow_up", reviewStatus: "reassigned" });
+assert.deepEqual(lensIssueReviewOutcome("resolve"), { issueStatus: "resolved", reviewStatus: "accepted" });
+assert.deepEqual(lensIssueReviewOutcome("waiting_design"), { issueStatus: "waiting_design", reviewStatus: "returned" });
+assert.throws(() => parseLensIssueReviewDraft({ ...review, decision: "resolve", responsibleCompany: "Other" }), (error: unknown) => error instanceof LensIssueResponseError && error.code === "LENS_ISSUE_REVIEW_COMPANY_FORBIDDEN");
 assert.throws(
   () => parseLensIssueResponseDraft({ ...parsed, outcome: "completed_work", recommendedCompany: "Other" }),
   (error: unknown) => error instanceof LensIssueResponseError && error.code === "LENS_ISSUE_RESPONSE_COMPANY_FORBIDDEN",

@@ -38,7 +38,7 @@ import { resolveLensCompanyDirectoryReference, type CompanyDirectoryCandidate } 
 import { lensIssueFieldAuthorities, lensResponsibleCompanyAvailability, lensSameProjectHistoricalCompanyAvailability, uniqueLensResponsibleCompanyOptions, type LensResponsibleCompanyOption } from "../lib/lens-issue-field-authority";
 import { assertCatalogLabel, assertLensIssueStatusTransition, normalizeGovernedLabel, LENS_ISSUE_BASE_TRADES, LENS_ISSUE_REPORT_TYPES } from "../lib/lens-issue-edit-policy";
 import { selectLensReportImage, type LensReportImageEvidence } from "../lib/lens-report-image";
-import { assertLensIssueCanReceiveResponse, lensIssueResponseFingerprint, LensIssueResponseError, LENS_ISSUE_RESPONSE_NEXT_STATUS, parseLensIssueResponseDraft } from "../lib/lens-issue-response";
+import { assertLensIssueCanReceiveResponse, lensIssueResponseFingerprint, lensIssueReviewOutcome, LensIssueResponseError, LENS_ISSUE_RESPONSE_NEXT_STATUS, parseLensIssueResponseDraft, parseLensIssueReviewDraft } from "../lib/lens-issue-response";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -2700,6 +2700,56 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/:id/responses",
       const correlationId = randomUUID();
       logLensImportInternal("lens-issue-response", correlationId, error);
       res.status(500).json({ error: "LENS_ISSUE_RESPONSE_FAILED", message: "The response could not be committed.", correlationId });
+    }
+  },
+);
+
+router.post("/projects/:projectId/clash-reports/lens-next/issues/:id/responses/review",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId), issueId = Number(req.params.id);
+    try {
+      if (!Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(issueId) || issueId <= 0)
+        throw new LensIssueResponseError("LENS_ISSUE_REVIEW_INVALID", "The project and issue identity are invalid.", 400);
+      let draft = parseLensIssueReviewDraft(req.body);
+      const [currentUser] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
+      const roleMeta = req.memberRole ? await getConfigOptionMeta("member_role", req.memberRole) : null;
+      if (!currentUser?.isSuperAdmin && roleMeta?.permission !== "admin")
+        throw new LensIssueResponseError("LENS_ISSUE_REVIEW_FORBIDDEN", "Only a project coordinator or administrator may decide a contractor response.", 403);
+      if (draft.responsibleCompany) {
+        const choices = await loadProjectCompanyChoices(projectId);
+        try { draft = Object.freeze({ ...draft, responsibleCompany: assertCatalogLabel(draft.responsibleCompany, choices.companies, "responsibleCompany") }); }
+        catch { throw new LensIssueResponseError("LENS_ISSUE_REVIEW_COMPANY_FORBIDDEN", "The selected company is not authorized for this project.", 422); }
+      }
+      const outcome = lensIssueReviewOutcome(draft.decision);
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        const responseRow = (await client.query(`SELECT * FROM lens_issue_responses WHERE id=$1 AND project_id=$2 AND issue_id=$3 FOR UPDATE`, [draft.responseId, projectId, issueId])).rows[0];
+        if (!responseRow) throw new LensIssueResponseError("LENS_ISSUE_RESPONSE_NOT_FOUND", "The response was not found in this project.", 404);
+        if (responseRow.review_status !== "pending_review") throw new LensIssueResponseError("LENS_ISSUE_RESPONSE_ALREADY_REVIEWED", "This response already has a coordinator decision.", 409);
+        const issue = (await client.query(`SELECT * FROM lens_viewpoints WHERE id=$1 AND project_id=$2 FOR UPDATE`, [issueId, projectId])).rows[0];
+        if (!issue) throw new LensIssueResponseError("LENS_ISSUE_NOT_FOUND", "The Lens issue was not found in this project.", 404);
+        if (issue.lifecycle_status !== "active" || issue.status !== LENS_ISSUE_RESPONSE_NEXT_STATUS)
+          throw new LensIssueResponseError("LENS_ISSUE_REVIEW_STATE_CONFLICT", "The issue is no longer awaiting coordinator review.", 409);
+        if (Number(issue.mutation_version) !== draft.mutationVersion)
+          throw new LensIssueResponseError("LENS_ISSUE_VERSION_CONFLICT", "The issue changed after review began. Reload the current issue.", 409);
+        const resultingMutationVersion = draft.mutationVersion + 1;
+        const responsibleCompany = draft.decision === "reassign" ? draft.responsibleCompany : issue.responsible_company;
+        const updated = (await client.query(`UPDATE lens_viewpoints SET status=$1,responsible_company=$2,mutation_version=$3,updated_at=now() WHERE id=$4 AND project_id=$5 AND mutation_version=$6 AND status='under_review' AND lifecycle_status='active' RETURNING *`, [outcome.issueStatus, responsibleCompany, resultingMutationVersion, issueId, projectId, draft.mutationVersion])).rows[0];
+        if (!updated) throw new LensIssueResponseError("LENS_ISSUE_VERSION_CONFLICT", "The issue changed while the decision was being saved.", 409);
+        await client.query(`UPDATE lens_issue_responses SET review_status=$1,reviewer_user_id=$2,review_decision=$3,review_reason=$4,reviewed_at=now() WHERE id=$5 AND project_id=$6 AND issue_id=$7 AND review_status='pending_review'`, [outcome.reviewStatus, req.user!.userId, draft.decision, draft.reason, draft.responseId, projectId, issueId]);
+        await client.query(`INSERT INTO lens_viewpoint_events(project_id,viewpoint_id,event_type,from_status,to_status,changed_by_id) VALUES($1,$2,'coordinator_response_reviewed',$3,$4,$5)`, [projectId, issueId, issue.status, outcome.issueStatus, req.user!.userId]);
+        await client.query(`INSERT INTO activity_log(project_id,user_id,user_full_name,user_company_name,action_type,entity_type,entity_id,file_name_before,file_name_after,details) VALUES($1,$2,$3,$4,'lens_issue_response_reviewed','lens_issue',$5,$6,$7,$8)`, [projectId, req.user!.userId, req.user!.fullName, req.user!.companyName, issueId, issue.status, outcome.issueStatus, JSON.stringify({ responseId: draft.responseId, decision: draft.decision, reason: draft.reason, responsibleCompanyBefore: issue.responsible_company, responsibleCompanyAfter: responsibleCompany, sourceApplication: "Lens Next" })]);
+        await client.query("COMMIT");
+        res.json({ success: true, response: { id: draft.responseId, reviewStatus: outcome.reviewStatus, decision: draft.decision, reviewedAt: new Date().toISOString() }, issue: { serverId: issueId, status: outcome.issueStatus, responsibleCompany, mutationVersion: resultingMutationVersion } });
+      } catch (error) { await client.query("ROLLBACK"); throw error; }
+      finally { client.release(); }
+    } catch (error) {
+      if (error instanceof LensIssueResponseError) { res.status(error.status).json({ error: error.code, message: error.message }); return; }
+      const correlationId = randomUUID(); logLensImportInternal("lens-issue-response-review", correlationId, error);
+      res.status(500).json({ error: "LENS_ISSUE_REVIEW_FAILED", message: "The coordinator decision could not be committed.", correlationId });
     }
   },
 );

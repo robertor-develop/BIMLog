@@ -82,3 +82,46 @@ export function assertLensIssueCanReceiveResponse(input: {
 
 export const LENS_ISSUE_RESPONSE_NEXT_STATUS = "under_review" as const;
 
+export const LENS_ISSUE_REVIEW_CONTRACT = "lens-issue-response-review.v1" as const;
+export const LENS_ISSUE_REVIEW_DECISIONS = ["resolve", "follow_up", "waiting_design", "approve", "reassign"] as const;
+export type LensIssueReviewDecision = typeof LENS_ISSUE_REVIEW_DECISIONS[number];
+export type LensIssueReviewDraft = Readonly<{
+  contractVersion: typeof LENS_ISSUE_REVIEW_CONTRACT;
+  responseId: number;
+  mutationVersion: number;
+  decision: LensIssueReviewDecision;
+  reason: string;
+  responsibleCompany: string | null;
+}>;
+
+export function parseLensIssueReviewDraft(value: unknown): LensIssueReviewDraft {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new LensIssueResponseError("LENS_ISSUE_REVIEW_INVALID", "The review contract is invalid.", 400);
+  const body = value as Record<string, unknown>;
+  const allowed = new Set(["contractVersion", "responseId", "mutationVersion", "decision", "reason", "responsibleCompany"]);
+  const responseId = Number(body.responseId), mutationVersion = Number(body.mutationVersion);
+  const decision = String(body.decision ?? "") as LensIssueReviewDecision;
+  if (body.contractVersion !== LENS_ISSUE_REVIEW_CONTRACT || Object.keys(body).some(key => !allowed.has(key))
+    || !Number.isSafeInteger(responseId) || responseId < 1 || !Number.isSafeInteger(mutationVersion) || mutationVersion < 1
+    || !(LENS_ISSUE_REVIEW_DECISIONS as readonly string[]).includes(decision))
+    throw new LensIssueResponseError("LENS_ISSUE_REVIEW_INVALID", "A pending response, current issue version, and valid decision are required.", 400);
+  const reason = boundedText(body.reason, "reason", 3, 2000);
+  const responsibleCompany = body.responsibleCompany == null || String(body.responsibleCompany).trim() === ""
+    ? null : boundedText(body.responsibleCompany, "responsibleCompany", 1, 160);
+  if (decision === "reassign" && !responsibleCompany)
+    throw new LensIssueResponseError("LENS_ISSUE_REVIEW_COMPANY_REQUIRED", "A responsible company is required for reassignment.", 422);
+  if (decision !== "reassign" && responsibleCompany)
+    throw new LensIssueResponseError("LENS_ISSUE_REVIEW_COMPANY_FORBIDDEN", "A responsible company is only valid for reassignment.", 422);
+  return Object.freeze({ contractVersion: LENS_ISSUE_REVIEW_CONTRACT, responseId, mutationVersion, decision, reason, responsibleCompany });
+}
+
+export function lensIssueReviewOutcome(decision: LensIssueReviewDecision): { issueStatus: string; reviewStatus: string } {
+  switch (decision) {
+    case "resolve": return { issueStatus: "resolved", reviewStatus: "accepted" };
+    case "approve": return { issueStatus: "approved", reviewStatus: "accepted" };
+    case "follow_up": return { issueStatus: "follow_up", reviewStatus: "returned" };
+    case "waiting_design": return { issueStatus: "waiting_design", reviewStatus: "returned" };
+    case "reassign": return { issueStatus: "follow_up", reviewStatus: "reassigned" };
+  }
+}
+
