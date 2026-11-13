@@ -30,6 +30,8 @@ import {
   type LensNextFilters,
   type LensNextHistory,
   type LensNextIssue,
+  type LensNextIssueResponseDraft,
+  type LensNextIssueResponseReviewDraft,
   type LensNextLocalInventory,
   type LensNextLocalViewpoint,
   type LensNextLayoutItem,
@@ -554,6 +556,26 @@ export function LensNextPanel({
         error instanceof Error ? error.message : "History read failed",
       );
     }
+  }, [apiClient, selectedIssue]);
+
+  const submitIssueResponse = useCallback(async (draft: LensNextIssueResponseDraft) => {
+    if (!apiClient || !selectedIssue) throw new Error("Select an active BIMLog issue before responding.");
+    const issue = selectedIssue;
+    const receipt = await apiClient.submitIssueResponse(issue, draft);
+    setIssues(current => current.map(item => item.identity.serverId === issue.identity.serverId ? {
+      ...item, status: receipt.status, mutationVersion: receipt.mutationVersion,
+    } : item));
+    setHistory(await apiClient.loadHistory(issue.identity));
+  }, [apiClient, selectedIssue]);
+
+  const reviewIssueResponse = useCallback(async (draft: LensNextIssueResponseReviewDraft) => {
+    if (!apiClient || !selectedIssue || !selectedIssue.publishingAllowed) throw new Error("Only a coordinator or administrator may decide this response.");
+    const issue = selectedIssue;
+    const receipt = await apiClient.reviewIssueResponse(issue, draft);
+    setIssues(current => current.map(item => item.identity.serverId === issue.identity.serverId ? {
+      ...item, status: receipt.status, responsibleCompany: receipt.responsibleCompany, mutationVersion: receipt.mutationVersion,
+    } : item));
+    setHistory(await apiClient.loadHistory(issue.identity));
   }, [apiClient, selectedIssue]);
 
   const loadIssueViewpoints = useCallback(async (signal?: AbortSignal) => {
@@ -1141,6 +1163,8 @@ export function LensNextPanel({
       }}
       onOpenWorkingView={() => void openWorkingView()}
       onLoadHistory={() => void loadHistory()}
+      onSubmitIssueResponse={submitIssueResponse}
+      onReviewIssueResponse={reviewIssueResponse}
       publishState={publishState}
       publishMessage={publishMessage}
       onPublishAction={(action, reason) => void publishAction(action, reason)}

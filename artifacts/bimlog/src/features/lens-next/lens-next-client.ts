@@ -34,6 +34,10 @@ import type {
   LensNextOpenWorkingViewResult,
   LensNextPublishAction,
   LensNextPublishResult,
+  LensNextIssueResponseDraft,
+  LensNextIssueResponseReceipt,
+  LensNextIssueResponseReviewDraft,
+  LensNextIssueResponseReviewReceipt,
   LensNextXmlExportOperationResult,
 } from "./lens-next-types.ts";
 
@@ -153,6 +157,8 @@ export interface LensNextApiClient {
     identity: LensNextImmutableIssueIdentity,
     signal?: AbortSignal,
   ): Promise<LensNextHistory>;
+  submitIssueResponse(issue: LensNextIssue, draft: LensNextIssueResponseDraft, signal?: AbortSignal): Promise<LensNextIssueResponseReceipt>;
+  reviewIssueResponse(issue: LensNextIssue, draft: LensNextIssueResponseReviewDraft, signal?: AbortSignal): Promise<LensNextIssueResponseReviewReceipt>;
   publishAction(issue: LensNextIssue, action: LensNextPublishAction, reason: string, idempotencyKey: string, modelFingerprint?: string | null, signal?: AbortSignal): Promise<LensNextPublishResult>;
   saveVisualState(issue: LensNextIssue, visualStateJson: string, visualStateDigest: string, confirmationReason: string, signal?: AbortSignal): Promise<void>;
   loadVisualState(issue: LensNextIssue, modelFingerprint?: string | null, signal?: AbortSignal): Promise<{ visualStateJson: string; visualStateDigest: string }>;
@@ -428,6 +434,38 @@ export function createLensNextApiClient(
         signal,
       );
       return adaptLensNextHistoryResponse(body, exactIdentity);
+    },
+    async submitIssueResponse(issue: LensNextIssue, draft: LensNextIssueResponseDraft, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const raw = await post(`/projects/${identity.projectId}/clash-reports/lens-next/issues/${identity.serverId}/responses`, {
+        contractVersion: "lens-issue-response.v1",
+        clientRequestId: draft.clientRequestId,
+        mutationVersion: issue.mutationVersion,
+        outcome: draft.outcome,
+        response: draft.response,
+        recommendedCompany: draft.outcome === "recommend_reassignment" ? draft.recommendedCompany : null,
+      }, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("BIMLog response receipt is invalid");
+      const body = raw as Record<string, any>, responseId = Number(body.response?.id), mutationVersion = Number(body.issue?.mutationVersion);
+      if (body.success !== true || !Number.isSafeInteger(responseId) || responseId <= 0 || body.issue?.serverId !== identity.serverId || body.issue?.status !== "under_review" || !Number.isSafeInteger(mutationVersion) || mutationVersion <= issue.mutationVersion)
+        throw new Error("BIMLog response receipt is invalid");
+      return Object.freeze({ replayed: body.replayed === true, responseId, status: "under_review" as const, mutationVersion });
+    },
+    async reviewIssueResponse(issue: LensNextIssue, draft: LensNextIssueResponseReviewDraft, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const raw = await post(`/projects/${identity.projectId}/clash-reports/lens-next/issues/${identity.serverId}/responses/review`, {
+        contractVersion: "lens-issue-response-review.v1",
+        responseId: draft.responseId,
+        mutationVersion: issue.mutationVersion,
+        decision: draft.decision,
+        reason: draft.reason,
+        responsibleCompany: draft.decision === "reassign" ? draft.responsibleCompany : null,
+      }, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("BIMLog response review receipt is invalid");
+      const body = raw as Record<string, any>, responseId = Number(body.response?.id), mutationVersion = Number(body.issue?.mutationVersion), status = String(body.issue?.status);
+      if (body.success !== true || responseId !== draft.responseId || body.issue?.serverId !== identity.serverId || !(LENS_NEXT_STATUSES as readonly string[]).includes(status) || status === "under_review" || !Number.isSafeInteger(mutationVersion) || mutationVersion <= issue.mutationVersion)
+        throw new Error("BIMLog response review receipt is invalid");
+      return Object.freeze({ responseId, status: status as LensNextStatus, responsibleCompany: body.issue?.responsibleCompany == null ? null : String(body.issue.responsibleCompany), mutationVersion });
     },
     async publishAction(issue: LensNextIssue, action: LensNextPublishAction, reason: string, idempotencyKey: string, modelFingerprint?: string | null, signal?: AbortSignal) {
       const identity = assertLensNextImmutableIdentity(issue.identity);
