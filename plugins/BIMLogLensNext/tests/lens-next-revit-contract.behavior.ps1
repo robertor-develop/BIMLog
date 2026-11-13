@@ -8,6 +8,10 @@ $required = @(
   'Revit element identities must be positive, unique and bounded',
   'The Revit internal target point must contain three finite coordinates',
   'VisualStateDigest'
+  'TransformPoint'
+  'EnsureDocumentMatch'
+  'invalid homogeneous coordinate'
+  'active Revit central model does not match'
 )
 foreach ($needle in $required) { if (-not $source.Contains($needle)) { throw "Missing Revit contract boundary: $needle" } }
 if ($source -match 'fallback transform|assume shared coordinates') { throw 'The Revit navigation contract must not guess coordinate conversion.' }

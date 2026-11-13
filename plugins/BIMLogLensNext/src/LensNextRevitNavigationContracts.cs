@@ -78,4 +78,37 @@ namespace BIMLogLensNext
         private static void RequireEqual(string value, string expected, string field) { if (!string.Equals(value, expected, StringComparison.Ordinal)) throw new InvalidOperationException("Revit navigation " + field + " must be " + expected + "."); }
         private static void RequireSha256(string value, string field) { if (string.IsNullOrWhiteSpace(value) || value.Length != 64 || value.Any(character => !Uri.IsHexDigit(character))) throw new InvalidOperationException("Revit navigation " + field + " must be a SHA-256 digest."); }
     }
+
+    public static class LensNextRevitCoordinateResolver
+    {
+        public static LensNextPointState TransformPoint(LensNextPointState navisworksPoint, LensNextRevitModelIdentity model)
+        {
+            if (navisworksPoint == null) throw new ArgumentNullException(nameof(navisworksPoint));
+            if (model == null || model.NavisworksToRevitTransform == null || model.NavisworksToRevitTransform.Length != 16)
+                throw new InvalidOperationException("Coordinate navigation requires the exact persisted 4x4 transform.");
+            var matrix = model.NavisworksToRevitTransform;
+            if (matrix.Any(value => double.IsNaN(value) || double.IsInfinity(value)))
+                throw new InvalidOperationException("Coordinate navigation rejects non-finite transforms.");
+            var x = matrix[0] * navisworksPoint.X + matrix[1] * navisworksPoint.Y + matrix[2] * navisworksPoint.Z + matrix[3];
+            var y = matrix[4] * navisworksPoint.X + matrix[5] * navisworksPoint.Y + matrix[6] * navisworksPoint.Z + matrix[7];
+            var z = matrix[8] * navisworksPoint.X + matrix[9] * navisworksPoint.Y + matrix[10] * navisworksPoint.Z + matrix[11];
+            var w = matrix[12] * navisworksPoint.X + matrix[13] * navisworksPoint.Y + matrix[14] * navisworksPoint.Z + matrix[15];
+            if (w == 0d || double.IsNaN(w) || double.IsInfinity(w)) throw new InvalidOperationException("Coordinate navigation transform produced an invalid homogeneous coordinate.");
+            var result = new LensNextPointState { X = x / w, Y = y / w, Z = z / w };
+            if (double.IsNaN(result.X) || double.IsInfinity(result.X) || double.IsNaN(result.Y) || double.IsInfinity(result.Y) || double.IsNaN(result.Z) || double.IsInfinity(result.Z))
+                throw new InvalidOperationException("Coordinate navigation transform produced a non-finite Revit point.");
+            return result;
+        }
+
+        public static void EnsureDocumentMatch(LensNextRevitModelIdentity expected, string actualDocumentGuid, string actualCentralModelGuid, int actualRevitMajorVersion)
+        {
+            if (expected == null) throw new ArgumentNullException(nameof(expected));
+            if (actualRevitMajorVersion != LensNextRevitNavigationSchema.LatestSupportedMajorVersion || expected.RevitMajorVersion != actualRevitMajorVersion)
+                throw new InvalidOperationException("The active Revit major version does not match the governed navigation target.");
+            if (!string.Equals(expected.DocumentGuid, actualDocumentGuid, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("The active Revit document does not match the governed navigation target.");
+            if (!string.IsNullOrWhiteSpace(expected.CentralModelGuid) && !string.Equals(expected.CentralModelGuid, actualCentralModelGuid, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("The active Revit central model does not match the governed navigation target.");
+        }
+    }
 }
