@@ -825,8 +825,6 @@ const validPositiveId = (value: unknown): number | null => {
   return Number.isSafeInteger(id) && id > 0 ? id : null;
 };
 
-const lensReferenceUpload = singleFileUpload({ fileSize: LENS_REFERENCE_MAX_BYTES, files: 1, fields: 0, parts: 1 });
-
 router.post("/projects/:projectId/clash-reports/lens-next/issues/:serverId/revit-navigation", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = validPositiveId(req.params.projectId), issueId = validPositiveId(req.params.serverId);
   if (!projectId || !issueId) { res.status(400).json({ error: "invalid_identifier" }); return; }
@@ -855,6 +853,8 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/:serverId/revit
   if (!updated.rowCount) { res.status(409).json({ error: "revit_receipt_conflict", message: "The request is missing, expired, already completed, or belongs to another identity." }); return; }
   res.json({ success: true, contractVersion: "lens-next-revit-navigation.v1", receipt: updated.rows[0] });
 });
+
+const lensReferenceUpload = singleFileUpload({ fileSize: LENS_REFERENCE_MAX_BYTES, files: 1, fields: 0, parts: 1 });
 
 async function readLensReferenceAttachments(projectId: number, serverId: number) {
   const links = await db.select({ linkId: linkedItemsTable.id, fileId: filesTable.id, fileName: filesTable.fileName, fileSize: filesTable.fileSizeBytes, mimeType: filesTable.fileType, createdAt: filesTable.createdAt })
