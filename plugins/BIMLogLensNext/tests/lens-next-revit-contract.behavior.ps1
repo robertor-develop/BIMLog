@@ -5,6 +5,7 @@ $navigator = Get-Content -LiteralPath (Join-Path $root 'src\LensNextRevitNavigat
 $adapter = Get-Content -LiteralPath (Join-Path $root 'revit\2026\AutodeskRevit2026Host.cs') -Raw
 $project = Get-Content -LiteralPath (Join-Path $root 'revit\2026\BIMLogLensNext.Revit2026.csproj') -Raw
 $manifest = Get-Content -LiteralPath (Join-Path $root 'revit\2026\BIMLogLensNext.Revit2026.addin') -Raw
+$security = Get-Content -LiteralPath (Join-Path $root 'src\LensNextRevitBridgeSecurity.cs') -Raw
 $required = @(
   'lens-next-revit-navigation.v1',
   'LatestSupportedMajorVersion = 2026',
@@ -29,4 +30,6 @@ $adapterRequired = @('Autodesk.Revit.DB','Autodesk.Revit.UI','WorksharingUtils.G
 foreach ($needle in $adapterRequired) { if (-not $adapter.Contains($needle)) { throw "Missing official Revit 2026 adapter behavior: $needle" } }
 if (-not $project.Contains('net8.0-windows') -or -not $project.Contains('RevitAPI.dll') -or -not $project.Contains('RevitAPIUI.dll') -or -not $project.Contains('will not compile against a fake SDK')) { throw 'Revit 2026 project must hard-gate on the official Autodesk API.' }
 if (-not $manifest.Contains('BIMLogLensNext.Revit2026.LensNextRevitApplication') -or -not $manifest.Contains('<UseRevitContext>False</UseRevitContext>')) { throw 'Revit 2026 manifest registration or dependency isolation is missing.' }
+$securityRequired = @('explicit BIMLog origin','MaximumSessionMinutes = 30','RandomNumberGenerator.Create','FixedTimeEquals','replayed request identity','MaximumAcceptedRequests')
+foreach ($needle in $securityRequired) { if (-not $security.Contains($needle)) { throw "Missing secure Revit bridge behavior: $needle" } }
 Write-Output 'Lens Next Revit navigation contract behavior: PASS'
