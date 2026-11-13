@@ -1,7 +1,7 @@
 import React from "react";
 import { BIMLOG_RELEASE_VERSION } from "@workspace/api-zod";
 import { Columns3, Eye, Filter, HelpCircle, ImageOff, List, PanelLeftClose, PanelLeftOpen, Plus, Settings, Table2, X } from "lucide-react";
-import { LENS_NEXT_DEFAULT_FILTERS, LENS_NEXT_STATUSES } from "./lens-next-types";
+import { LENS_NEXT_DEFAULT_FILTERS, LENS_NEXT_STATUSES, LENS_NEXT_USER_SETTABLE_STATUSES } from "./lens-next-types";
 import {
   LENS_NEXT_VIEW_DIMENSIONS,
   type LensNextIssueGroupNode,
@@ -40,10 +40,10 @@ import type { LensNextIssueViewpoint, LensNextResponsibleCompanyOption } from ".
 
 const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
 const STATUS_LABELS_ES: Record<LensNextStatus, string> = {
-  open: "Abierta", follow_up: "Seguimiento", waiting_design: "En espera de diseño", approved: "Aprobada", resolved: "Resuelta",
+  open: "Abierta", follow_up: "Seguimiento", waiting_design: "En espera de diseño", under_review: "Respondida — En revisión", approved: "Aprobada", resolved: "Resuelta",
 };
 const STATUS_LABELS_PT: Record<LensNextStatus, string> = {
-  open: "Aberta", follow_up: "Acompanhamento", waiting_design: "Aguardando projeto", approved: "Aprovada", resolved: "Resolvida",
+  open: "Aberta", follow_up: "Acompanhamento", waiting_design: "Aguardando projeto", under_review: "Respondida — Em revisão", approved: "Aprovada", resolved: "Resolvida",
 };
 
 function formatTimestamp(value: string | null): string {
@@ -968,7 +968,7 @@ export function LensNextPanelView({
           <label className="lens-next__field"><span>Responsible company</span><select value={createDraft.responsibleCompany} disabled={catalogState !== "current"} onChange={e => { setCreateDraft({ ...createDraft, responsibleCompany: e.target.value }); setCreateReviewReady(false); }}><option value="">{catalogState === "current" ? "Unassigned" : "Refresh governed catalog"}</option>{createResponsibleCompanies.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
           <label className="lens-next__field"><span>Report type</span><select value={createDraft.reportType} onChange={e => { setCreateDraft({ ...createDraft, reportType: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select report type</option>{createReportTypes.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
           <label className="lens-next__field"><span>Priority</span><select value={createDraft.priority} onChange={e => { setCreateDraft({ ...createDraft, priority: Number(e.target.value) }); setCreateReviewReady(false); }}>{[1,2,3,4,5].map(p => <option key={p} value={p}>P{p}</option>)}</select></label>
-          <label className="lens-next__field"><span>Status</span><select value={createDraft.status} onChange={e => { setCreateDraft({ ...createDraft, status: e.target.value as LensNextStatus }); setCreateReviewReady(false); }}>{LENS_NEXT_STATUSES.map(status => <option key={status} value={status}>{STATUS_LABELS[status]}</option>)}</select></label>
+          <label className="lens-next__field"><span>Status</span><select value={createDraft.status} onChange={e => { setCreateDraft({ ...createDraft, status: e.target.value as LensNextStatus }); setCreateReviewReady(false); }}>{LENS_NEXT_USER_SETTABLE_STATUSES.map(status => <option key={status} value={status}>{STATUS_LABELS[status]}</option>)}</select></label>
           <label className="lens-next__field lens-next__field--wide"><span>Instruction</span><textarea value={createDraft.note} onChange={e => { setCreateDraft({ ...createDraft, note: e.target.value }); setCreateReviewReady(false); }} /></label>
           <label className="lens-next__field lens-next__field--wide"><span>Open items / equipment tag (optional)</span><input value={createDraft.openItems} onChange={e => { setCreateDraft({ ...createDraft, openItems: e.target.value }); setCreateReviewReady(false); }} /></label>
           <label className="lens-next__field lens-next__field--wide"><span>Reason for audit history (optional)</span><textarea value={createReason} onChange={e => { setCreateReason(e.target.value); setCreateReviewReady(false); }} /></label>
@@ -1339,7 +1339,7 @@ export function LensNextPanelView({
                 <label className="lens-next__field"><span>{tt("Responsible company", "Empresa responsable")}</span><select disabled={catalogState !== "current"} value={editDraft.responsibleCompany} onChange={event => setEditDraft({...editDraft, responsibleCompany:event.target.value})}><option value="">{tt("Unassigned", "Sin asignar")}</option>{editDraft.responsibleCompany && !createResponsibleCompanies.includes(editDraft.responsibleCompany) && <option value={editDraft.responsibleCompany}>{editDraft.responsibleCompany} · historical</option>}{createResponsibleCompanies.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
                 <label className="lens-next__field"><span>{tt("Report type", "Tipo de informe")}</span><select value={editDraft.reportType} onChange={event => setEditDraft({...editDraft, reportType:event.target.value})}>{createReportTypes.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
                 <label className="lens-next__field"><span>{tt("Priority", "Prioridad")}</span><select value={editDraft.priority} onChange={event => setEditDraft({...editDraft, priority:Number(event.target.value)})}>{[1,2,3,4,5].map(value=><option key={value} value={value}>P{value}</option>)}</select></label>
-                <label className="lens-next__field"><span>{tt("Status", "Estado")}</span><select value={editDraft.status} onChange={event => setEditDraft({...editDraft, status:event.target.value as LensNextStatus})}>{LENS_NEXT_STATUSES.map(value=><option key={value} value={value}>{STATUS_LABELS[value]}</option>)}</select></label>
+                <label className="lens-next__field"><span>{tt("Status", "Estado")}</span><select value={editDraft.status} onChange={event => setEditDraft({...editDraft, status:event.target.value as LensNextStatus})}>{LENS_NEXT_USER_SETTABLE_STATUSES.map(value=><option key={value} value={value}>{STATUS_LABELS[value]}</option>)}</select></label>
                 <label className="lens-next__field lens-next__field--wide"><span>{tt("Instruction", "Instrucción")}</span><textarea value={editDraft.note} onChange={event => setEditDraft({...editDraft, note:event.target.value})}/></label>
                 <label className="lens-next__field lens-next__field--wide"><span>{tt("Open items / Equipment tag", "Pendientes / Etiqueta de equipo")}</span><textarea value={editDraft.openItems} onChange={event => setEditDraft({...editDraft, openItems:event.target.value})}/></label>
                 <label className="lens-next__field lens-next__field--wide"><span>{tt("Reason for audit history", "Motivo para el historial de auditoría")}</span><textarea required minLength={5} value={editReason} onChange={event=>setEditReason(event.target.value)}/></label>
@@ -1466,7 +1466,7 @@ export function LensNextPanelView({
                   </select>
                 </label>
                 {publishKind === "status" ? (
-                  <label className="lens-next__field"><span>New status</span><select value={publishStatus} onChange={event => setPublishStatus(event.target.value as LensNextStatus)}>{LENS_NEXT_STATUSES.map(status => <option key={status} value={status}>{STATUS_LABELS[status]}</option>)}</select></label>
+                  <label className="lens-next__field"><span>New status</span><select value={publishStatus} onChange={event => setPublishStatus(event.target.value as LensNextStatus)}>{LENS_NEXT_USER_SETTABLE_STATUSES.map(status => <option key={status} value={status}>{STATUS_LABELS[status]}</option>)}</select></label>
                 ) : (
                   <label className="lens-next__field lens-next__field--wide"><span>{publishKind === "comment" ? "Comment" : "Responsible company"}</span><textarea maxLength={publishKind === "comment" ? 4000 : 256} value={publishText} onChange={event => setPublishText(event.target.value)} /></label>
                 )}

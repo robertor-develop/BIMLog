@@ -2,6 +2,14 @@ export const LENS_NEXT_STATUSES = [
   "open",
   "follow_up",
   "waiting_design",
+  "under_review",
+  "approved",
+  "resolved",
+] as const;
+export const LENS_NEXT_USER_SETTABLE_STATUSES = [
+  "open",
+  "follow_up",
+  "waiting_design",
   "approved",
   "resolved",
 ] as const;

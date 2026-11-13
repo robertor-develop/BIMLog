@@ -20,6 +20,9 @@ assert.match(ui, /recommend_reassignment/);
 assert.match(ui, /needs_information/);
 assert.match(ui, /completed_work/);
 assert.match(ui, /disabled=\{\(v\.lifecycleStatus != null && v\.lifecycleStatus !== "active"\) \|\| v\.status === "resolved"\}/);
+assert.match(route, /\["open","follow_up","waiting_design","under_review","approved","resolved"\]\.includes\(String\(local\.status\)\)/);
+assert.match(route, /const LENS_STATUSES = \["open", "follow_up", "waiting_design", "under_review", "approved", "resolved"\]/);
+assert.match(route, /new Set\(\["all", "open", "follow_up", "waiting_design", "under_review"/);
 
 const historyStart = route.indexOf('router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/history"');
 const historyEnd = route.indexOf('router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/active"', historyStart);

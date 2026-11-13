@@ -198,7 +198,7 @@ export class CoordinatorRegisterError extends Error {
 const SAFE_TEXT = /^[\p{L}\p{N} _.,:/()&+\-'#]{1,120}$/u;
 const MAX_PAGE = 100;
 const MAX_PAGE_SIZE = 50;
-const LENS_ACTIONABLE_STATUSES = ["open", "follow_up", "waiting_design"];
+const LENS_ACTIONABLE_STATUSES = ["open", "follow_up", "waiting_design", "under_review"];
 
 function dateOnly(value: unknown, field: string): string | null {
   const text = String(value ?? "").trim();
@@ -582,7 +582,7 @@ const SOURCE_SQL: Record<CoordinatorActionModule, string> = {
     l.floor,l.trade discipline,CASE WHEN l.priority IS NULL THEN NULL ELSE 'P'||l.priority::text END priority,l.updated_at source_updated_at,
     '/projects/'||l.project_id||'/clash-reports?view=lens&viewpoint='||l.id internal_link,
     jsonb_build_object('meetings','[]'::jsonb,'schedule','[]'::jsonb,'lens',${lensIdentitySql("l")}) related
-    FROM lens_viewpoints l WHERE l.project_id=$1 AND l.lifecycle_status='active' AND lower(l.status) IN ('open','follow_up','waiting_design')`,
+    FROM lens_viewpoints l WHERE l.project_id=$1 AND l.lifecycle_status='active' AND lower(l.status) IN ('open','follow_up','waiting_design','under_review')`,
   rfi: `SELECT 'rfi'::text source_module,r.id source_id,r.project_id,r.number display_identifier,r.status original_status,
     CASE lower(r.status) WHEN 'in_review' THEN 'in_review' ELSE lower(r.status) END presentation_status,r.subject title,
     COALESCE(r.submitted_to_company,ac.name) responsible_company,COALESCE(au.full_name,r.submitted_to_person,r.ball_in_court) responsible_person,

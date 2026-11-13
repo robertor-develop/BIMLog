@@ -660,7 +660,7 @@ router.post("/projects/:projectId/clash-reports/lens-next/local-viewpoints/uploa
           reportType: String(local.reportType ?? "").trim() || null, floor: String(local.floor ?? "").trim() || null,
           priority: Number.isInteger(priority) && priority >= 1 && priority <= 5 ? priority : 3,
           openItems: String(local.openItems ?? "").trim() || null,
-          status: ["open","follow_up","waiting_design","approved","resolved"].includes(String(local.status)) ? String(local.status) : "open",
+          status: ["open","follow_up","waiting_design","under_review","approved","resolved"].includes(String(local.status)) ? String(local.status) : "open",
           lifecycleStatus: "active", revisionNumber: 1, syncedAt: new Date(),
         }).returning();
         if (!inserted) throw new LensNextLocalUploadError("atomic_insert_failed", "BIMLog did not create the local viewpoint record.", 500);
@@ -1137,7 +1137,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         // wipe + re-sync restores Follow Up / Waiting Design / Approved / Resolved. Unknown/blank
         // falls back to open - the default for a brand-new viewpoint.
         const incomingStatus = norm(v?.status);
-        const LENS_STATUSES = ["open", "follow_up", "waiting_design", "approved", "resolved"];
+        const LENS_STATUSES = ["open", "follow_up", "waiting_design", "under_review", "approved", "resolved"];
         const replayStatus = incomingStatus && LENS_STATUSES.includes(incomingStatus) ? incomingStatus : "open";
         const replayRevision = v?.revisionNumber != null && !Number.isNaN(Number(v.revisionNumber)) ? Math.max(1, Number(v.revisionNumber)) : 1;
         const localSupersedesDisplayId = norm(v?.localSupersedesId);
@@ -4127,7 +4127,7 @@ router.get(
     const search = typeof req.query.search === "string" ? req.query.search.trim().toLowerCase() : "";
     const view = typeof req.query.view === "string" ? req.query.view : "normal";
     const allowedPriorities = new Set(["all", "P1", "P2", "P3", "P4"]);
-    const allowedStatuses = new Set(["all", "open", "follow_up", "waiting_design", "in_progress", "approved", "resolved", "wont_fix"]);
+    const allowedStatuses = new Set(["all", "open", "follow_up", "waiting_design", "under_review", "in_progress", "approved", "resolved", "wont_fix"]);
     const allowedViews = new Set(["normal", "grouped"]);
     if (!Number.isInteger(reportId) || reportId <= 0) {
       res.status(400).json({ error: "invalid_report_id" });

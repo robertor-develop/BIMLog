@@ -26,7 +26,7 @@ export type NormalizedLensImportViewpoint = {
   floor: string | null;
   openItems: string | null;
   lifecycle: "active" | "superseded" | "voided";
-  status: "open" | "follow_up" | "waiting_design" | "approved" | "resolved";
+  status: "open" | "follow_up" | "waiting_design" | "under_review" | "approved" | "resolved";
   revisionNumber: number;
   issueGroupId: string | null;
 };
@@ -98,7 +98,7 @@ export function validateAndHashLensImportRequest(body: unknown, authenticatedUse
     const lifecycle = (["active", "superseded", "voided"] as const).find(x => x === lifecycleRaw);
     if (!lifecycle) throw new LensImportValidationError("INVALID_IMPORT_LIFECYCLE", 400, "Lifecycle status is invalid");
     const statusRaw = String(v.status ?? "open");
-    const status = (["open", "follow_up", "waiting_design", "approved", "resolved"] as const).find(x => x === statusRaw);
+    const status = (["open", "follow_up", "waiting_design", "under_review", "approved", "resolved"] as const).find(x => x === statusRaw);
     if (!status) throw new LensImportValidationError("INVALID_IMPORT_STATUS", 400, "Workflow status is invalid");
     return {
       sourceProjectId, sourceIdentityKey, sourceServerId, sourcePhysicalId: physical, sourceNavisworksGuid: guid,

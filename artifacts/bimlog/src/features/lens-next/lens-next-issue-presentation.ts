@@ -12,6 +12,7 @@ export const LENS_NEXT_STATUS_LABELS: Readonly<Record<LensNextStatus, string>> =
   open: "Open",
   follow_up: "Follow Up",
   waiting_design: "Waiting Design",
+  under_review: "Answered — Under Review",
   approved: "Approved",
   resolved: "Resolved",
 });
