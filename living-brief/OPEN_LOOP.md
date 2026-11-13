@@ -6930,3 +6930,11 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [ ] Complete Block 3 Builds 11–15 for the latest supported Revit integration, coordinate navigation, packaging, compatibility evidence and final three-feature acceptance; then push and publish the completed program.
 - [ ] Preserve current customer data, existing Lens/Navisworks workflows and live pilot records throughout the program. Do not use Replit Agent.
 
+## Active continuation — Lens three-feature program / Block 2 — 2026-11-13
+
+- Builds 6–10 are locally accepted through `d38c3927964b3e86725bbdbbbdc7eac6ae80f105`. The response lifecycle is answered-but-open, assigned-company scoped, coordinator-governed, optimistic-version-safe, retry-safe, auditable and bilingual. The connected HTTP/database/PDF regression and both package typechecks pass.
+- Block 2 must now receive its Living Brief seal, clean full production build, exact branch push and remote equality check. Because this is the tenth build in the authorized three-feature program, canonical integration, controlled publication, deployed-commit/version/health verification and authenticated live acceptance are due before Block 3 is released.
+- Builds 11–15 remain: latest supported Revit bridge contract, coordinate/view identity, governed Open in Revit request/receipt, frontend discoverability and end-to-end native/package acceptance. Do not claim Revit completion from source-only tests; native/physical acceptance must remain truthful.
+- The retained task-owned loopback PostgreSQL fixture on port 55439 is test-only. No customer record, production database row, provider credential, Replit Agent, or production runtime was changed by Builds 6–10.
+- Safe resume: seal and push Block 2, reconcile it into canonical `main`, publish and verify the exact deployed source, then begin Build 11. No duplicate authorization is required.
+
