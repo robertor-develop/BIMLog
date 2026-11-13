@@ -256,6 +256,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     watermarkType: "draft",
     showHealthScore: true,
     isExecutiveOnePager: false,
+    includeCaptureAppendix: true,
     fPriority: "all",
     fStatus: "open",
     fFloor: "all",
@@ -986,6 +987,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           watermarkType: form.watermarkType,
           showHealthScore: form.showHealthScore,
           isExecutiveOnePager: form.isExecutiveOnePager,
+          includeCaptureAppendix: form.includeCaptureAppendix,
           idFormat: form.idFormat,
           includeNonActive: form.includeNonActive,
           includeResolved: form.includeResolved,
@@ -2013,6 +2015,18 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
               <input type="checkbox" checked={form.isExecutiveOnePager}
                 onChange={e => setForm(f => ({ ...f, isExecutiveOnePager: e.target.checked }))} />
               {t("Executive one-pager (summary only, no full register)", "Resumen ejecutivo (solo resumen, sin registro completo)")}
+            </label>
+
+            <label style={{ display: "flex", alignItems: "flex-start", gap: 8, marginTop: 10, fontSize: 13, color: form.isExecutiveOnePager ? "#94A3B8" : "#374151", cursor: form.isExecutiveOnePager ? "not-allowed" : "pointer" }}>
+              <input type="checkbox" checked={form.includeCaptureAppendix}
+                disabled={form.isExecutiveOnePager}
+                onChange={e => setForm(f => ({ ...f, includeCaptureAppendix: e.target.checked }))} />
+              <span>
+                {t("Include verified issue captures and markups", "Incluir capturas y marcas verificadas de los Issues")}
+                <small style={{ display: "block", marginTop: 2, color: "#64748B" }}>
+                  {t("Each full-report image is bound to its Lens visual-package fingerprint. Missing marked evidence is identified instead of replaced with an unmarked image.", "Cada imagen del reporte completo queda vinculada a la huella del paquete visual Lens. La evidencia marcada faltante se identifica y no se reemplaza por una imagen sin marcas.")}
+                </small>
+              </span>
             </label>
 
             <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 13, color: "#374151", cursor: "pointer" }}>

@@ -3361,6 +3361,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       };
       const watermarkType: string = ["draft", "issued", "superseded"].includes(body.watermarkType) ? body.watermarkType : "draft";
       const isOnePager = body.isExecutiveOnePager === true;
+      const includeCaptureAppendix = body.includeCaptureAppendix !== false && !isOnePager;
       const showHealthScore = body.showHealthScore !== false;
       // ID rendering on the register: "displayId" (raw plugin id, default) or
       // "code" (Trade-Floor-Seq, matching the on-screen viewpoint code).
@@ -3537,7 +3538,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       for (let attempt = 0; attempt < 12 && !inserted; attempt++) {
         reportNumber = `${code}-LV-${String(seq).padStart(3, "0")}`;
         if (usedNums.has(reportNumber)) { seq++; continue; }
-        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, accessScope: scope.label, watermarkType, isOnePager, idFormat, includeNonActive, includeResolved, showGroupIds, showLifecycleState, showRevisionColumn, includeAuditRecords, includeReportHistory, includeRevisionHistory, healthScore, snapshot });
+        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, accessScope: scope.label, watermarkType, isOnePager, includeCaptureAppendix, idFormat, includeNonActive, includeResolved, showGroupIds, showLifecycleState, showRevisionColumn, includeAuditRecords, includeReportHistory, includeRevisionHistory, healthScore, snapshot });
         try {
           await tx.transaction(async savepoint => savepoint.insert(lensViewpointReportsTable).values({
             projectId,
@@ -3809,7 +3810,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         // the report fingerprint. When redlines exist but a verified marked
         // capture does not, the report states that explicitly and never falls
         // back to an unrelated/unmarked thumbnail.
-        for (const viewpoint of vps) {
+        if (includeCaptureAppendix) for (const viewpoint of vps) {
           const evidence = reportImageEvidence.get(viewpoint.id) ?? selectLensReportImage(null);
           doc.y = addLensContinuationPage(`Lens capture — ${idText(viewpoint)}`);
           doc.fontSize(14).font("Helvetica-Bold").fillColor("#111827")
