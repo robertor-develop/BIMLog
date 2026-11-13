@@ -1,18 +1,18 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "d25ebf535742ceebcf9dd9df45efdbdb1c7718b34443e85f84a7a5bee8d7c24a",
-  "itemCount": 578,
+  "sourceSha256": "30f45c9d33dde0a34e7e663928ee017c7753dacee6b97d2852146b216556c5ab",
+  "itemCount": 581,
   "counts": {
-    "ACTIVE": 518,
+    "ACTIVE": 521,
     "SUPERSEDED": 48,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 403,
+    "ACTIVE_DEFECT": 405,
     "VALID_FUTURE_ROADMAP": 12,
-    "EXTERNAL_OWNER_INPUT": 103,
+    "EXTERNAL_OWNER_INPUT": 104,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 48,
     "CLOSED_WITH_EVIDENCE": 9
@@ -11084,6 +11084,63 @@
       "evidence": [
         "OPEN_LOOP.md:6931",
         "2026-11-13 — Three-feature Lens program"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "8b6d89abce1af71c",
+      "sourceLine": 6943,
+      "heading": "2026-11-13 — Lens contractor-response production correction",
+      "statement": "Push and republish the Lens Next contractor-response corrective integration after the complete exact-head gate passes.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6943",
+        "2026-11-13 — Lens contractor-response production correction"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "6f8214b45941287a",
+      "sourceLine": 6944,
+      "heading": "2026-11-13 — Lens contractor-response production correction",
+      "statement": "Restart authenticated production acceptance at Round 1 and verify the visible response/review panel, refresh/reopen persistence, clean reentry, console and relevant network state without mutating a real customer issue.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6944",
+        "2026-11-13 — Lens contractor-response production correction"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "d7536eafb5902c2c",
+      "sourceLine": 6945,
+      "heading": "2026-11-13 — Lens contractor-response production correction",
+      "statement": "Keep Block 3 Revit Builds 11–15 pending until this reopened Block 2 release gate is accepted.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6945",
+        "2026-11-13 — Lens contractor-response production correction"
       ],
       "currentAuthority": false
     }

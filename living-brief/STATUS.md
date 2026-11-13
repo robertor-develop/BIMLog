@@ -5128,3 +5128,5 @@ Focused contract, persistence, UI and review tests pass. The guarded real HTTP/P
 
 Production Round 1 after the Block 2 publication proved that the lifecycle was not discoverable in the actual Lens Next issue surface: the legacy project Lens view exposed contractor responses, while `LensNextPanelView` did not. The corrective integration adds the same governed response and coordinator-review operations to Lens Next, keeps every answer visibly open and under review until an authorized decision, reloads immutable response history after each accepted mutation, and preserves the existing project/company/version/idempotency boundaries. Focused API, Lens Next integration, UI-contract and frontend TypeScript checks pass. The correction must pass the complete release gate, be pushed and republished, and restart authenticated production acceptance from Round 1; those release outcomes are not claimed by this source record.
 
+This corrective release unit is accepted at `11ff93cd5b093f03427e781b7b0d96ede9c7ebbb`; generated Living Brief state and release receipts remain separate evidence changes.
+

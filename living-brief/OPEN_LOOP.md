@@ -6943,4 +6943,5 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [ ] Push and republish the Lens Next contractor-response corrective integration after the complete exact-head gate passes.
 - [ ] Restart authenticated production acceptance at Round 1 and verify the visible response/review panel, refresh/reopen persistence, clean reentry, console and relevant network state without mutating a real customer issue.
 - [ ] Keep Block 3 Revit Builds 11–15 pending until this reopened Block 2 release gate is accepted.
+- [x] Bind the corrective Lens Next implementation to accepted source `11ff93cd5b093f03427e781b7b0d96ede9c7ebbb` before regenerating release evidence.
 
