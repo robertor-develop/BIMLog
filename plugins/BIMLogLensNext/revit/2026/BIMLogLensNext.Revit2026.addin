@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>BIMLog Lens Next</Name>
+    <Assembly>BIMLogLensNext.Revit2026.dll</Assembly>
+    <AddInId>EF17BC7B-E3C0-4E26-BFC6-0ED87F2A1A26</AddInId>
+    <FullClassName>BIMLogLensNext.Revit2026.LensNextRevitApplication</FullClassName>
+    <VendorId>BIMT</VendorId>
+    <VendorDescription>BIMTech, BIMLog Lens Next</VendorDescription>
+  </AddIn>
+  <ManifestSettings>
+    <UseRevitContext>False</UseRevitContext>
+    <ContextName>BIMLogLensNext2026</ContextName>
+  </ManifestSettings>
+</RevitAddIns>

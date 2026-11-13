@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <PlatformTarget>x64</PlatformTarget>
+    <Platforms>x64</Platforms>
+    <AssemblyName>BIMLogLensNext.Revit2026</AssemblyName>
+    <RootNamespace>BIMLogLensNext.Revit2026</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RevitInstallDir Condition="'$(RevitInstallDir)' == ''">C:\Program Files\Autodesk\Revit 2026</RevitInstallDir>
+  </PropertyGroup>
+  <Target Name="RequireOfficialRevit2026Api" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(RevitInstallDir)\RevitAPI.dll') Or !Exists('$(RevitInstallDir)\RevitAPIUI.dll')"
+           Text="Official Revit 2026 API assemblies were not found at $(RevitInstallDir). Install licensed Revit 2026 or set RevitInstallDir; BIMLog will not compile against a fake SDK." />
+  </Target>
+  <ItemGroup>
+    <Reference Include="RevitAPI">
+      <HintPath>$(RevitInstallDir)\RevitAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="RevitAPIUI">
+      <HintPath>$(RevitInstallDir)\RevitAPIUI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Compile Include="..\..\src\LensNextRevitNavigationContracts.cs" Link="Core\LensNextRevitNavigationContracts.cs" />
+    <Compile Include="..\..\src\LensNextRevitNavigator.cs" Link="Core\LensNextRevitNavigator.cs" />
+    <Compile Include="..\..\src\LensNextVisualStateContracts.cs" Link="Core\LensNextVisualStateContracts.cs" />
+  </ItemGroup>
+</Project>

@@ -12,6 +12,11 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="revit\**\*.cs" />
+    <EmbeddedResource Remove="revit\**\*" />
+    <None Remove="revit\**\*" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="System.Web.Extensions" />
     <Compile Remove="tests\**\*.cs" />
     <Compile Remove="native\**\*.cs" />
