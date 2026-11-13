@@ -111,4 +111,58 @@ namespace BIMLogLensNext
                 throw new InvalidOperationException("The active Revit central model does not match the governed navigation target.");
         }
     }
+
+    public sealed class LensNextOpenInRevitRequest
+    {
+        public string RequestId { get; set; }
+        public string SessionId { get; set; }
+        public string ConfirmationReason { get; set; }
+        public DateTimeOffset ExpiresAt { get; set; }
+        public LensNextRevitNavigationTarget Target { get; set; }
+    }
+
+    public sealed class LensNextOpenInRevitReceipt
+    {
+        public string RequestId { get; set; }
+        public int ProjectId { get; set; }
+        public int IssueId { get; set; }
+        public string TargetDigest { get; set; }
+        public string DocumentGuid { get; set; }
+        public int RevitMajorVersion { get; set; }
+        public bool ViewActivated { get; set; }
+        public bool PointShown { get; set; }
+        public int ElementsSelected { get; set; }
+        public DateTimeOffset AppliedAt { get; set; }
+        public string Outcome { get; set; }
+    }
+
+    public static class LensNextOpenInRevitPolicy
+    {
+        public static string ValidateRequest(LensNextOpenInRevitRequest request, string expectedSessionId, DateTimeOffset now)
+        {
+            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (!Guid.TryParse(request.RequestId, out _)) throw new InvalidOperationException("Open in Revit requires a UUID request identity.");
+            if (!string.Equals(request.SessionId, expectedSessionId, StringComparison.Ordinal)) throw new InvalidOperationException("Open in Revit session identity mismatch.");
+            if (request.ExpiresAt <= now || request.ExpiresAt > now.AddMinutes(5)) throw new InvalidOperationException("Open in Revit request is expired or exceeds the bounded lifetime.");
+            if (string.IsNullOrWhiteSpace(request.ConfirmationReason) || request.ConfirmationReason.Trim().Length < 3 || request.ConfirmationReason.Length > 500)
+                throw new InvalidOperationException("Open in Revit requires a bounded confirmation reason.");
+            var digest = LensNextRevitNavigationContract.ValidateAndDigest(request.Target);
+            if (!string.IsNullOrWhiteSpace(request.Target.TargetDigest) && !string.Equals(request.Target.TargetDigest, digest, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Open in Revit target digest mismatch.");
+            return digest;
+        }
+
+        public static void ValidateReceipt(LensNextOpenInRevitRequest request, LensNextOpenInRevitReceipt receipt, string expectedDigest)
+        {
+            if (request == null || receipt == null) throw new ArgumentNullException(receipt == null ? nameof(receipt) : nameof(request));
+            if (!string.Equals(request.RequestId, receipt.RequestId, StringComparison.Ordinal) || request.Target.ProjectId != receipt.ProjectId || request.Target.IssueId != receipt.IssueId)
+                throw new InvalidOperationException("Open in Revit receipt identity mismatch.");
+            if (!string.Equals(expectedDigest, receipt.TargetDigest, StringComparison.OrdinalIgnoreCase) || !string.Equals(request.Target.Model.DocumentGuid, receipt.DocumentGuid, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Open in Revit receipt target mismatch.");
+            if (receipt.RevitMajorVersion != LensNextRevitNavigationSchema.LatestSupportedMajorVersion || !new[] { "opened", "already-opened", "blocked" }.Contains(receipt.Outcome))
+                throw new InvalidOperationException("Open in Revit receipt outcome is invalid.");
+            if (receipt.Outcome != "blocked" && (!receipt.ViewActivated || !receipt.PointShown))
+                throw new InvalidOperationException("Open in Revit cannot claim success without activating a view and showing the governed point.");
+        }
+    }
 }
