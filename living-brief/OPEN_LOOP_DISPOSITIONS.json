@@ -1,20 +1,20 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "1e4fd3b2773e7b2c76103f07dbb1b488338db228cb2def1ba69bab3542529eb9",
-  "itemCount": 574,
+  "sourceSha256": "46be16dd607cd5f2bc4174d9042b6782969be15598b31f7aa22b8fe5d76a0662",
+  "itemCount": 578,
   "counts": {
-    "ACTIVE": 515,
-    "SUPERSEDED": 47,
+    "ACTIVE": 518,
+    "SUPERSEDED": 48,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 401,
+    "ACTIVE_DEFECT": 403,
     "VALID_FUTURE_ROADMAP": 12,
-    "EXTERNAL_OWNER_INPUT": 102,
+    "EXTERNAL_OWNER_INPUT": 103,
     "ACCEPTED_LIMITATION": 3,
-    "SUPERSEDED_HISTORY": 47,
+    "SUPERSEDED_HISTORY": 48,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "allowedClassifications": [
@@ -11008,6 +11008,82 @@
       "evidence": [
         "OPEN_LOOP.md:6923",
         "2026-11-10 — Replit deployment-source verification correction"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "a5683ffa059b0f88",
+      "sourceLine": 6928,
+      "heading": "2026-11-13 — Three-feature Lens program",
+      "statement": "Push the reconciled Block 1 source normally and verify local/remote equality; do not publish until the authorized ten-build cadence is reached.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6928",
+        "2026-11-13 — Three-feature Lens program"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "9958cb071851c80f",
+      "sourceLine": 6929,
+      "heading": "2026-11-13 — Three-feature Lens program",
+      "statement": "Complete Block 2 Builds 6–10 for answered-but-open contractor response, coordinator review, reassignment, permissions, audit history and UI acceptance; then push, publish and restart live acceptance at Round 1.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6929",
+        "2026-11-13 — Three-feature Lens program"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "2ca486a60aa46b87",
+      "sourceLine": 6930,
+      "heading": "2026-11-13 — Three-feature Lens program",
+      "statement": "Complete Block 3 Builds 11–15 for the latest supported Revit integration, coordinate navigation, packaging, compatibility evidence and final three-feature acceptance; then push and publish the completed program.",
+      "classification": "SUPERSEDED",
+      "dispositionCategory": "SUPERSEDED_HISTORY",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "e46b99bb973e4147",
+      "sourceLine": 6931,
+      "heading": "2026-11-13 — Three-feature Lens program",
+      "statement": "Preserve current customer data, existing Lens/Navisworks workflows and live pilot records throughout the program. Do not use Replit Agent.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6931",
+        "2026-11-13 — Three-feature Lens program"
       ],
       "currentAuthority": false
     }

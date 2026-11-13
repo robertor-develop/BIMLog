@@ -6922,3 +6922,11 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [x] Pass focused deployment-source behavior and API TypeScript checks at exact corrective source `f766df624f8258e22638fe808e42e0d1cae301ef`.
 - [ ] Reconcile and push this final corrective source, rebuild in the existing Replit Shell, publish the exact reconciled commit, verify deployed identity/version/health and complete non-mutating authenticated Lens UI acceptance.
 
+## 2026-11-13 — Three-feature Lens program
+
+- [x] Complete Block 1 Builds 1–5: verified marked-image selection, PDF embedding, secondary-viewpoint marked capture persistence, visible report option, and guarded end-to-end HTTP/PDF evidence.
+- [ ] Push the reconciled Block 1 source normally and verify local/remote equality; do not publish until the authorized ten-build cadence is reached.
+- [ ] Complete Block 2 Builds 6–10 for answered-but-open contractor response, coordinator review, reassignment, permissions, audit history and UI acceptance; then push, publish and restart live acceptance at Round 1.
+- [ ] Complete Block 3 Builds 11–15 for the latest supported Revit integration, coordinate navigation, packaging, compatibility evidence and final three-feature acceptance; then push and publish the completed program.
+- [ ] Preserve current customer data, existing Lens/Navisworks workflows and live pilot records throughout the program. Do not use Replit Agent.
+

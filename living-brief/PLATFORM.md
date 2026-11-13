@@ -1151,6 +1151,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/lens-issue-gallery-http.behavior.ts
 - artifacts/api-server/src/lib/lens-issue-reopen-browser.behavior.ts
 - artifacts/api-server/src/lib/lens-issue-viewpoint-compatibility.behavior.ts
+- artifacts/api-server/src/lib/lens-issue-viewpoint-marked-capture.behavior.ts
 - artifacts/api-server/src/lib/lens-issue-viewpoints-api.behavior.ts
 - artifacts/api-server/src/lib/lens-issue-viewpoints-migration.behavior.ts
 - artifacts/api-server/src/lib/lens-issue-viewpoints-migration.ts
@@ -1177,8 +1178,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/lens-project-trades-http.behavior.ts
 - artifacts/api-server/src/lib/lens-pull-browser.behavior.ts
 - artifacts/api-server/src/lib/lens-pull-http.behavior.ts
+- artifacts/api-server/src/lib/lens-report-annotated-pdf.behavior.ts
 - artifacts/api-server/src/lib/lens-report-history-browser.behavior.ts
 - artifacts/api-server/src/lib/lens-report-history-http.behavior.ts
+- artifacts/api-server/src/lib/lens-report-image.behavior.ts
+- artifacts/api-server/src/lib/lens-report-image.ts
 - artifacts/api-server/src/lib/lens-revision-visual-package.behavior.ts
 - artifacts/api-server/src/lib/lens-sequence-status-browser.behavior.ts
 - artifacts/api-server/src/lib/lens-sequence-status-http.behavior.ts
