@@ -6,6 +6,7 @@ import {
   type LensNextHistory,
   type LensNextHistoryEvent,
   type LensNextHistoryRevision,
+  type LensNextIssueResponse,
   type LensNextImmutableIssueIdentity,
   type LensNextIssue,
   type LensNextLocalInventory,
@@ -502,7 +503,8 @@ export function adaptLensNextHistoryResponse(
   if (
     body.success !== true ||
     !Array.isArray(body.chain) ||
-    !Array.isArray(body.events)
+    !Array.isArray(body.events) ||
+    !Array.isArray(body.responses)
   ) {
     throw new Error("invalid Lens history response");
   }
@@ -516,6 +518,34 @@ export function adaptLensNextHistoryResponse(
   }
   return Object.freeze({
     revisions,
+    responses: body.responses.map((value): LensNextIssueResponse => {
+      const row = recordOf(value, "Lens issue response");
+      const outcome = String(row.outcome);
+      const reviewStatus = String(row.reviewStatus);
+      const reviewDecision = row.reviewDecision == null ? null : String(row.reviewDecision);
+      if (!(["cannot_complete", "recommend_reassignment", "needs_information", "completed_work"] as string[]).includes(outcome))
+        throw new Error("invalid Lens issue response outcome");
+      if (!(["pending_review", "follow_up_required", "waiting_design", "reassigned", "resolved"] as string[]).includes(reviewStatus))
+        throw new Error("invalid Lens issue response review status");
+      if (reviewDecision !== null && !(["follow_up", "waiting_design", "reassign", "resolve"] as string[]).includes(reviewDecision))
+        throw new Error("invalid Lens issue response review decision");
+      return Object.freeze({
+        id: positiveInteger(row.id, "response id"),
+        issueId: positiveInteger(row.issueId, "response issue id"),
+        outcome: outcome as LensNextIssueResponse["outcome"],
+        response: nonEmptyString(row.response, "response explanation"),
+        recommendedCompany: nullableString(row.recommendedCompany),
+        reviewStatus: reviewStatus as LensNextIssueResponse["reviewStatus"],
+        actorUserId: positiveInteger(row.actorUserId, "response actor user id"),
+        actorFullName: nullableString(row.actorFullName),
+        actorCompanyName: nullableString(row.actorCompanyName),
+        reviewerUserId: nullablePositiveInteger(row.reviewerUserId, "response reviewer user id"),
+        reviewDecision: reviewDecision as LensNextIssueResponse["reviewDecision"],
+        reviewReason: nullableString(row.reviewReason),
+        reviewedAt: nullableTimestamp(row.reviewedAt),
+        createdAt: nullableTimestamp(row.createdAt),
+      });
+    }),
     events: body.events.map(adaptHistoryEvent),
   });
 }

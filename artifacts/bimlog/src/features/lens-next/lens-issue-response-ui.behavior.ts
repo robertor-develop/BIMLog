@@ -4,6 +4,9 @@ import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "../../../../..");
 const ui = fs.readFileSync(path.join(root, "artifacts/bimlog/src/pages/project/LensViewpointsView.tsx"), "utf8");
+const lensNext = fs.readFileSync(path.join(root, "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx"), "utf8");
+const lensNextController = fs.readFileSync(path.join(root, "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx"), "utf8");
+const lensNextClient = fs.readFileSync(path.join(root, "artifacts/bimlog/src/features/lens-next/lens-next-client.ts"), "utf8");
 const route = fs.readFileSync(path.join(root, "artifacts/api-server/src/routes/clash_reports.ts"), "utf8");
 
 assert.match(ui, /Respond — issue stays open/);
@@ -20,6 +23,18 @@ assert.match(ui, /recommend_reassignment/);
 assert.match(ui, /needs_information/);
 assert.match(ui, /completed_work/);
 assert.match(ui, /disabled=\{\(v\.lifecycleStatus != null && v\.lifecycleStatus !== "active"\) \|\| v\.status === "resolved"\}/);
+assert.match(lensNext, /Contractor responses — issue remains open until coordinator decision/);
+assert.match(lensNext, /Respond — issue stays open/);
+assert.match(lensNext, /It will not close the issue/);
+assert.match(lensNext, /onSubmitIssueResponse/);
+assert.match(lensNext, /onReviewIssueResponse/);
+assert.match(lensNext, /responseDraft\.outcome === "recommend_reassignment"/);
+assert.match(lensNext, /selectedIssue\.status === "under_review"/);
+assert.match(lensNextController, /apiClient\.submitIssueResponse/);
+assert.match(lensNextController, /apiClient\.reviewIssueResponse/);
+assert.match(lensNextController, /setHistory\(await apiClient\.loadHistory/);
+assert.match(lensNextClient, /contractVersion: "lens-issue-response\.v1"/);
+assert.match(lensNextClient, /contractVersion: "lens-issue-response-review\.v1"/);
 assert.match(route, /\["open","follow_up","waiting_design","under_review","approved","resolved"\]\.includes\(String\(local\.status\)\)/);
 assert.match(route, /const LENS_STATUSES = \["open", "follow_up", "waiting_design", "under_review", "approved", "resolved"\]/);
 assert.match(route, /new Set\(\["all", "open", "follow_up", "waiting_design", "under_review"/);

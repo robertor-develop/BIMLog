@@ -17,6 +17,8 @@ import type {
   LensNextFilters,
   LensNextHistory,
   LensNextIssue,
+  LensNextIssueResponseDraft,
+  LensNextIssueResponseReviewDraft,
   LensNextLocalViewpoint,
   LensNextInventorySummary,
   LensNextSyncPlan,
@@ -484,6 +486,8 @@ export interface LensNextPanelViewProps {
   onCloseIssue(): void;
   onOpenWorkingView(): void;
   onLoadHistory(): void;
+  onSubmitIssueResponse(draft: LensNextIssueResponseDraft): Promise<void>;
+  onReviewIssueResponse(draft: LensNextIssueResponseReviewDraft): Promise<void>;
   publishState: "idle" | "publishing" | "published" | "error";
   publishMessage: string | null;
   onPublishAction(action: LensNextPublishAction, reason: string): void;
@@ -588,6 +592,8 @@ export function LensNextPanelView({
   onCloseIssue,
   onOpenWorkingView,
   onLoadHistory,
+  onSubmitIssueResponse,
+  onReviewIssueResponse,
   publishState,
   publishMessage,
   onPublishAction,
@@ -611,6 +617,13 @@ export function LensNextPanelView({
   const [publishText, setPublishText] = React.useState("");
   const [publishReason, setPublishReason] = React.useState("");
   const [publishReviewReady, setPublishReviewReady] = React.useState(false);
+  const [responseFormOpen, setResponseFormOpen] = React.useState(false);
+  const [responseDraft, setResponseDraft] = React.useState<LensNextIssueResponseDraft>({ clientRequestId: "", outcome: "cannot_complete", response: "", recommendedCompany: null });
+  const [responseState, setResponseState] = React.useState<"idle" | "saving" | "success" | "error">("idle");
+  const [responseMessage, setResponseMessage] = React.useState<string | null>(null);
+  const [reviewDraft, setReviewDraft] = React.useState<LensNextIssueResponseReviewDraft | null>(null);
+  const [reviewState, setReviewState] = React.useState<"idle" | "saving" | "success" | "error">("idle");
+  const [reviewMessage, setReviewMessage] = React.useState<string | null>(null);
   const [createDraft, setCreateDraft] = React.useState<LensNextCreateDraft>({ trade: "", note: "", responsibleCompany: "", reportType: "COORDINATION", floor: "", priority: 3, openItems: "", status: "open" });
   const [createReason, setCreateReason] = React.useState("");
   const [createReviewReady, setCreateReviewReady] = React.useState(false);
@@ -660,6 +673,10 @@ export function LensNextPanelView({
   React.useEffect(()=>writeLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage,workspaceLayout),[workspaceLayout]);
   React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
   React.useEffect(() => {
+    setResponseFormOpen(false); setResponseState("idle"); setResponseMessage(null); setReviewDraft(null); setReviewState("idle"); setReviewMessage(null);
+    setResponseDraft({ clientRequestId: typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now().toString(16).padStart(8, "0").slice(-8)}-0000-4000-8000-${Math.random().toString(16).slice(2).padEnd(12, "0").slice(0, 12)}`, outcome: "cannot_complete", response: "", recommendedCompany: null });
+  }, [selectedIssue?.identity.serverId]);
+  React.useEffect(() => {
     if (!selectedIssue) return;
     setEditDraft({ trade: selectedIssue.trade ?? "", floor: selectedIssue.floor ?? "", responsibleCompany: selectedIssue.responsibleCompany ?? "",
       reportType: selectedIssue.reportType ?? "COORDINATION", priority: selectedIssue.priority ?? 3, status: selectedIssue.status,
@@ -672,6 +689,24 @@ export function LensNextPanelView({
   React.useEffect(() => {
     if (!selectedIssue) setCompactDetailOpen(false);
   }, [selectedIssue]);
+  const submitResponse = React.useCallback(async () => {
+    if (responseState === "saving" || responseDraft.response.trim().length < 3) return;
+    if (responseDraft.outcome === "recommend_reassignment" && !responseDraft.recommendedCompany) return;
+    setResponseState("saving"); setResponseMessage(null);
+    try {
+      await onSubmitIssueResponse({ ...responseDraft, response: responseDraft.response.trim() });
+      setResponseState("success"); setResponseMessage(tt("Response saved. The issue is answered and remains open for coordinator review.", "Respuesta guardada. La incidencia está respondida y sigue abierta para revisión del coordinador."));
+      setResponseFormOpen(false);
+    } catch (error) { setResponseState("error"); setResponseMessage(error instanceof Error ? error.message : String(error)); }
+  }, [onSubmitIssueResponse, responseDraft, responseState, tt]);
+  const submitResponseReview = React.useCallback(async () => {
+    if (!reviewDraft || reviewState === "saving" || reviewDraft.reason.trim().length < 3 || (reviewDraft.decision === "reassign" && !reviewDraft.responsibleCompany)) return;
+    setReviewState("saving"); setReviewMessage(null);
+    try {
+      await onReviewIssueResponse({ ...reviewDraft, reason: reviewDraft.reason.trim() });
+      setReviewState("success"); setReviewMessage(tt("Coordinator decision saved.", "Decisión del coordinador guardada.")); setReviewDraft(null);
+    } catch (error) { setReviewState("error"); setReviewMessage(error instanceof Error ? error.message : String(error)); }
+  }, [onReviewIssueResponse, reviewDraft, reviewState, tt]);
   React.useEffect(() => {
     if (createState !== "success" || createdIssueServerId === null || selectedIssue?.identity.serverId !== createdIssueServerId || handledCreatedIssueId.current === createdIssueServerId) return;
     handledCreatedIssueId.current = createdIssueServerId;
@@ -1452,6 +1487,41 @@ export function LensNextPanelView({
             </section>
             </details>
           )}
+          <details className="lens-next__publisher lens-next__detail-section lens-next__detail-section--responses" open aria-label={tt("Contractor responses and coordinator review", "Respuestas del contratista y revisión del coordinador")}>
+            <summary>{tt("Contractor responses — issue remains open until coordinator decision", "Respuestas del contratista — la incidencia sigue abierta hasta la decisión del coordinador")}{history && history !== "loading" ? ` (${history.responses.length})` : ""}</summary>
+            <div className="lens-next__detail-section-content">
+              <p className="lens-next__section-help">{tt("A response records what happened and changes the issue to Answered — Under Review. It never closes the issue by itself.", "Una respuesta registra lo ocurrido y cambia la incidencia a Respondida — En revisión. Nunca cierra la incidencia por sí sola.")}</p>
+              {history === null && <button type="button" onClick={onLoadHistory}>{tt("Load responses", "Cargar respuestas")}</button>}
+              {history === "loading" && <p role="status">{tt("Loading responses…", "Cargando respuestas…")}</p>}
+              {historyError && <p className="lens-next__inline-error" role="alert">{historyError}</p>}
+              {history && history !== "loading" && history.responses.length === 0 && <p>{tt("No contractor responses have been recorded.", "No se han registrado respuestas del contratista.")}</p>}
+              {history && history !== "loading" && history.responses.map(response => (
+                <article key={response.id} className="lens-next__response-card" data-review-status={response.reviewStatus}>
+                  <header><strong>{response.actorFullName || response.actorCompanyName || tt("Project member", "Miembro del proyecto")}</strong><span>{response.reviewStatus === "pending_review" ? tt("Under review", "En revisión") : response.reviewStatus.replaceAll("_", " ")}</span></header>
+                  <p>{response.response}</p>
+                  <small>{response.outcome.replaceAll("_", " ")}{response.recommendedCompany ? ` · ${tt("Recommended", "Recomendada")}: ${response.recommendedCompany}` : ""} · {formatTimestamp(response.createdAt)}</small>
+                  {selectedIssue.publishingAllowed && response.reviewStatus === "pending_review" && selectedIssue.status === "under_review" && <button type="button" onClick={() => { setReviewDraft({ responseId: response.id, decision: "follow_up", reason: "", responsibleCompany: null }); setReviewState("idle"); setReviewMessage(null); }}>{tt("Coordinator review", "Revisión del coordinador")}</button>}
+                </article>
+              ))}
+              {!responseFormOpen && selectedIssue.identity.lifecycleStatus === "active" && selectedIssue.status !== "under_review" && selectedIssue.status !== "resolved" && <button type="button" className="lens-next__primary" disabled={!selectedIssue.responsibleCompany} onClick={() => setResponseFormOpen(true)}>{tt("Respond — issue stays open", "Responder — la incidencia sigue abierta")}</button>}
+              {!selectedIssue.responsibleCompany && selectedIssue.status !== "resolved" && <p className="lens-next__inline-notice">{tt("Assign a responsible company before a contractor response can be recorded.", "Asigne una empresa responsable antes de registrar una respuesta del contratista.")}</p>}
+              {responseFormOpen && <div className="lens-next__publish-confirm">
+                <p><strong>{tt("It will not close the issue.", "No cerrará la incidencia.")}</strong> {tt("The coordinator decides what happens next.", "El coordinador decide qué sucede después.")}</p>
+                <label className="lens-next__field"><span>{tt("Response type", "Tipo de respuesta")}</span><select value={responseDraft.outcome} onChange={event => setResponseDraft(current => ({ ...current, outcome: event.target.value as LensNextIssueResponseDraft["outcome"], recommendedCompany: event.target.value === "recommend_reassignment" ? current.recommendedCompany : null }))}><option value="cannot_complete">{tt("Cannot complete as directed", "No se puede completar según lo indicado")}</option><option value="recommend_reassignment">{tt("Recommend reassignment", "Recomendar reasignación")}</option><option value="needs_information">{tt("Need more information", "Se necesita más información")}</option><option value="completed_work">{tt("Work completed — ready for review", "Trabajo completado — listo para revisión")}</option></select></label>
+                {responseDraft.outcome === "recommend_reassignment" && <label className="lens-next__field"><span>{tt("Recommended responsible company", "Empresa responsable recomendada")}</span><select value={responseDraft.recommendedCompany ?? ""} onChange={event => setResponseDraft(current => ({ ...current, recommendedCompany: event.target.value || null }))}><option value="">{tt("Select company", "Seleccione empresa")}</option>{createResponsibleCompanies.filter(company => company !== selectedIssue.responsibleCompany).map(company => <option key={company} value={company}>{company}</option>)}</select></label>}
+                <label className="lens-next__field lens-next__field--wide"><span>{tt("Explanation", "Explicación")}</span><textarea rows={5} maxLength={4000} value={responseDraft.response} onChange={event => setResponseDraft(current => ({ ...current, response: event.target.value }))}/></label>
+                <div className="lens-next__actions"><button type="button" onClick={() => setResponseFormOpen(false)} disabled={responseState === "saving"}>{tt("Cancel", "Cancelar")}</button><button type="button" className="lens-next__primary" onClick={() => void submitResponse()} disabled={responseState === "saving" || responseDraft.response.trim().length < 3 || (responseDraft.outcome === "recommend_reassignment" && !responseDraft.recommendedCompany)}>{responseState === "saving" ? tt("Saving…", "Guardando…") : tt("Send for review", "Enviar a revisión")}</button></div>
+              </div>}
+              {responseMessage && <p role={responseState === "error" ? "alert" : "status"} className={responseState === "error" ? "lens-next__inline-error" : "lens-next__publish-success"}>{responseMessage}</p>}
+              {reviewDraft && <div className="lens-next__publish-confirm">
+                <label className="lens-next__field"><span>{tt("Coordinator decision", "Decisión del coordinador")}</span><select value={reviewDraft.decision} onChange={event => setReviewDraft(current => current ? ({ ...current, decision: event.target.value as LensNextIssueResponseReviewDraft["decision"], responsibleCompany: event.target.value === "reassign" ? current.responsibleCompany : null }) : current)}><option value="follow_up">{tt("Return for follow-up", "Devolver para seguimiento")}</option><option value="waiting_design">{tt("Wait for design", "Esperar diseño")}</option><option value="reassign">{tt("Reassign", "Reasignar")}</option><option value="resolve">{tt("Accept and resolve", "Aceptar y resolver")}</option></select></label>
+                {reviewDraft.decision === "reassign" && <label className="lens-next__field"><span>{tt("New responsible company", "Nueva empresa responsable")}</span><select value={reviewDraft.responsibleCompany ?? ""} onChange={event => setReviewDraft(current => current ? ({ ...current, responsibleCompany: event.target.value || null }) : current)}><option value="">{tt("Select company", "Seleccione empresa")}</option>{createResponsibleCompanies.map(company => <option key={company} value={company}>{company}</option>)}</select></label>}
+                <label className="lens-next__field lens-next__field--wide"><span>{tt("Reason for coordinator decision", "Motivo de la decisión del coordinador")}</span><textarea minLength={3} value={reviewDraft.reason} onChange={event => setReviewDraft(current => current ? ({ ...current, reason: event.target.value }) : current)}/></label>
+                <div className="lens-next__actions"><button type="button" onClick={() => setReviewDraft(null)} disabled={reviewState === "saving"}>{tt("Cancel", "Cancelar")}</button><button type="button" className="lens-next__primary" onClick={() => void submitResponseReview()} disabled={reviewState === "saving" || reviewDraft.reason.trim().length < 3 || (reviewDraft.decision === "reassign" && !reviewDraft.responsibleCompany)}>{reviewState === "saving" ? tt("Saving…", "Guardando…") : tt("Save decision", "Guardar decisión")}</button></div>
+              </div>}
+              {reviewMessage && <p role={reviewState === "error" ? "alert" : "status"} className={reviewState === "error" ? "lens-next__inline-error" : "lens-next__publish-success"}>{reviewMessage}</p>}
+            </div>
+          </details>
           <details className="lens-next__publisher lens-next__detail-section lens-next__detail-section--publishing" aria-label="Controlled issue publishing">
             <summary>Publish an issue update</summary>
             <div className="lens-next__detail-section-content">

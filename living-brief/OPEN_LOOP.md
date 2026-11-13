@@ -6938,3 +6938,9 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - The retained task-owned loopback PostgreSQL fixture on port 55439 is test-only. No customer record, production database row, provider credential, Replit Agent, or production runtime was changed by Builds 6–10.
 - Safe resume: seal and push Block 2, reconcile it into canonical `main`, publish and verify the exact deployed source, then begin Build 11. No duplicate authorization is required.
 
+# 2026-11-13 — Lens contractor-response production correction
+
+- [ ] Push and republish the Lens Next contractor-response corrective integration after the complete exact-head gate passes.
+- [ ] Restart authenticated production acceptance at Round 1 and verify the visible response/review panel, refresh/reopen persistence, clean reentry, console and relevant network state without mutating a real customer issue.
+- [ ] Keep Block 3 Revit Builds 11–15 pending until this reopened Block 2 release gate is accepted.
+

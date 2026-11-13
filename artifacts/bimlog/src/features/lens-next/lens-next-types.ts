@@ -139,8 +139,64 @@ export interface LensNextHistoryEvent {
   createdAt: string | null;
 }
 
+export type LensNextIssueResponseOutcome =
+  | "cannot_complete"
+  | "recommend_reassignment"
+  | "needs_information"
+  | "completed_work";
+export type LensNextIssueResponseDecision =
+  | "follow_up"
+  | "waiting_design"
+  | "reassign"
+  | "resolve";
+export interface LensNextIssueResponse {
+  id: number;
+  issueId: number;
+  outcome: LensNextIssueResponseOutcome;
+  response: string;
+  recommendedCompany: string | null;
+  reviewStatus: "pending_review" | "follow_up_required" | "waiting_design" | "reassigned" | "resolved";
+  actorUserId: number;
+  actorFullName: string | null;
+  actorCompanyName: string | null;
+  reviewerUserId: number | null;
+  reviewDecision: LensNextIssueResponseDecision | null;
+  reviewReason: string | null;
+  reviewedAt: string | null;
+  createdAt: string | null;
+}
+
+export interface LensNextIssueResponseDraft {
+  clientRequestId: string;
+  outcome: LensNextIssueResponseOutcome;
+  response: string;
+  recommendedCompany: string | null;
+}
+
+export interface LensNextIssueResponseReviewDraft {
+  responseId: number;
+  decision: LensNextIssueResponseDecision;
+  reason: string;
+  responsibleCompany: string | null;
+}
+
+export interface LensNextIssueResponseReceipt {
+  replayed: boolean;
+  responseId: number;
+  status: "under_review";
+  mutationVersion: number;
+}
+
+export interface LensNextIssueResponseReviewReceipt {
+  responseId: number;
+  status: LensNextStatus;
+  responsibleCompany: string | null;
+  mutationVersion: number;
+}
+
 export interface LensNextHistory {
   revisions: LensNextHistoryRevision[];
+  responses: LensNextIssueResponse[];
   events: LensNextHistoryEvent[];
 }
 
