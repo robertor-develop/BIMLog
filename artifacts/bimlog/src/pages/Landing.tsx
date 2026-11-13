@@ -107,12 +107,12 @@ export function Landing() {
           </ol>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6" aria-label={tt("Actual BIMLog product screens", "Pantallas reales del producto BIMLog")}>
             <figure className="card overflow-hidden">
-              <img src="/images/product-proof/project-dashboard.png" alt={tt("BIMLog project dashboard showing connected project workspaces", "Panel de proyecto BIMLog mostrando espacios de trabajo conectados")} className="w-full aspect-video object-cover object-top" loading="lazy" />
-              <figcaption className="p-4 text-sm text-muted-foreground">{tt("Actual product screen: open a project and move between its governed workspaces.", "Pantalla real del producto: abra un proyecto y navegue entre sus espacios controlados.")}</figcaption>
+              <img src="/images/product-proof/project-dashboard-sanitized.png" alt={tt("Redacted BIMLog project dashboard showing connected project workspaces", "Panel de proyecto BIMLog redactado mostrando espacios de trabajo conectados")} className="w-full aspect-video object-cover object-top" loading="lazy" />
+              <figcaption className="p-4 text-sm text-muted-foreground">{tt("Redacted actual product screen: open a project and move between its governed workspaces. Account and project identifiers are removed from this public preview.", "Pantalla real redactada del producto: abra un proyecto y navegue entre sus espacios controlados. Los identificadores de cuenta y proyecto se eliminaron de esta vista pública.")}</figcaption>
             </figure>
             <figure className="card overflow-hidden">
-              <img src="/images/product-proof/project-controls.png" alt={tt("BIMLog project controls with status and progress records", "Controles de proyecto BIMLog con registros de estado y avance")} className="w-full aspect-video object-cover object-top" loading="lazy" />
-              <figcaption className="p-4 text-sm text-muted-foreground">{tt("Actual product screen: review status, responsibility, and the next project action.", "Pantalla real del producto: revise estado, responsabilidad y la próxima acción del proyecto.")}</figcaption>
+              <img src="/images/product-proof/project-controls-sanitized.png" alt={tt("Redacted BIMLog project controls with status and progress records", "Controles de proyecto BIMLog redactados con registros de estado y avance")} className="w-full aspect-video object-cover object-top" loading="lazy" />
+              <figcaption className="p-4 text-sm text-muted-foreground">{tt("Redacted actual product screen: review status, responsibility, and the next project action. Live record details are excluded from this public preview.", "Pantalla real redactada del producto: revise estado, responsabilidad y la próxima acción del proyecto. Los detalles de registros activos se excluyen de esta vista pública.")}</figcaption>
             </figure>
           </div>
           <Link href="/features" className="inline-flex min-h-11 items-center gap-2 mt-6 font-semibold text-primary hover:underline underline-offset-4">
@@ -322,12 +322,12 @@ export function Landing() {
             <div className="text-sm text-muted-foreground">{tt("Create an account, follow the guided setup, and start your first controlled project.", "Crea una cuenta, sigue la configuración guiada e inicia tu primer proyecto controlado.")}</div>
           </div>
           <div className="flex gap-3 flex-shrink-0">
-            <Link href="/login">
+            {!user && <Link href="/login">
               <Button variant="outline" className="text-sm px-5">{tt("Sign In", "Iniciar Sesión")}</Button>
-            </Link>
-            <Link href="/register">
+            </Link>}
+            <Link href={user ? "/dashboard" : "/register"}>
               <Button className="gap-2 text-sm px-5">
-                {tt("Create Account", "Crear Cuenta")}
+                {user ? tt("Open Dashboard", "Abrir panel") : tt("Create Account", "Crear Cuenta")}
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
@@ -397,9 +397,9 @@ export function Landing() {
           : availability
             ? tt(`The current free offer supports ${availability.freeOffer.projectLimit} active project and up to ${availability.freeOffer.memberLimit} members. Email verification is required before project setup. No evaluation duration is promised unless your entitlement or agreement states one.`, `La oferta gratuita actual admite ${availability.freeOffer.projectLimit} proyecto activo y hasta ${availability.freeOffer.memberLimit} miembros. Se requiere verificar el correo antes de configurar proyectos. No se promete una duración de evaluación salvo que su habilitación o acuerdo la establezca.`)
             : tt("Checking the current free offer…", "Verificando la oferta gratuita actual…")}</p>
-        <Link href="/register">
+        <Link href={user ? "/dashboard" : "/register"}>
           <Button size="lg" className="gap-2 text-base px-8">
-            {tt("Start for free", "Empieza gratis")}
+            {user ? tt("Continue to your projects", "Continuar a sus proyectos") : tt("Start for free", "Empieza gratis")}
             <ArrowRight className="w-4 h-4" />
           </Button>
         </Link>

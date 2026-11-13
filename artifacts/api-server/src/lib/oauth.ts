@@ -2,6 +2,7 @@ import { db } from "@workspace/db";
 import { userConnectionsTable } from "@workspace/db/schema";
 import { and, eq } from "drizzle-orm";
 import { getAppUrl } from "./email";
+import { procoreConfigurationIssue, procoreEndpointSet } from "./procore-environment";
 
 // Per-user OAuth providers. The platform registers ONE app per provider
 // (client id/secret as server env); every user then self-connects. Adding a
@@ -77,12 +78,12 @@ export const OAUTH_PROVIDERS: Record<OAuthProviderKey, ProviderCfg> = {
     kind: "pm",
     clientIdEnv: "PROCORE_CLIENT_ID",
     clientSecretEnv: "PROCORE_CLIENT_SECRET",
-    authUrl: "https://login.procore.com/oauth/authorize",
-    tokenUrl: "https://login.procore.com/oauth/token",
+    authUrl: `${procoreEndpointSet(process.env.PROCORE_ENVIRONMENT || "production").loginBaseUrl}/oauth/authorize`,
+    tokenUrl: `${procoreEndpointSet(process.env.PROCORE_ENVIRONMENT || "production").loginBaseUrl}/oauth/token`,
     scope: "",
     tokenAuth: "body",
     accountLabel: async (t) => {
-      const r = await fetch("https://api.procore.com/rest/v1.0/me", { headers: { Authorization: `Bearer ${t}` } });
+      const r = await fetch(`${procoreEndpointSet().apiBaseUrl}/rest/v1.0/me`, { headers: { Authorization: `Bearer ${t}` } });
       if (!r.ok) return null;
       const u = await r.json() as { email?: string; login?: string };
       return u.email ?? u.login ?? null;
@@ -102,8 +103,14 @@ export function redirectUriFor(param: string): string {
 }
 
 export function providerConfigured(key: OAuthProviderKey): boolean {
+  if (key === "procore" && procoreConfigurationIssue()) return false;
   const cfg = OAUTH_PROVIDERS[key];
   return !!process.env[cfg.clientIdEnv] && !!process.env[cfg.clientSecretEnv];
+}
+
+export function providerConfigurationCode(key: OAuthProviderKey): string | null {
+  if (key === "procore") return procoreConfigurationIssue();
+  return providerConfigured(key) ? null : "PROVIDER_NOT_CONFIGURED";
 }
 
 export function buildAuthorizeUrl(key: OAuthProviderKey, state: string, redirectUri: string): string {

@@ -15,6 +15,31 @@ export type ProductionSourceCandidate = {
 
 export type ProductionCommitIdentity = { commit: string; tree: string; subject: string };
 
+export function resolveReplitBuildCommit(
+  deploymentCommit: string | undefined,
+  canonicalHead: ProductionCommitIdentity,
+): string {
+  const candidate = deploymentCommit?.trim() || canonicalHead.commit;
+  return verifyReplitDeploymentCommit(candidate, canonicalHead.tree, canonicalHead);
+}
+
+export function verifyReplitDeploymentCommit(
+  deploymentCommit: string,
+  deploymentTree: string,
+  canonicalHead: ProductionCommitIdentity,
+): string {
+  const commit = deploymentCommit.trim().toLowerCase();
+  const tree = deploymentTree.trim().toLowerCase();
+  if (!SHA40.test(commit)) throw new Error("Replit deployment commit is not a full Git commit.");
+  if (commit !== canonicalHead.commit.trim().toLowerCase()) {
+    throw new Error("Replit deployment commit differs from the canonical build source.");
+  }
+  if (tree !== canonicalHead.tree.trim().toLowerCase()) {
+    throw new Error("Replit deployment commit changes the canonical source tree.");
+  }
+  return commit;
+}
+
 export function selectUniqueRemoteTreeMatch(
   headTree: string,
   candidates: readonly ProductionCommitIdentity[],

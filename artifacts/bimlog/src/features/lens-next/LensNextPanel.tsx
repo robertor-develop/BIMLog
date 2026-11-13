@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {executeLensNextCreation,type LensNextCreationAttempt} from "./lens-next-create-attempt";
+import {executeLensNextCreation,type LensNextCreationAttempt,type LensNextCreationHolder} from "./lens-next-create-attempt";
 import {executeLensNextUpload,type LensNextUploadAttempt} from "./lens-next-upload-attempt";
 import { LensNextPanelView } from "./LensNextPanelView";
 import {
@@ -62,6 +62,34 @@ const LENS_NEXT_REPORT_TYPE_OPTIONS = ["SHOP", "SLEEVE", "COORDINATION", "FIELD"
 const LENS_NEXT_FALLBACK_FLOORS = ["CELLAR", "1", "2", "3", "4", "5", "ROOF", "Other"] as const;
 const ISSUE_VIEWPOINT_CAPTURE_TIMEOUT_MS = 75_000;
 const ISSUE_VIEWPOINT_SAVE_TIMEOUT_MS = 45_000;
+const LENS_NEXT_PENDING_CREATION_KEY = "bimlog.lens-next.pending-creation.v1";
+
+function pendingCreationStorage(): Pick<LensNextCreationHolder,"load"|"save"> {
+  return {
+    load(_fingerprint) {
+      try {
+        const raw=sessionStorage.getItem(LENS_NEXT_PENDING_CREATION_KEY);
+        if(!raw)return null;
+        const value=JSON.parse(raw) as Partial<LensNextCreationAttempt>;
+        if(typeof value.fingerprint!=="string"||!value.fingerprint||typeof value.viewpointId!=="string"||!value.viewpointId)return null;
+        const receipt=value.receipt;
+        if(receipt&&(!Number.isSafeInteger(receipt.serverId)||receipt.serverId<=0||receipt.viewpointId!==value.viewpointId||!receipt.displayId||!receipt.displayCode||receipt.displayId!==receipt.displayCode||receipt.revisionNumber!==1||receipt.lifecycleStatus!=="active"||!/^[a-f0-9]{64}$/i.test(receipt.visualStateDigest)))return null;
+        return {fingerprint:value.fingerprint,viewpointId:value.viewpointId,submitted:value.submitted===true,receipt};
+      } catch (error) {
+        console.warn("Lens issue recovery state could not be read; in-memory recovery remains active.",error instanceof Error?error.name:"StorageError");
+        return null;
+      }
+    },
+    save(attempt) {
+      try {
+        if(!attempt){sessionStorage.removeItem(LENS_NEXT_PENDING_CREATION_KEY);return;}
+        sessionStorage.setItem(LENS_NEXT_PENDING_CREATION_KEY,JSON.stringify({fingerprint:attempt.fingerprint,viewpointId:attempt.viewpointId,submitted:attempt.submitted===true,receipt:attempt.receipt}));
+      } catch (error) {
+        console.warn("Lens issue recovery state could not be persisted; in-memory recovery remains active.",error instanceof Error?error.name:"StorageError");
+      }
+    },
+  };
+}
 
 async function withIssueViewpointTimeout<T>(
   stage: "capture" | "save",
@@ -170,7 +198,7 @@ export function LensNextPanel({
   const [selectedIssueViewpointId, setSelectedIssueViewpointId] = useState<string | null>(null);
   const [issueViewpointHistory, setIssueViewpointHistory] = useState<readonly Record<string, unknown>[] | "loading" | null>(null);
   const issueViewpointSaveInFlight = useRef(false);
-  const creationInFlight=useRef(false),pendingCreation=useRef<LensNextCreationAttempt|null>(null);
+  const creationInFlight=useRef(false),pendingCreation=useRef<LensNextCreationHolder>({current:null,...pendingCreationStorage()});
   const uploadInFlight=useRef(false),pendingLocalUpload=useRef<LensNextUploadAttempt|null>(null);
   const pendingIssueViewpointSave = useRef<{
     fingerprint: string;
@@ -182,6 +210,7 @@ export function LensNextPanel({
   const [referenceAttachmentsError, setReferenceAttachmentsError] = useState<string | null>(null);
   const refreshSequence = useRef(0);
   const publishAttempt = useRef<{ fingerprint: string; idempotencyKey: string } | null>(null);
+  const quickAssignmentAttempts = useRef(new Map<number, { fingerprint: string; idempotencyKey: string }>());
   const [publishState, setPublishState] = useState<"idle" | "publishing" | "published" | "error">("idle");
   const [publishMessage, setPublishMessage] = useState<string | null>(null);
   const [localUploadState, setLocalUploadState] = useState<"idle" | "capturing" | "uploading" | "success" | "error">("idle");
@@ -356,7 +385,7 @@ export function LensNextPanel({
           apiClient.loadIssues(authorizedProjectId, signal),
           apiClient.loadReferenceData(authorizedProjectId, signal),
         ]);
-        if (sequence !== refreshSequence.current || signal?.aborted) return false;
+        if ((!expected && sequence !== refreshSequence.current) || signal?.aborted) return false;
         if (issuesResult.status === "rejected") throw issuesResult.reason;
         const incoming = issuesResult.value;
         if(expected&&!incoming.some(issue=>issue.identity.serverId===expected.serverId&&issue.identity.viewpointId===expected.viewpointId))throw new Error("Saved creation identity was not present in refreshed project records.");
@@ -385,7 +414,7 @@ export function LensNextPanel({
         setLastRefreshedAt(new Date().toISOString());
         return true;
       } catch (error) {
-        if (signal?.aborted || sequence !== refreshSequence.current) return false;
+        if (signal?.aborted || (!expected && sequence !== refreshSequence.current)) return false;
         if(error instanceof LensNextHttpError&&[401,403].includes(error.status)){setIssues([]);setSelectedServerId(null);setHistory(null);setLinkedItems(null);setReferenceAttachments(null);}
         else setIssues(current=>current.map(issue=>({...issue,publishingAllowed:false})));
         setApiState("error");
@@ -763,6 +792,29 @@ export function LensNextPanel({
     }
   }, [apiClient, bridgeContext?.modelFingerprint, selectedIssue]);
 
+  const quickAssignResponsibleCompany = useCallback(async (issue: LensNextIssue, responsibleCompany: string) => {
+    if (!apiClient || !issue.publishingAllowed) throw new Error("Your current project role cannot assign responsible companies.");
+    const action: LensNextPublishAction = { type: "assignment", responsibleCompany };
+    const reason = "Quick assignment from Lens Next Issue Browser";
+    const fingerprint = JSON.stringify({ serverId: issue.identity.serverId, mutationVersion: issue.mutationVersion, action, reason });
+    const pending = quickAssignmentAttempts.current.get(issue.identity.serverId);
+    const attempt = pending?.fingerprint === fingerprint ? pending : { fingerprint, idempotencyKey: `lens-next-ui-${crypto.randomUUID()}` };
+    quickAssignmentAttempts.current.set(issue.identity.serverId, attempt);
+    try {
+      const result = await apiClient.publishAction(issue, action, reason, attempt.idempotencyKey, bridgeContext?.modelFingerprint ?? null);
+      setIssues(current => current.map(currentIssue => currentIssue.identity.serverId === result.issue.serverId ? {
+        ...currentIssue,
+        mutationVersion: result.issue.mutationVersion,
+        status: result.issue.status,
+        responsibleCompany: result.issue.responsibleCompany,
+      } : currentIssue));
+      quickAssignmentAttempts.current.delete(issue.identity.serverId);
+      setHistory(null);
+    } catch (error) {
+      throw error instanceof Error ? error : new Error("Responsible company assignment failed.");
+    }
+  }, [apiClient, bridgeContext?.modelFingerprint]);
+
   const uploadLocalViewpoint = useCallback(async (viewpoint: LensNextLocalViewpoint) => {
     if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || uploadInFlight.current) return;
     if (viewpoint.projectId !== authorizedProjectId || bridgeContext.projectId !== authorizedProjectId) { setLocalUploadState("error"); setLocalUploadMessage("Project/model identity mismatch; upload refused."); return; }
@@ -784,7 +836,7 @@ export function LensNextPanel({
     setCreatedIssueServerId(null);
     setCreateMessage(null); setCreateState("capturing");
     try {
-      const receipt=await executeLensNextCreation(pendingCreation,{projectId:authorizedProjectId,modelFingerprint:bridgeContext.modelFingerprint,authorityKey:authToken,draft,reason:auditReason},{newIdentity:()=>crypto.randomUUID(),isCurrent:()=>current===creationContextScope.current,capture:viewpointId=>bridgeClient.captureNewIssueNavigationView(viewpointId,bridgeContext),create:(viewpointId,navigationView)=>{setCreateState("creating");return apiClient.createIssue(authorizedProjectId,viewpointId,bridgeContext.modelFingerprint,navigationView,draft,auditReason);},reopen:receipt=>loadIssues("refresh",undefined,receipt)});
+      const receipt=await executeLensNextCreation(pendingCreation.current,{projectId:authorizedProjectId,modelFingerprint:bridgeContext.modelFingerprint,authorityKey:authToken,draft,reason:auditReason},{newIdentity:()=>crypto.randomUUID(),isCurrent:()=>current===creationContextScope.current,capture:viewpointId=>bridgeClient.captureNewIssueNavigationView(viewpointId,bridgeContext),create:(viewpointId,navigationView)=>{setCreateState("creating");return apiClient.createIssue(authorizedProjectId,viewpointId,bridgeContext.modelFingerprint,navigationView,draft,auditReason);},reopen:receipt=>loadIssues("refresh",undefined,receipt)});
       if(current!==creationContextScope.current)return;
       setSelectedServerId(receipt.serverId);
       setCreatedIssueServerId(receipt.serverId);
@@ -1092,6 +1144,7 @@ export function LensNextPanel({
       publishState={publishState}
       publishMessage={publishMessage}
       onPublishAction={(action, reason) => void publishAction(action, reason)}
+      onQuickAssignResponsibleCompany={quickAssignResponsibleCompany}
     />
   );
 }

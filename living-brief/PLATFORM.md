@@ -1150,7 +1150,12 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/lens-issue-field-authority.ts
 - artifacts/api-server/src/lib/lens-issue-gallery-http.behavior.ts
 - artifacts/api-server/src/lib/lens-issue-reopen-browser.behavior.ts
+- artifacts/api-server/src/lib/lens-issue-response-persistence.behavior.ts
+- artifacts/api-server/src/lib/lens-issue-response-review.behavior.ts
+- artifacts/api-server/src/lib/lens-issue-response.behavior.ts
+- artifacts/api-server/src/lib/lens-issue-response.ts
 - artifacts/api-server/src/lib/lens-issue-viewpoint-compatibility.behavior.ts
+- artifacts/api-server/src/lib/lens-issue-viewpoint-marked-capture.behavior.ts
 - artifacts/api-server/src/lib/lens-issue-viewpoints-api.behavior.ts
 - artifacts/api-server/src/lib/lens-issue-viewpoints-migration.behavior.ts
 - artifacts/api-server/src/lib/lens-issue-viewpoints-migration.ts
@@ -1177,8 +1182,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/lens-project-trades-http.behavior.ts
 - artifacts/api-server/src/lib/lens-pull-browser.behavior.ts
 - artifacts/api-server/src/lib/lens-pull-http.behavior.ts
+- artifacts/api-server/src/lib/lens-report-annotated-pdf.behavior.ts
 - artifacts/api-server/src/lib/lens-report-history-browser.behavior.ts
 - artifacts/api-server/src/lib/lens-report-history-http.behavior.ts
+- artifacts/api-server/src/lib/lens-report-image.behavior.ts
+- artifacts/api-server/src/lib/lens-report-image.ts
 - artifacts/api-server/src/lib/lens-revision-visual-package.behavior.ts
 - artifacts/api-server/src/lib/lens-sequence-status-browser.behavior.ts
 - artifacts/api-server/src/lib/lens-sequence-status-http.behavior.ts
@@ -1311,6 +1319,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/procore-current-provider-approval.behavior.ts
 - artifacts/api-server/src/lib/procore-document-import-http.behavior.ts
 - artifacts/api-server/src/lib/procore-document-real-files-route.behavior.ts
+- artifacts/api-server/src/lib/procore-environment.behavior.ts
+- artifacts/api-server/src/lib/procore-environment.ts
 - artifacts/api-server/src/lib/procore-file-download-dispatch.behavior.ts
 - artifacts/api-server/src/lib/procore-file-download.behavior.ts
 - artifacts/api-server/src/lib/procore-file-download.ts
@@ -1680,6 +1690,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/job-intakes.ts
 - lib/db/src/schema/launch-configuration.ts
 - lib/db/src/schema/lens-imports.ts
+- lib/db/src/schema/lens-issue-responses.ts
 - lib/db/src/schema/lens-issue-viewpoints.ts
 - lib/db/src/schema/lens-next-model-bindings.ts
 - lib/db/src/schema/lens-next-publishing.ts

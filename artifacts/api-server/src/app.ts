@@ -1470,8 +1470,32 @@ const livingBriefAndLensStartupBarrier = queueDatabaseStartup(async () => {
     await pool.query(
       `CREATE INDEX IF NOT EXISTS lens_viewpoint_events_viewpoint_idx ON lens_viewpoint_events (viewpoint_id)`,
     );
+    await pool.query(`CREATE TABLE IF NOT EXISTS lens_issue_responses (
+      id SERIAL PRIMARY KEY,
+      project_id INTEGER NOT NULL,
+      issue_id INTEGER NOT NULL,
+      client_request_id TEXT NOT NULL,
+      request_fingerprint TEXT NOT NULL,
+      issue_mutation_version INTEGER NOT NULL,
+      resulting_mutation_version INTEGER NOT NULL,
+      outcome TEXT NOT NULL,
+      response TEXT NOT NULL,
+      recommended_company TEXT,
+      review_status TEXT NOT NULL DEFAULT 'pending_review',
+      actor_user_id INTEGER NOT NULL,
+      actor_company_name TEXT NOT NULL,
+      reviewer_user_id INTEGER,
+      review_decision TEXT,
+      review_reason TEXT,
+      reviewed_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_issue_responses_project_issue_request_unique
+      ON lens_issue_responses(project_id, issue_id, client_request_id)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS lens_issue_responses_project_issue_created_idx
+      ON lens_issue_responses(project_id, issue_id, created_at DESC)`);
     console.log(
-      "[migration] lens_viewpoint_reports + lens_viewpoint_events tables ensured",
+      "[migration] lens_viewpoint_reports + lens_viewpoint_events + lens_issue_responses tables ensured",
     );
   } catch (e) {
     console.error(

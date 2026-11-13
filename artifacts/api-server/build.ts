@@ -22,7 +22,7 @@ import {
   writeFile,
 } from "fs/promises";
 import { generatePlatformMd } from "./scripts/generate-platform-md";
-import { resolveProductionSourceCommit, selectUniqueRemoteTreeMatch, unwrapReplitPublishChain } from "./src/lib/production-source-commit";
+import { resolveProductionSourceCommit, resolveReplitBuildCommit, selectUniqueRemoteTreeMatch, unwrapReplitPublishChain } from "./src/lib/production-source-commit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -153,6 +153,30 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
     });
   const canonicalHead = unwrapReplitPublishChain(localHistory);
   const replitEnvironment = Boolean(process.env.REPL_ID || process.env.REPL_SLUG);
+  const replitDeploymentCommit = process.env.REPLIT_GIT_COMMIT_SHA?.trim().toLowerCase();
+  if (replitEnvironment) {
+    const sourceCommit = resolveReplitBuildCommit(replitDeploymentCommit, canonicalHead);
+    const deploymentTree = git("show", "-s", "--format=%T", sourceCommit);
+    if (deploymentTree !== canonicalHead.tree) {
+      throw new Error("Replit build commit changes the canonical source tree.");
+    }
+    const acceptedCommit = process.env.BIMLOG_ACCEPTED_COMMIT?.trim().toLowerCase();
+    if (acceptedCommit && acceptedCommit !== sourceCommit) {
+      throw new Error("Accepted production commit differs from the verified Replit deployment commit.");
+    }
+    execFileSync(
+      "git",
+      ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, "merge-base", "--is-ancestor", state.reconciledThroughCommit, sourceCommit],
+      { stdio: "ignore" },
+    );
+    return {
+      sourceRoot: livingBriefSourceRoot,
+      sourceCommit,
+      catalogSha256: state.catalogSha256,
+      bundleSha256: state.bundleSha256,
+      files: ["catalog.json", "state.json", ...catalog.documents.map(document => document.file)],
+    };
+  }
   let acceptedBranch = process.env.BIMLOG_ACCEPTED_BRANCH?.trim();
   if (replitEnvironment && !acceptedBranch) {
     const remoteHeads = git("for-each-ref", "--format=%(objectname)%09%(tree)%09%(subject)", "refs/remotes/origin")

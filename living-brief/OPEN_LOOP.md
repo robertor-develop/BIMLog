@@ -1,9 +1,13 @@
-## Current open-loop authority — final external holds — 2026-11-04 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
+## Current open-loop authority — final external hold — 2026-11-10 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
 The complete non-Procore source audit at `edcf79e80a1d840e0419c186119ccfafdda91db9` found no remaining internally executable product row: the blocking platform audit reports `P0=0 P1=0 P2=0`, current-state and Living Brief contracts pass, TypeScript passes, and the deterministic production build passes. Builds 223–225 remain authoritative for closure of prior provider/current-state work. Do not invent P216–P220 or reopen accepted rows without a new reproduced defect.
 
-- [ ] Activate the already-implemented Procore flow only after the authorized production `PROCORE_CLIENT_ID` and `PROCORE_CLIENT_SECRET` are available; keep this final configuration gate isolated from completed BIMLog product work and do not request email credentials or contact Ruben.
-- [ ] Preserve Ruben's deferred physical Navisworks 2025 confirmation as post-closure field evidence; it does not reopen accepted Platform builds and no physical 2025 success is claimed on this workstation.
+- [ ] Complete Procore production activation after Procore approves the developer organization and enables production promotion for the existing BIMLog app. The production `PROCORE_CLIENT_ID` and `PROCORE_CLIENT_SECRET` are present, but live OAuth correctly remains unaccepted while the app has only Sandbox Version 0.1.0. Keep this external-provider gate isolated from completed BIMLog product work and do not request email credentials or contact Ruben.
+- [x] Roberto confirmed physical Navisworks 2025 acceptance on 2026-11-10. This closes the deferred post-closure field-evidence gate without reopening accepted Platform builds or changing Native binaries.
+- [x] Reconcile the previously flagged revision-to-action, access-revocation/private-metadata, and permissioned marketing-story rows against current source and executable contracts. Sales next actions are owner-only, optimistic-revision-safe, bilingual, and visible in the queue; session revocation and current project membership remain fail closed; Meeting source selectors return private/no-store minimal payloads and exclude private fields. The audit found one bounded frontend defect: two lower Landing-page calls to action still sent an already authenticated user to registration. They now use the same authenticated Dashboard destination as the hero, hide the redundant Sign In action, and retain public registration for signed-out visitors. Procore is unchanged and remains the final external gate.
+- [x] Complete BM11 contractor/access/privacy reconciliation. The accepted matrices prove invitation and session revocation, negative authorization, contractor read-plus-Coordination-upload ceilings, public discovery allowlists, requester/company-owned exports, and private no-store responses. Correct the stale bilingual Sub-trade description so it no longer contradicts the canonical bounded-read policy. No access grant, schema, provider, customer data or production state changes.
+- [x] Reconcile roadmap v11 BM10 and BM12 acceptance without inventing new builds. BM10 preserves the owner-only revision-to-assigned-action journey with optimistic concurrency, stale reload, failed-request guidance, bilingual controls and narrow-screen containment. BM12 preserves permission-aware calls to action, signed-out registration, authenticated Dashboard continuation and checked-in labeled product screenshots. Combined focused and connected authorization evidence passes; no new deployment is claimed by this evidence reconciliation.
+- [x] Remove private account, company, project and live-record text from BM12's public product-proof assets. Publish only the mechanically redacted screenshots, retain honest bilingual captions explaining the boundary, and remove the originals from the public bundle. Preserve the real interface layout and every product capability.
 
 ## Committed aggregate release handoff — 2026-10-30
 
@@ -6889,3 +6893,48 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - Do not begin P216 or consume another queued block until these gates close.
 - [x] Correct the authenticated live BIMCorp approval mismatch at `e9903fe12` without granting unrelated tenants or bypassing Procore consent.
 - [ ] Republish the corrected exact source and restart live acceptance at Round 1. The guided intake may proceed only after the existing Procore OAuth application variables are restored in the deployment; email credentials are neither required nor accepted.
+
+## Lens saved-issue recovery closure - 2026-11-10
+
+- [x] Persist and validate the minimal saved-creation receipt across a Lens panel reload so an unchanged retry reopens the exact issue without recapture or duplicate creation.
+- [x] Deny edited-draft creation while a different saved receipt remains pending, preserve project/model/session isolation, omit tokens and customer content from recovery storage, and report storage fallback without a silent catch.
+- [x] Pass the exact synthetic `#1079` recovery regression, connected Lens acceptance, frontend typecheck, production build, blocking platform audit, tracked-secret scan and database-safety gates without mutating the real issue or production data.
+- [ ] After normal push and publication cadence, perform non-mutating live confirmation that the deployed UI loads cleanly. Do not recreate or alter real issue `#1079` merely to prove recovery.
+- [ ] Procore production OAuth activation remains the final separate external-provider gate and is intentionally deferred until all independent work is complete.
+## 2026-11-10 — Procore production activation remains external
+
+- Closed in source at `b25010a68`: sandbox and production Procore OAuth/API endpoint families can no longer be mixed silently; missing or invalid environment configuration fails closed with sanitized diagnostics.
+- External activation still required: verify the Procore developer organization, promote a Data Connector version, receive production OAuth credentials, install/configure them in the authorized deployment secret scope, then complete Ruben's genuine production authorization and company/project/document acceptance.
+- Safe resume: do not retry the old authorization URL or reuse its state. After production credentials are present, start a fresh BIMLog Procore connection, verify the registered HTTPS callback exactly, then browse only the authenticated user's permitted companies/projects and preserve explicit import confirmation.
+
+## 2026-11-10 — Lens quick responsible-company assignment release
+
+- [x] Add the card-level responsible-company selector and Assign action without removing or replacing the existing issue-detail workflow.
+- [x] Enforce current-project authorization and company-catalog membership, preserve idempotency/concurrency, and emit an immutable assignment-change audit event.
+- [x] Preserve issue evidence and browser list context; pass focused positive, negative, authorization, responsive, scale, TypeScript and production frontend build gates.
+- [x] Push exact product source `570434f7d40b40972def40a6873075b7c975245c` to canonical `main` and verify remote equality.
+- [ ] Publish the reconciled exact source through the existing Replit Shell/Publish path, verify deployed identity and health, and complete non-mutating authenticated live UI acceptance. Do not alter a real customer assignment solely to prove the control.
+
+## 2026-11-10 — Replit deployment-source verification correction
+
+- [x] Diagnose the failed Replit publication from the exact builder log: the isolated builder contained the checked-out source commit but no matching `origin/*` ref, so the generic remote-ref guard found zero matches.
+- [x] Verify the exact checked-out Replit source directly, using `REPLIT_GIT_COMMIT_SHA` when present and the same verified checked-out HEAD when omitted; preserve the existing remote-match guard everywhere else.
+- [x] Pass focused deployment-source behavior and API TypeScript checks at exact corrective source `f766df624f8258e22638fe808e42e0d1cae301ef`.
+- [ ] Reconcile and push this final corrective source, rebuild in the existing Replit Shell, publish the exact reconciled commit, verify deployed identity/version/health and complete non-mutating authenticated Lens UI acceptance.
+
+## 2026-11-13 — Three-feature Lens program
+
+- [x] Complete Block 1 Builds 1–5: verified marked-image selection, PDF embedding, secondary-viewpoint marked capture persistence, visible report option, and guarded end-to-end HTTP/PDF evidence.
+- [ ] Push the reconciled Block 1 source normally and verify local/remote equality; do not publish until the authorized ten-build cadence is reached.
+- [ ] Complete Block 2 Builds 6–10 for answered-but-open contractor response, coordinator review, reassignment, permissions, audit history and UI acceptance; then push, publish and restart live acceptance at Round 1.
+- [ ] Complete Block 3 Builds 11–15 for the latest supported Revit integration, coordinate navigation, packaging, compatibility evidence and final three-feature acceptance; then push and publish the completed program.
+- [ ] Preserve current customer data, existing Lens/Navisworks workflows and live pilot records throughout the program. Do not use Replit Agent.
+
+## Active continuation — Lens three-feature program / Block 2 — 2026-11-13
+
+- Builds 6–10 are locally accepted through `d38c3927964b3e86725bbdbbbdc7eac6ae80f105`. The response lifecycle is answered-but-open, assigned-company scoped, coordinator-governed, optimistic-version-safe, retry-safe, auditable and bilingual. The connected HTTP/database/PDF regression and both package typechecks pass.
+- Block 2 must now receive its Living Brief seal, clean full production build, exact branch push and remote equality check. Because this is the tenth build in the authorized three-feature program, canonical integration, controlled publication, deployed-commit/version/health verification and authenticated live acceptance are due before Block 3 is released.
+- Builds 11–15 remain: latest supported Revit bridge contract, coordinate/view identity, governed Open in Revit request/receipt, frontend discoverability and end-to-end native/package acceptance. Do not claim Revit completion from source-only tests; native/physical acceptance must remain truthful.
+- The retained task-owned loopback PostgreSQL fixture on port 55439 is test-only. No customer record, production database row, provider credential, Replit Agent, or production runtime was changed by Builds 6–10.
+- Safe resume: seal and push Block 2, reconcile it into canonical `main`, publish and verify the exact deployed source, then begin Build 11. No duplicate authorization is required.
+

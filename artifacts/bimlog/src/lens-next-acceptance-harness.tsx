@@ -113,7 +113,7 @@ function Harness() {
     workingViewState: "idle", workingViewUnavailable: false, visualRepairState: "idle", visualRepairMessage: null, onRepairCurrentWorkingView: noop,
     onRefresh: noop, onRegisterProjectCompany: async () => true, companyRegistrationState: "idle", companyRegistrationMessage: null,
     onSelectIssue: setSelectedServerId, onCloseIssue: () => setSelectedServerId(null), onOpenWorkingView: noop, onLoadHistory: noop,
-    publishState: "idle", publishMessage: null, onPublishAction: noop,
+    publishState: "idle", publishMessage: null, onPublishAction: noop, onQuickAssignResponsibleCompany: async () => {},
   };
   return <div className="lens-next-acceptance-shell">
     <div className="lens-next-acceptance-toolbar">

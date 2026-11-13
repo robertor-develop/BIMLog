@@ -2,7 +2,7 @@
 import { db, pool } from "@workspace/db";
 import { loadProjectCompanyChoices } from "../lib/project-company-choices";
 import type { Request } from "express";
-import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable, lensViewpointSequenceCountersTable, lensIssueViewpointsTable, lensIssueViewpointRevisionsTable, lensNextPublishReceiptsTable, filesTable } from "@workspace/db/schema";
+import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable, lensViewpointSequenceCountersTable, lensIssueViewpointsTable, lensIssueViewpointRevisionsTable, lensIssueResponsesTable, lensNextPublishReceiptsTable, filesTable } from "@workspace/db/schema";
 import { eq, desc, asc, and, isNull, isNotNull, ne, or, sql, inArray } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
 import {
@@ -37,6 +37,8 @@ import { classifyVisualPackageTruth, presentLensReferenceAttachment } from "../l
 import { resolveLensCompanyDirectoryReference, type CompanyDirectoryCandidate } from "../lib/company-directory-resolution";
 import { lensIssueFieldAuthorities, lensResponsibleCompanyAvailability, lensSameProjectHistoricalCompanyAvailability, uniqueLensResponsibleCompanyOptions, type LensResponsibleCompanyOption } from "../lib/lens-issue-field-authority";
 import { assertCatalogLabel, assertLensIssueStatusTransition, normalizeGovernedLabel, LENS_ISSUE_BASE_TRADES, LENS_ISSUE_REPORT_TYPES } from "../lib/lens-issue-edit-policy";
+import { selectLensReportImage, type LensReportImageEvidence } from "../lib/lens-report-image";
+import { assertLensIssueCanReceiveResponse, lensIssueResponseFingerprint, lensIssueReviewOutcome, LensIssueResponseError, LENS_ISSUE_RESPONSE_NEXT_STATUS, parseLensIssueResponseDraft, parseLensIssueReviewDraft } from "../lib/lens-issue-response";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -658,7 +660,7 @@ router.post("/projects/:projectId/clash-reports/lens-next/local-viewpoints/uploa
           reportType: String(local.reportType ?? "").trim() || null, floor: String(local.floor ?? "").trim() || null,
           priority: Number.isInteger(priority) && priority >= 1 && priority <= 5 ? priority : 3,
           openItems: String(local.openItems ?? "").trim() || null,
-          status: ["open","follow_up","waiting_design","approved","resolved"].includes(String(local.status)) ? String(local.status) : "open",
+          status: ["open","follow_up","waiting_design","under_review","approved","resolved"].includes(String(local.status)) ? String(local.status) : "open",
           lifecycleStatus: "active", revisionNumber: 1, syncedAt: new Date(),
         }).returning();
         if (!inserted) throw new LensNextLocalUploadError("atomic_insert_failed", "BIMLog did not create the local viewpoint record.", 500);
@@ -1135,7 +1137,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         // wipe + re-sync restores Follow Up / Waiting Design / Approved / Resolved. Unknown/blank
         // falls back to open - the default for a brand-new viewpoint.
         const incomingStatus = norm(v?.status);
-        const LENS_STATUSES = ["open", "follow_up", "waiting_design", "approved", "resolved"];
+        const LENS_STATUSES = ["open", "follow_up", "waiting_design", "under_review", "approved", "resolved"];
         const replayStatus = incomingStatus && LENS_STATUSES.includes(incomingStatus) ? incomingStatus : "open";
         const replayRevision = v?.revisionNumber != null && !Number.isNaN(Number(v.revisionNumber)) ? Math.max(1, Number(v.revisionNumber)) : 1;
         const localSupersedesDisplayId = norm(v?.localSupersedesId);
@@ -1567,21 +1569,22 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/vi
       const issueResult = await client.query(`SELECT id,viewpoint_id,lifecycle_status,revision_number,mutation_version FROM lens_viewpoints WHERE id=$1 AND project_id=$2 FOR UPDATE`, [issueId, projectId]);
       const issue = issueResult.rows[0];
       if (!issue || issue.lifecycle_status !== "active") { await client.query("ROLLBACK"); res.status(404).json({ error: "lens_issue_not_found" }); return; }
-      const replay = await client.query(`SELECT id,name,display_order,is_primary,lifecycle_status,visual_state_digest FROM lens_issue_viewpoints WHERE issue_id=$1 AND idempotency_key=$2`, [issueId, idempotencyKey]);
+      const replay = await client.query(`SELECT id,name,display_order,is_primary,lifecycle_status,screenshot_url,visual_state_digest FROM lens_issue_viewpoints WHERE issue_id=$1 AND idempotency_key=$2`, [issueId, idempotencyKey]);
       if (replay.rows[0]) { await client.query("COMMIT"); res.status(200).json({ success: true, created: false, replayed: true, viewpoint: replay.rows[0] }); return; }
       if (Number(issue.mutation_version) !== expectedMutationVersion) { await client.query("ROLLBACK"); res.status(409).json({ error: "lens_issue_stale_write", currentMutationVersion: Number(issue.mutation_version) }); return; }
-      validatePersistedLensNextVisualState(visualStateJson, visualStateDigest, { projectId, serverId: issueId, viewpointId: String(issue.viewpoint_id), lifecycleStatus: String(issue.lifecycle_status), revisionNumber: Number(issue.revision_number) });
-      const parsedVisualState = JSON.parse(visualStateJson) as Record<string, unknown>;
+      const verifiedVisualState = validatePersistedLensNextVisualState(visualStateJson, visualStateDigest, { projectId, serverId: issueId, viewpointId: String(issue.viewpoint_id), lifecycleStatus: String(issue.lifecycle_status), revisionNumber: Number(issue.revision_number) });
+      const parsedVisualState = verifiedVisualState.state;
+      const screenshotUrl = selectLensReportImage(parsedVisualState).dataUrl;
       const capturedFingerprint = String(parsedVisualState.ModelFingerprint ?? parsedVisualState.modelFingerprint ?? "").trim().toLowerCase();
       if (capturedFingerprint !== modelFingerprint) { await client.query("ROLLBACK"); res.status(409).json({ error: "lens_issue_viewpoint_model_mismatch" }); return; }
       const orderResult = await client.query(`SELECT COALESCE(MAX(display_order),-1)+1 AS next_order FROM lens_issue_viewpoints WHERE issue_id=$1 AND lifecycle_status='active'`, [issueId]);
       const id = randomUUID();
       const displayOrder = Number(orderResult.rows[0]?.next_order ?? 0);
-      await client.query(`INSERT INTO lens_issue_viewpoints(id,issue_id,idempotency_key,project_id,model_fingerprint,name,viewpoint_type,display_order,is_primary,lifecycle_status,visual_state_json,visual_state_digest,captured_by_user_id,captured_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,false,'active',$9,$10,$11,now())`, [id, issueId, idempotencyKey, projectId, modelFingerprint, name, viewpointType, displayOrder, visualStateJson, visualStateDigest, req.user!.userId]);
-      await client.query(`INSERT INTO lens_issue_viewpoint_revisions(id,issue_viewpoint_id,revision_number,action,name,display_order,is_primary,lifecycle_status,model_fingerprint,visual_state_json,visual_state_digest,actor_user_id,reason) VALUES($1,$2,1,'captured',$3,$4,false,'active',$5,$6,$7,$8,$9)`, [`${id}-r1`, id, name, displayOrder, modelFingerprint, visualStateJson, visualStateDigest, req.user!.userId, reason]);
+      await client.query(`INSERT INTO lens_issue_viewpoints(id,issue_id,idempotency_key,project_id,model_fingerprint,name,viewpoint_type,display_order,is_primary,lifecycle_status,screenshot_url,visual_state_json,visual_state_digest,captured_by_user_id,captured_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,false,'active',$9,$10,$11,$12,now())`, [id, issueId, idempotencyKey, projectId, modelFingerprint, name, viewpointType, displayOrder, screenshotUrl, visualStateJson, visualStateDigest, req.user!.userId]);
+      await client.query(`INSERT INTO lens_issue_viewpoint_revisions(id,issue_viewpoint_id,revision_number,action,name,display_order,is_primary,lifecycle_status,model_fingerprint,screenshot_url,visual_state_json,visual_state_digest,actor_user_id,reason) VALUES($1,$2,1,'captured',$3,$4,false,'active',$5,$6,$7,$8,$9,$10)`, [`${id}-r1`, id, name, displayOrder, modelFingerprint, screenshotUrl, visualStateJson, visualStateDigest, req.user!.userId, reason]);
       await client.query(`INSERT INTO activity_log(project_id,user_id,user_full_name,user_company_name,action_type,entity_type,entity_id,details) VALUES($1,$2,$3,$4,'lens_issue_viewpoint_added','lens_viewpoint',$5,$6)`, [projectId, req.user!.userId, req.user!.fullName, req.user!.companyName, issueId, JSON.stringify({ issueViewpointId: id, name, viewpointType, displayOrder, reason, modelFingerprint, visualStateDigest })]);
       await client.query("COMMIT");
-      res.status(201).json({ success: true, created: true, replayed: false, viewpoint: { id, issueId, projectId, modelFingerprint, name, viewpointType, displayOrder, isPrimary: false, lifecycleStatus: "active", visualStateDigest } });
+      res.status(201).json({ success: true, created: true, replayed: false, viewpoint: { id, issueId, projectId, modelFingerprint, name, viewpointType, displayOrder, isPrimary: false, lifecycleStatus: "active", screenshotUrl, visualStateDigest } });
     } catch (error) {
       try { await client.query("ROLLBACK"); } catch { /* preserve original failure */ }
       if (error instanceof LensNextLocalUploadError) { res.status(error.status).json({ error: error.code, message: error.message }); return; }
@@ -2601,6 +2604,17 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/:id/publish",
     const id = Number(req.params.id);
     try {
       const request = parseLensNextPublishRequest(req.body, projectId, id);
+      if (request.action.type === "assignment" && request.action.responsibleCompany) {
+        const choices = await loadProjectCompanyChoices(projectId);
+        try {
+          request.action.responsibleCompany = assertCatalogLabel(request.action.responsibleCompany, choices.companies, "responsibleCompany");
+        } catch (error) {
+          if (error instanceof Error && error.message.startsWith("LENS_ISSUE_CATALOG_VALUE_FORBIDDEN")) {
+            throw new LensNextPublishError(422, "LENS_NEXT_ASSIGNMENT_FORBIDDEN", "That responsible company is not authorized for this project. Refresh the governed catalog and try again.");
+          }
+          throw error;
+        }
+      }
       const [currentUser] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
       const roleMeta = req.memberRole ? await getConfigOptionMeta("member_role", req.memberRole) : null;
       const response = await publishLensNextAction(pool, {
@@ -2620,6 +2634,122 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/:id/publish",
       const correlationId = randomUUID();
       logLensImportInternal("lens-next-publish", correlationId, error);
       res.status(500).json({ error: "LENS_NEXT_PUBLISH_FAILED", message: "The issue publication could not be committed.", correlationId });
+    }
+  },
+);
+
+// A contractor response is evidence, not closure. It atomically advances the
+// active Issue to under_review and leaves the coordinator as the only actor who
+// can decide the next workflow state or reassignment.
+router.post("/projects/:projectId/clash-reports/lens-next/issues/:id/responses",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId), issueId = Number(req.params.id);
+    let draft;
+    try {
+      if (!Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(issueId) || issueId <= 0)
+        throw new LensIssueResponseError("LENS_ISSUE_RESPONSE_INVALID", "The project and issue identity are invalid.", 400);
+      draft = parseLensIssueResponseDraft(req.body);
+      if (draft.recommendedCompany) {
+        const choices = await loadProjectCompanyChoices(projectId);
+        try {
+          draft = Object.freeze({ ...draft, recommendedCompany: assertCatalogLabel(draft.recommendedCompany, choices.companies, "recommendedCompany") });
+        } catch {
+          throw new LensIssueResponseError("LENS_ISSUE_RESPONSE_COMPANY_FORBIDDEN", "The recommended company is not authorized for this project.", 422);
+        }
+      }
+      const fingerprint = createHash("sha256").update(lensIssueResponseFingerprint(draft)).digest("hex");
+      const [currentUser] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
+      const roleMeta = req.memberRole ? await getConfigOptionMeta("member_role", req.memberRole) : null;
+      const elevated = Boolean(currentUser?.isSuperAdmin) || roleMeta?.permission === "admin";
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        const replay = (await client.query(`SELECT * FROM lens_issue_responses WHERE project_id=$1 AND issue_id=$2 AND client_request_id=$3 FOR UPDATE`, [projectId, issueId, draft.clientRequestId])).rows[0];
+        if (replay) {
+          if (replay.request_fingerprint !== fingerprint) {
+            await client.query("ROLLBACK");
+            res.status(409).json({ error: "LENS_ISSUE_RESPONSE_RETRY_CONFLICT", message: "That request ID was already used for a different response." }); return;
+          }
+          await client.query("COMMIT");
+          res.json({ success: true, replayed: true, response: { id: replay.id, issueId, outcome: replay.outcome, response: replay.response, recommendedCompany: replay.recommended_company, reviewStatus: replay.review_status, resultingMutationVersion: replay.resulting_mutation_version, createdAt: replay.created_at }, issue: { serverId: issueId, status: LENS_ISSUE_RESPONSE_NEXT_STATUS, mutationVersion: replay.resulting_mutation_version } });
+          return;
+        }
+        const before = (await client.query(`SELECT * FROM lens_viewpoints WHERE id=$1 AND project_id=$2 FOR UPDATE`, [issueId, projectId])).rows[0];
+        if (!before) throw new LensIssueResponseError("LENS_ISSUE_NOT_FOUND", "The Lens issue was not found in this project.", 404);
+        assertLensIssueCanReceiveResponse({ lifecycleStatus: before.lifecycle_status, status: before.status, responsibleCompany: before.responsible_company, actorCompany: req.user!.companyName, elevated });
+        if (Number(before.mutation_version) !== draft.mutationVersion)
+          throw new LensIssueResponseError("LENS_ISSUE_VERSION_CONFLICT", "The issue changed after the response began. Reload and review the current issue.", 409);
+        const resultingMutationVersion = draft.mutationVersion + 1;
+        const updated = (await client.query(`UPDATE lens_viewpoints SET status=$1,mutation_version=$2,updated_at=now() WHERE id=$3 AND project_id=$4 AND mutation_version=$5 AND lifecycle_status='active' RETURNING id`, [LENS_ISSUE_RESPONSE_NEXT_STATUS, resultingMutationVersion, issueId, projectId, draft.mutationVersion])).rows[0];
+        if (!updated) throw new LensIssueResponseError("LENS_ISSUE_VERSION_CONFLICT", "The issue changed while the response was being saved.", 409);
+        const saved = (await client.query(`INSERT INTO lens_issue_responses(project_id,issue_id,client_request_id,request_fingerprint,issue_mutation_version,resulting_mutation_version,outcome,response,recommended_company,review_status,actor_user_id,actor_company_name) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,'pending_review',$10,$11) RETURNING *`, [projectId, issueId, draft.clientRequestId, fingerprint, draft.mutationVersion, resultingMutationVersion, draft.outcome, draft.response, draft.recommendedCompany, req.user!.userId, req.user!.companyName])).rows[0];
+        await client.query(`INSERT INTO lens_viewpoint_events(project_id,viewpoint_id,event_type,from_status,to_status,changed_by_id) VALUES($1,$2,'contractor_response_submitted',$3,$4,$5)`, [projectId, issueId, before.status, LENS_ISSUE_RESPONSE_NEXT_STATUS, req.user!.userId]);
+        await client.query(`INSERT INTO activity_log(project_id,user_id,user_full_name,user_company_name,action_type,entity_type,entity_id,file_name_before,file_name_after,details) VALUES($1,$2,$3,$4,'lens_issue_response_submitted','lens_issue',$5,$6,$7,$8)`, [projectId, req.user!.userId, req.user!.fullName, req.user!.companyName, issueId, String(before.status), LENS_ISSUE_RESPONSE_NEXT_STATUS, JSON.stringify({ responseId: saved.id, outcome: draft.outcome, recommendedCompany: draft.recommendedCompany, reviewStatus: "pending_review", sourceApplication: "Lens Next" })]);
+        await client.query("COMMIT");
+        res.status(201).json({ success: true, replayed: false, response: { id: saved.id, issueId, outcome: saved.outcome, response: saved.response, recommendedCompany: saved.recommended_company, reviewStatus: saved.review_status, resultingMutationVersion, createdAt: saved.created_at }, issue: { serverId: issueId, status: LENS_ISSUE_RESPONSE_NEXT_STATUS, mutationVersion: resultingMutationVersion } });
+      } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+      } finally { client.release(); }
+    } catch (error) {
+      if (error instanceof LensIssueResponseError) {
+        res.status(error.status).json({ error: error.code, message: error.message }); return;
+      }
+      const correlationId = randomUUID();
+      logLensImportInternal("lens-issue-response", correlationId, error);
+      res.status(500).json({ error: "LENS_ISSUE_RESPONSE_FAILED", message: "The response could not be committed.", correlationId });
+    }
+  },
+);
+
+router.post("/projects/:projectId/clash-reports/lens-next/issues/:id/responses/review",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId), issueId = Number(req.params.id);
+    try {
+      if (!Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(issueId) || issueId <= 0)
+        throw new LensIssueResponseError("LENS_ISSUE_REVIEW_INVALID", "The project and issue identity are invalid.", 400);
+      let draft = parseLensIssueReviewDraft(req.body);
+      const [currentUser] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
+      const roleMeta = req.memberRole ? await getConfigOptionMeta("member_role", req.memberRole) : null;
+      if (!currentUser?.isSuperAdmin && roleMeta?.permission !== "admin")
+        throw new LensIssueResponseError("LENS_ISSUE_REVIEW_FORBIDDEN", "Only a project coordinator or administrator may decide a contractor response.", 403);
+      if (draft.responsibleCompany) {
+        const choices = await loadProjectCompanyChoices(projectId);
+        try { draft = Object.freeze({ ...draft, responsibleCompany: assertCatalogLabel(draft.responsibleCompany, choices.companies, "responsibleCompany") }); }
+        catch { throw new LensIssueResponseError("LENS_ISSUE_REVIEW_COMPANY_FORBIDDEN", "The selected company is not authorized for this project.", 422); }
+      }
+      const outcome = lensIssueReviewOutcome(draft.decision);
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        const responseRow = (await client.query(`SELECT * FROM lens_issue_responses WHERE id=$1 AND project_id=$2 AND issue_id=$3 FOR UPDATE`, [draft.responseId, projectId, issueId])).rows[0];
+        if (!responseRow) throw new LensIssueResponseError("LENS_ISSUE_RESPONSE_NOT_FOUND", "The response was not found in this project.", 404);
+        if (responseRow.review_status !== "pending_review") throw new LensIssueResponseError("LENS_ISSUE_RESPONSE_ALREADY_REVIEWED", "This response already has a coordinator decision.", 409);
+        const issue = (await client.query(`SELECT * FROM lens_viewpoints WHERE id=$1 AND project_id=$2 FOR UPDATE`, [issueId, projectId])).rows[0];
+        if (!issue) throw new LensIssueResponseError("LENS_ISSUE_NOT_FOUND", "The Lens issue was not found in this project.", 404);
+        if (issue.lifecycle_status !== "active" || issue.status !== LENS_ISSUE_RESPONSE_NEXT_STATUS)
+          throw new LensIssueResponseError("LENS_ISSUE_REVIEW_STATE_CONFLICT", "The issue is no longer awaiting coordinator review.", 409);
+        if (Number(issue.mutation_version) !== draft.mutationVersion)
+          throw new LensIssueResponseError("LENS_ISSUE_VERSION_CONFLICT", "The issue changed after review began. Reload the current issue.", 409);
+        const resultingMutationVersion = draft.mutationVersion + 1;
+        const responsibleCompany = draft.decision === "reassign" ? draft.responsibleCompany : issue.responsible_company;
+        const updated = (await client.query(`UPDATE lens_viewpoints SET status=$1,responsible_company=$2,mutation_version=$3,updated_at=now() WHERE id=$4 AND project_id=$5 AND mutation_version=$6 AND status='under_review' AND lifecycle_status='active' RETURNING *`, [outcome.issueStatus, responsibleCompany, resultingMutationVersion, issueId, projectId, draft.mutationVersion])).rows[0];
+        if (!updated) throw new LensIssueResponseError("LENS_ISSUE_VERSION_CONFLICT", "The issue changed while the decision was being saved.", 409);
+        await client.query(`UPDATE lens_issue_responses SET review_status=$1,reviewer_user_id=$2,review_decision=$3,review_reason=$4,reviewed_at=now() WHERE id=$5 AND project_id=$6 AND issue_id=$7 AND review_status='pending_review'`, [outcome.reviewStatus, req.user!.userId, draft.decision, draft.reason, draft.responseId, projectId, issueId]);
+        await client.query(`INSERT INTO lens_viewpoint_events(project_id,viewpoint_id,event_type,from_status,to_status,changed_by_id) VALUES($1,$2,'coordinator_response_reviewed',$3,$4,$5)`, [projectId, issueId, issue.status, outcome.issueStatus, req.user!.userId]);
+        await client.query(`INSERT INTO activity_log(project_id,user_id,user_full_name,user_company_name,action_type,entity_type,entity_id,file_name_before,file_name_after,details) VALUES($1,$2,$3,$4,'lens_issue_response_reviewed','lens_issue',$5,$6,$7,$8)`, [projectId, req.user!.userId, req.user!.fullName, req.user!.companyName, issueId, issue.status, outcome.issueStatus, JSON.stringify({ responseId: draft.responseId, decision: draft.decision, reason: draft.reason, responsibleCompanyBefore: issue.responsible_company, responsibleCompanyAfter: responsibleCompany, sourceApplication: "Lens Next" })]);
+        await client.query("COMMIT");
+        res.json({ success: true, response: { id: draft.responseId, reviewStatus: outcome.reviewStatus, decision: draft.decision, reviewedAt: new Date().toISOString() }, issue: { serverId: issueId, status: outcome.issueStatus, responsibleCompany, mutationVersion: resultingMutationVersion } });
+      } catch (error) { await client.query("ROLLBACK"); throw error; }
+      finally { client.release(); }
+    } catch (error) {
+      if (error instanceof LensIssueResponseError) { res.status(error.status).json({ error: error.code, message: error.message }); return; }
+      const correlationId = randomUUID(); logLensImportInternal("lens-issue-response-review", correlationId, error);
+      res.status(500).json({ error: "LENS_ISSUE_REVIEW_FAILED", message: "The coordinator decision could not be committed.", correlationId });
     }
   },
 );
@@ -3027,6 +3157,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/history",
         ))
         .orderBy(desc(activityLogTable.createdAt));
       const publishEvents = await pool.query(`SELECT r.id,r.action_type,r.viewpoint_id,r.before_snapshot,r.after_snapshot,r.reason,r.comment,r.created_at,r.actor_user_id,u.full_name,c.name company_name FROM lens_next_publish_receipts r JOIN users u ON u.id=r.actor_user_id JOIN companies c ON c.id=u.company_id WHERE r.project_id=$1 AND r.viewpoint_id = ANY($2::int[]) ORDER BY r.created_at DESC,r.id DESC`, [projectId, chainIds]);
+      const responses = await pool.query(`SELECT r.id,r.issue_id,r.outcome,r.response,r.recommended_company,r.review_status,r.actor_user_id,r.actor_company_name,r.reviewer_user_id,r.review_decision,r.review_reason,r.reviewed_at,r.created_at,u.full_name actor_full_name FROM lens_issue_responses r JOIN users u ON u.id=r.actor_user_id WHERE r.project_id=$1 AND r.issue_id = ANY($2::int[]) ORDER BY r.created_at DESC,r.id DESC`, [projectId, chainIds]);
       res.json({
         success: true,
         // Newest revision first.
@@ -3040,6 +3171,14 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/history",
           supersedesId: c.supersedesId,
           updatedAt: c.updatedAt,
           createdAt: c.createdAt,
+        })),
+        responses: responses.rows.map(row => ({
+          id: Number(row.id), issueId: Number(row.issue_id), outcome: row.outcome, response: row.response,
+          recommendedCompany: row.recommended_company, reviewStatus: row.review_status,
+          actorUserId: Number(row.actor_user_id), actorFullName: row.actor_full_name, actorCompanyName: row.actor_company_name,
+          reviewerUserId: row.reviewer_user_id == null ? null : Number(row.reviewer_user_id), reviewDecision: row.review_decision,
+          reviewReason: row.review_reason, reviewedAt: row.reviewed_at instanceof Date ? row.reviewed_at.toISOString() : row.reviewed_at,
+          createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
         })),
         events: [...publishEvents.rows.map(e => ({
           id: Number(e.id),
@@ -3348,6 +3487,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       };
       const watermarkType: string = ["draft", "issued", "superseded"].includes(body.watermarkType) ? body.watermarkType : "draft";
       const isOnePager = body.isExecutiveOnePager === true;
+      const includeCaptureAppendix = body.includeCaptureAppendix !== false && !isOnePager;
       const showHealthScore = body.showHealthScore !== false;
       // ID rendering on the register: "displayId" (raw plugin id, default) or
       // "code" (Trade-Floor-Seq, matching the on-screen viewpoint code).
@@ -3419,6 +3559,35 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       ].find(result => result !== 0) ?? 0);
       const pOrder = (priority: number | null | undefined) => priority ?? 99;
 
+      const reportImageEvidence = new Map<number, LensReportImageEvidence>();
+      for (const viewpoint of vps) {
+        if (!viewpoint.visualStateJson || !viewpoint.visualStateDigest) {
+          reportImageEvidence.set(viewpoint.id, selectLensReportImage(null));
+          continue;
+        }
+        try {
+          const verified = validatePersistedLensNextVisualState(
+            viewpoint.visualStateJson,
+            viewpoint.visualStateDigest,
+            {
+              projectId,
+              serverId: viewpoint.id,
+              viewpointId: viewpoint.viewpointId,
+              lifecycleStatus: viewpoint.lifecycleStatus ?? "active",
+              revisionNumber: viewpoint.revisionNumber ?? 1,
+            },
+          );
+          reportImageEvidence.set(viewpoint.id, selectLensReportImage(verified.state));
+        } catch {
+          reportImageEvidence.set(viewpoint.id, {
+            kind: "unavailable",
+            dataUrl: null,
+            hasRedlines: false,
+            message: "Verified Lens capture unavailable; the stored visual package did not pass integrity validation.",
+          });
+        }
+      }
+
       if (vps.length === 0) {
         res.status(400).json({ error: "no_viewpoints", message: "No viewpoints match the selected filters." });
         return;
@@ -3473,6 +3642,11 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         revisionNumber: v.revisionNumber, lifecycleStatus: v.lifecycleStatus,
         supersedesId: v.supersedesId, issueGroupId: v.issueGroupId,
         hasLinkedRfi: linkedRfiVpIds.has(v.id),
+        imageEvidence: {
+          kind: reportImageEvidence.get(v.id)?.kind ?? "unavailable",
+          hasRedlines: reportImageEvidence.get(v.id)?.hasRedlines ?? false,
+          visualStateDigest: v.visualStateDigest ?? null,
+        },
       }));
 
       // -- Sequential report number (<CODE>-LV-001) + persist, made
@@ -3490,7 +3664,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       for (let attempt = 0; attempt < 12 && !inserted; attempt++) {
         reportNumber = `${code}-LV-${String(seq).padStart(3, "0")}`;
         if (usedNums.has(reportNumber)) { seq++; continue; }
-        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, accessScope: scope.label, watermarkType, isOnePager, idFormat, includeNonActive, includeResolved, showGroupIds, showLifecycleState, showRevisionColumn, includeAuditRecords, includeReportHistory, includeRevisionHistory, healthScore, snapshot });
+        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, accessScope: scope.label, watermarkType, isOnePager, includeCaptureAppendix, idFormat, includeNonActive, includeResolved, showGroupIds, showLifecycleState, showRevisionColumn, includeAuditRecords, includeReportHistory, includeRevisionHistory, healthScore, snapshot });
         try {
           await tx.transaction(async savepoint => savepoint.insert(lensViewpointReportsTable).values({
             projectId,
@@ -3757,6 +3931,43 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         });
         doc.y = endY;
 
+        // -- VERIFIED CAPTURE APPENDIX ---------------------------------------
+        // Each page is bound to the exact issue visual-state digest included in
+        // the report fingerprint. When redlines exist but a verified marked
+        // capture does not, the report states that explicitly and never falls
+        // back to an unrelated/unmarked thumbnail.
+        if (includeCaptureAppendix) for (const viewpoint of vps) {
+          const evidence = reportImageEvidence.get(viewpoint.id) ?? selectLensReportImage(null);
+          doc.y = addLensContinuationPage(`Lens capture — ${idText(viewpoint)}`);
+          doc.fontSize(14).font("Helvetica-Bold").fillColor("#111827")
+            .text(`Lens Capture: ${idText(viewpoint)}`, M, doc.y, { width: CW });
+          doc.moveDown(0.35);
+          doc.fontSize(8).font("Helvetica").fillColor("#475569")
+            .text(`${viewpoint.trade || "-"}  |  ${viewpoint.floor || "-"}  |  ${statusLabel(viewpoint.status)}  |  ${viewpoint.responsibleCompany || "Unassigned"}`, M, doc.y, { width: CW });
+          doc.moveDown(0.2);
+          doc.fontSize(7).font("Helvetica").fillColor("#64748B")
+            .text(`Visual package: ${viewpoint.visualStateDigest || "unavailable"}`, M, doc.y, { width: CW });
+          doc.moveDown(0.6);
+
+          if (evidence.dataUrl) {
+            const imageBytes = Buffer.from(evidence.dataUrl.slice(evidence.dataUrl.indexOf(",") + 1), "base64");
+            const imageTop = doc.y;
+            const imageHeight = PAGE_BOTTOM - imageTop - 42;
+            doc.image(imageBytes, M, imageTop, { fit: [CW, imageHeight], align: "center", valign: "center" });
+            doc.y = PAGE_BOTTOM - 32;
+          } else {
+            const unavailableTop = doc.y + 34;
+            doc.rect(M, unavailableTop, CW, 150).fillAndStroke("#F8FAFC", "#CBD5E1");
+            doc.fontSize(13).font("Helvetica-Bold").fillColor("#334155")
+              .text("Capture unavailable", M + 20, unavailableTop + 48, { width: CW - 40, align: "center" });
+            doc.fontSize(9).font("Helvetica").fillColor("#475569")
+              .text(evidence.message, M + 40, unavailableTop + 78, { width: CW - 80, align: "center" });
+            doc.y = unavailableTop + 165;
+          }
+          doc.fontSize(8).font("Helvetica-Bold").fillColor("#334155")
+            .text(evidence.kind === "annotated" ? "ANNOTATED CAPTURE" : evidence.kind === "capture" ? "CAPTURE — NO MARKUPS RECORDED" : "CAPTURE EVIDENCE UNAVAILABLE", M, Math.min(doc.y + 8, PAGE_BOTTOM - 18), { width: CW, align: "center" });
+        }
+
         // Keep sign-off with revision history when it exists, avoiding a
         // dedicated near-empty page between two small controlled sections.
         const drawSignoff = () => {
@@ -3916,7 +4127,7 @@ router.get(
     const search = typeof req.query.search === "string" ? req.query.search.trim().toLowerCase() : "";
     const view = typeof req.query.view === "string" ? req.query.view : "normal";
     const allowedPriorities = new Set(["all", "P1", "P2", "P3", "P4"]);
-    const allowedStatuses = new Set(["all", "open", "follow_up", "waiting_design", "in_progress", "approved", "resolved", "wont_fix"]);
+    const allowedStatuses = new Set(["all", "open", "follow_up", "waiting_design", "under_review", "in_progress", "approved", "resolved", "wont_fix"]);
     const allowedViews = new Set(["normal", "grouped"]);
     if (!Number.isInteger(reportId) || reportId <= 0) {
       res.status(400).json({ error: "invalid_report_id" });

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { LENS_NEXT_STATUS_LABELS, lensNextIssueAccessibleLabel, lensNextIssueDescription, lensNextPriorityLabel } from "./lens-next-issue-presentation";
-import type { LensNextIssue } from "./lens-next-types";
+import { LENS_NEXT_STATUSES, LENS_NEXT_USER_SETTABLE_STATUSES, type LensNextIssue } from "./lens-next-types";
 
 const issue = {
   identity: { projectId: 4, serverId: 91, viewpointId: "VIEW-91", lifecycleStatus: "active", revisionNumber: 2 },
@@ -19,6 +19,9 @@ assert.equal(lensNextPriorityLabel(5), "P5 Monitor");
 assert.equal(lensNextPriorityLabel(null), "Priority not recorded");
 assert.equal(lensNextIssueDescription(issue), "Duct conflicts with beam");
 assert.equal(LENS_NEXT_STATUS_LABELS.waiting_design, "Waiting Design");
+assert.equal(LENS_NEXT_STATUS_LABELS.under_review, "Answered — Under Review");
+assert.ok(LENS_NEXT_STATUSES.includes("under_review"));
+assert.ok(!(LENS_NEXT_USER_SETTABLE_STATUSES as readonly string[]).includes("under_review"));
 assert.equal(lensNextIssueAccessibleLabel(issue), "View issue CL-091, P1 Critical, Waiting Design, HVAC, Level 02");
 
 const view = readFileSync(new URL("./LensNextPanelView.tsx", import.meta.url), "utf8");
@@ -41,6 +44,7 @@ assert.match(view, /Link BIMLog item/);
 assert.match(view, /Ready for confirmation/);
 assert.match(view, /Synchronization operation progress/);
 assert.match(view, /Review record/);
+assert.match(view, /LENS_NEXT_USER_SETTABLE_STATUSES/);
 assert.doesNotMatch(view, /placeholder\.com|placehold\.co|dummyimage/i);
 
 console.log("Lens Next issue presentation: PASS");

@@ -31,6 +31,10 @@ const exactText = (value: unknown, label: string, max: number) => {
   if (typeof value !== "string" || value.trim() !== value || !value || Buffer.byteLength(value, "utf8") > max) throw new LensNextPublishError(400, "LENS_NEXT_REQUEST_INVALID", `${label} is invalid.`);
   return value;
 };
+const assignmentText = (value: unknown) => {
+  if (typeof value !== "string" || value.trim() !== value || Buffer.byteLength(value, "utf8") > 256) throw new LensNextPublishError(400, "LENS_NEXT_REQUEST_INVALID", "action.responsibleCompany is invalid.");
+  return value;
+};
 const positive = (value: unknown, label: string) => {
   if (typeof value !== "number" || !Number.isSafeInteger(value) || value <= 0) throw new LensNextPublishError(400, "LENS_NEXT_REQUEST_INVALID", `${label} is invalid.`);
   return value;
@@ -65,7 +69,7 @@ export function parseLensNextPublishRequest(value: unknown, routeProjectId: numb
     if (!(LENS_NEXT_STATUSES as readonly string[]).includes(status)) throw new LensNextPublishError(400, "LENS_NEXT_ACTION_INVALID", "Status is invalid.");
     normalized.status = status;
   } else if (type === "comment") normalized.comment = exactText(action.comment, "action.comment", 4000);
-  else normalized.responsibleCompany = exactText(action.responsibleCompany, "action.responsibleCompany", 256);
+  else normalized.responsibleCompany = assignmentText(action.responsibleCompany);
   return { contractVersion: LENS_NEXT_PUBLISH_CONTRACT, requestId, idempotencyKey, identity: { projectId, serverId, viewpointId, lifecycleStatus: "active", revisionNumber, mutationVersion }, action: normalized, reason: exactText(body.reason, "reason", 1000), modelFingerprint: body.modelFingerprint == null ? null : exactText(body.modelFingerprint, "modelFingerprint", 256) };
 }
 
@@ -119,11 +123,14 @@ export async function publishLensNextAction(pool: PublishingPool, actor: LensNex
     if (row.viewpoint_id !== request.identity.viewpointId || row.lifecycle_status !== "active" || row.revision_number !== request.identity.revisionNumber || row.mutation_version !== request.identity.mutationVersion) throw new LensNextPublishError(409, "LENS_NEXT_VERSION_CONFLICT", "The issue changed after this draft was opened.", before);
     let afterRow = row;
     if (request.action.type === "status") afterRow = (await client.query(`UPDATE lens_viewpoints SET status=$1,mutation_version=mutation_version+1,updated_at=now() WHERE id=$2 RETURNING id,viewpoint_id,lifecycle_status,revision_number,mutation_version,status,responsible_company`, [request.action.status, row.id])).rows[0];
-    else if (request.action.type === "assignment") afterRow = (await client.query(`UPDATE lens_viewpoints SET responsible_company=$1,mutation_version=mutation_version+1,updated_at=now() WHERE id=$2 RETURNING id,viewpoint_id,lifecycle_status,revision_number,mutation_version,status,responsible_company`, [request.action.responsibleCompany, row.id])).rows[0];
+    else if (request.action.type === "assignment") afterRow = (await client.query(`UPDATE lens_viewpoints SET responsible_company=$1,mutation_version=mutation_version+1,updated_at=now() WHERE id=$2 RETURNING id,viewpoint_id,lifecycle_status,revision_number,mutation_version,status,responsible_company`, [request.action.responsibleCompany || null, row.id])).rows[0];
     else afterRow = (await client.query(`UPDATE lens_viewpoints SET mutation_version=mutation_version+1,updated_at=now() WHERE id=$1 RETURNING id,viewpoint_id,lifecycle_status,revision_number,mutation_version,status,responsible_company`, [row.id])).rows[0];
     const after = snapshot(afterRow);
     const response = { success: true, contractVersion: LENS_NEXT_PUBLISH_CONTRACT, receipt: { requestId: request.requestId, idempotencyKey: request.idempotencyKey, requestHash, actionType: request.action.type, recordedAt: new Date().toISOString() }, issue: after, replayed: false };
     await hooks?.beforeAudit?.();
+    if (request.action.type === "assignment") {
+      await client.query(`INSERT INTO activity_log(project_id,user_id,user_full_name,user_company_name,action_type,entity_type,entity_id,file_name_before,file_name_after,details) VALUES($1,$2,$3,$4,'RESPONSIBLE_COMPANY_CHANGED','lens_issue',$5,$6,$7,$8::jsonb)`, [request.identity.projectId, actor.userId, actor.fullName, actor.companyName, row.id, before.responsibleCompany ?? null, after.responsibleCompany ?? null, JSON.stringify({ previousResponsibleCompany: before.responsibleCompany ?? null, newResponsibleCompany: after.responsibleCompany ?? null, actorUserId: actor.userId, changedAt: response.receipt.recordedAt, projectId: request.identity.projectId, modelFingerprint: request.modelFingerprint ?? null, reason: request.reason, sourceApplication: "Lens Next Issue Browser" })]);
+    }
     await client.query(`INSERT INTO lens_next_publish_receipts(project_id,viewpoint_id,actor_user_id,idempotency_key,request_hash,request_id,action_type,before_snapshot,after_snapshot,reason,comment,model_fingerprint,response_payload) VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9::jsonb,$10,$11,$12,$13::jsonb)`, [request.identity.projectId, row.id, actor.userId, request.idempotencyKey, requestHash, request.requestId, request.action.type, JSON.stringify(before), JSON.stringify(after), request.reason, request.action.comment ?? null, request.modelFingerprint ?? null, JSON.stringify(response)]);
     await client.query("COMMIT");
     return response;

@@ -8,7 +8,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { buildZeroImportPreview } from "../lib/connector-crawl-preview";
 import { getAppUrl } from "../lib/email";
 import { browseCloud } from "../lib/cloud-files";
-import { OAUTH_PROVIDERS, providerFromParam, redirectUriFor, providerConfigured, buildAuthorizeUrl, exchangeCodeForTokens, getValidAccessToken } from "../lib/oauth";
+import { OAUTH_PROVIDERS, providerFromParam, redirectUriFor, providerConfigured, providerConfigurationCode, buildAuthorizeUrl, exchangeCodeForTokens, getValidAccessToken } from "../lib/oauth";
 import { getAiUsageSummary, sendAiUsageError } from "../lib/ai-usage";
 import {
   customerProviderCatalog,
@@ -187,7 +187,19 @@ router.get("/me/connections/:provider/authorize", authMiddleware, async (req, re
     return;
   }
   if (!providerConfigured(key)) {
-    res.status(503).json({ error: `${OAUTH_PROVIDERS[key].label} is not enabled on this BIMLog yet — the platform app is not configured.`, code: "PROVIDER_NOT_CONFIGURED" });
+    const code = providerConfigurationCode(key) || "PROVIDER_NOT_CONFIGURED";
+    const activationHold = key === "procore" && code === "PROCORE_CREDENTIALS_NOT_CONFIGURED";
+    res.status(503).json({
+      error: activationHold
+        ? "Procore production activation is not complete. Your Procore password and company permissions are not the cause."
+        : `${OAUTH_PROVIDERS[key].label} is not enabled on this BIMLog yet - the platform app is not configured.`,
+      errorEs: activationHold
+        ? "La activacion de Procore para produccion no esta completa. Su contrasena y permisos de empresa no son la causa."
+        : undefined,
+      code,
+      retryable: false,
+      credentialsExposed: false,
+    });
     return;
   }
   const returnTo = req.query.returnTo === undefined ? null : safeProcoreIntakeReturn(req.query.returnTo);

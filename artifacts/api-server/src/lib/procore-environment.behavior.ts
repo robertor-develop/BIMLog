@@ -1,0 +1,23 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { parseProcoreEnvironment, procoreConfigurationIssue, procoreEndpointSet } from "./procore-environment";
+
+assert.equal(parseProcoreEnvironment("sandbox"), "sandbox");
+assert.equal(parseProcoreEnvironment("production"), "production");
+assert.equal(parseProcoreEnvironment(""), null);
+assert.equal(parseProcoreEnvironment("prod"), null);
+assert.equal(procoreEndpointSet("sandbox").loginBaseUrl, "https://login-sandbox.procore.com");
+assert.equal(procoreEndpointSet("sandbox").apiBaseUrl, "https://sandbox.procore.com");
+assert.equal(procoreEndpointSet("production").loginBaseUrl, "https://login.procore.com");
+assert.equal(procoreEndpointSet("production").apiBaseUrl, "https://api.procore.com");
+assert.equal(procoreConfigurationIssue({} as NodeJS.ProcessEnv), "PROCORE_ENVIRONMENT_NOT_CONFIGURED");
+assert.equal(procoreConfigurationIssue({ PROCORE_ENVIRONMENT: "sandbox" } as NodeJS.ProcessEnv), "PROCORE_CREDENTIALS_NOT_CONFIGURED");
+assert.equal(procoreConfigurationIssue({ PROCORE_ENVIRONMENT: "production", PROCORE_CLIENT_ID: "id", PROCORE_CLIENT_SECRET: "secret" } as NodeJS.ProcessEnv), null);
+assert.throws(() => procoreEndpointSet("mixed"), /PROCORE_ENVIRONMENT_NOT_CONFIGURED/);
+const cloudFiles = readFileSync(new URL("./cloud-files.ts", import.meta.url), "utf8");
+const versionSource = readFileSync(new URL("./procore-version-source.ts", import.meta.url), "utf8");
+assert.doesNotMatch(cloudFiles, /https:\/\/(?:api|sandbox)\.procore\.com/, "cloud browse/download must use the selected Procore API environment");
+assert.doesNotMatch(versionSource, /https:\/\/(?:api|sandbox)\.procore\.com/, "exact source lookup must use the selected Procore API environment");
+assert.match(cloudFiles, /procoreApiUrl/);
+assert.match(versionSource, /procoreApiUrl/);
+console.log("Procore fail-closed environment matrix: PASS");

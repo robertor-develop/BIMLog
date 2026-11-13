@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { LensNextPublishError, parseLensNextPublishRequest, publishLensNextAction } from "./lens-next-publishing";
 
-type State = { issue: any; receipts: any[]; member: boolean };
+type State = { issue: any; receipts: any[]; activity: any[]; member: boolean };
 class MemoryPool {
-  state: State = { issue: { id: 7, viewpoint_id: "vp-7", lifecycle_status: "active", revision_number: 2, mutation_version: 3, status: "open", responsible_company: "Trade A" }, receipts: [], member: true };
+  state: State = { issue: { id: 7, viewpoint_id: "vp-7", lifecycle_status: "active", revision_number: 2, mutation_version: 3, status: "open", responsible_company: "Trade A" }, receipts: [], activity: [], member: true };
   async query() { return { rows: [] }; }
   async connect() {
     const saved = structuredClone(this.state);
@@ -18,6 +18,7 @@ class MemoryPool {
       if (sql.startsWith("UPDATE lens_viewpoints SET status")) { this.state.issue.status = values[0]; this.state.issue.mutation_version++; return { rows: [structuredClone(this.state.issue)] }; }
       if (sql.startsWith("UPDATE lens_viewpoints SET responsible_company")) { this.state.issue.responsible_company = values[0]; this.state.issue.mutation_version++; return { rows: [structuredClone(this.state.issue)] }; }
       if (sql.startsWith("UPDATE lens_viewpoints SET mutation_version")) { this.state.issue.mutation_version++; return { rows: [structuredClone(this.state.issue)] }; }
+      if (sql.startsWith("INSERT INTO activity_log")) { this.state.activity.push({ action_type: "RESPONSIBLE_COMPANY_CHANGED", values }); return { rows: [] }; }
       if (sql.startsWith("INSERT INTO lens_next_publish_receipts")) { this.state.receipts.push({ actor_user_id: values[2], idempotency_key: values[3], request_hash: values[4], response_payload: JSON.parse(String(values[12])) }); return { rows: [] }; }
       throw new Error(`unexpected SQL: ${sql}`);
     }};
@@ -57,13 +58,19 @@ const comment = await publishLensNextAction(commentPool as any, actor, parseLens
 assert.equal(comment.issue.mutationVersion, 4); assert.equal(commentPool.state.issue.status, "open"); checks.push("comment advances workflow version without changing status");
 const assignmentPool = new MemoryPool();
 const assignment = await publishLensNextAction(assignmentPool as any, actor, parseLensNextPublishRequest(body("publish-key-assign", { type: "assignment", responsibleCompany: "Trade B" }), 3, 7));
-assert.equal(assignment.issue.responsibleCompany, "Trade B"); checks.push("assignment publishes atomically");
+assert.equal(assignment.issue.responsibleCompany, "Trade B"); assert.equal(assignmentPool.state.activity.length, 1); checks.push("assignment and explicit audit publish atomically");
+const assignmentReplay = await publishLensNextAction(assignmentPool as any, actor, parseLensNextPublishRequest(body("publish-key-assign", { type: "assignment", responsibleCompany: "Trade B" }), 3, 7));
+assert.equal(assignmentReplay.replayed, true); assert.equal(assignmentPool.state.activity.length, 1); checks.push("assignment replay does not duplicate audit");
+const unassignedPool = new MemoryPool();
+const unassigned = await publishLensNextAction(unassignedPool as any, actor, parseLensNextPublishRequest(body("publish-key-unassign", { type: "assignment", responsibleCompany: "" }), 3, 7));
+assert.equal(unassigned.issue.responsibleCompany, null); assert.equal(unassignedPool.state.activity[0].values[5], "Trade A"); assert.equal(unassignedPool.state.activity[0].values[6], null); checks.push("Unassigned is valid and audits old and new values");
 const inactivePool = new MemoryPool(); inactivePool.state.member = false;
 await assert.rejects(() => publishLensNextAction(inactivePool as any, actor, parsed), (error: any) => error.code === "LENS_NEXT_PUBLISH_FORBIDDEN"); checks.push("inactive membership denied inside transaction");
 
 const route = readFileSync(new URL("../routes/clash_reports.ts", import.meta.url), "utf8");
 assert.match(route, /requirePermission\("admin", "write"\)/);
 assert.match(route, /lens-next\/issues\/:id\/publish/);
+assert.match(route, /loadProjectCompanyChoices\(projectId\)/); assert.match(route, /LENS_NEXT_ASSIGNMENT_FORBIDDEN/); checks.push("route enforces project company catalog");
 const schema = readFileSync(new URL("../../../../lib/db/src/schema/lens-next-publishing.ts", import.meta.url), "utf8");
 assert.match(schema, /actorIdempotencyUnique/); checks.push("route and schema authority mounted");
 console.log(JSON.stringify({ status: "PASS", checks: checks.length, details: checks }));

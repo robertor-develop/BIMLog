@@ -3,7 +3,7 @@ import express from 'express';
 import {randomUUID} from 'node:crypto';
 const target=new URL(process.env.PROD_DATABASE_URL??'postgres://invalid/invalid');
 if(target.hostname!=='127.0.0.1'||target.port!=='55439'||target.pathname!=='/bimlog_rfi_restore_test')throw Error('Owned restored fixture required');
-process.env.JWT_SECRET='procore-oauth-local-fixture';process.env.APP_URL='https://bimlog.fixture.invalid';process.env.PROCORE_CLIENT_ID='synthetic-local-client';process.env.PROCORE_CLIENT_SECRET='synthetic-local-secret';
+process.env.JWT_SECRET='procore-oauth-local-fixture';process.env.APP_URL='https://bimlog.fixture.invalid';process.env.PROCORE_ENVIRONMENT='production';process.env.PROCORE_CLIENT_ID='synthetic-local-client';process.env.PROCORE_CLIENT_SECRET='synthetic-local-secret';
 const {pool}=await import('@workspace/db');const {startCompanyProviderApprovalMigration}=await import('./provider-governance');const {default:router}=await import('../routes/connections');const {signToken,signOAuthState,verifyOAuthState}=await import('../middlewares/auth');
 const mark='oauth-approval-'+randomUUID();const company=Number((await pool.query('INSERT INTO companies(name) VALUES($1) RETURNING id',[mark])).rows[0].id);const user=(await pool.query("INSERT INTO users(email,password_hash,full_name,company_id) VALUES($1,'unused',$2,$3) RETURNING id,email",[mark+'@example.test',mark,company])).rows[0];
 await startCompanyProviderApprovalMigration();
