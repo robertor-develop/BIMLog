@@ -6,6 +6,7 @@ $adapter = Get-Content -LiteralPath (Join-Path $root 'revit\2026\AutodeskRevit20
 $project = Get-Content -LiteralPath (Join-Path $root 'revit\2026\BIMLogLensNext.Revit2026.csproj') -Raw
 $manifest = Get-Content -LiteralPath (Join-Path $root 'revit\2026\BIMLogLensNext.Revit2026.addin') -Raw
 $security = Get-Content -LiteralPath (Join-Path $root 'src\LensNextRevitBridgeSecurity.cs') -Raw
+$revitBridge = Get-Content -LiteralPath (Join-Path $root 'revit\2026\LensNextRevitBridgeHost.cs') -Raw
 $required = @(
   'lens-next-revit-navigation.v1',
   'LatestSupportedMajorVersion = 2026',
@@ -32,4 +33,6 @@ if (-not $project.Contains('net8.0-windows') -or -not $project.Contains('RevitAP
 if (-not $manifest.Contains('BIMLogLensNext.Revit2026.LensNextRevitApplication') -or -not $manifest.Contains('<UseRevitContext>False</UseRevitContext>')) { throw 'Revit 2026 manifest registration or dependency isolation is missing.' }
 $securityRequired = @('explicit BIMLog origin','MaximumSessionMinutes = 30','RandomNumberGenerator.Create','FixedTimeEquals','replayed request identity','MaximumAcceptedRequests')
 foreach ($needle in $securityRequired) { if (-not $security.Contains($needle)) { throw "Missing secure Revit bridge behavior: $needle" } }
+$bridgeRequired = @('http://127.0.0.1:8876/','ExternalEvent','/v1/session','/v1/model-binding','/v1/open-request','ValidateMutation','revit-2026-binding.json','EnsureDocumentMatch','LensNextRevitNavigator','WaitAsync(TimeSpan.FromSeconds(30))')
+foreach ($needle in $bridgeRequired) { if (-not $revitBridge.Contains($needle)) { throw "Missing operational Revit bridge behavior: $needle" } }
 Write-Output 'Lens Next Revit navigation contract behavior: PASS'

@@ -46,15 +46,18 @@ namespace BIMLogLensNext
 
         public void ValidateMutation(string origin, string bearerToken, LensNextRevitBridgeSession session, string requestId, DateTimeOffset now)
         {
-            if (!IsOriginAllowed(origin)) throw new InvalidOperationException("Revit bridge origin is not authorized.");
-            if (session == null || now < session.IssuedAt || now >= session.ExpiresAt || session.ExpiresAt > session.IssuedAt.AddMinutes(MaximumSessionMinutes))
-                throw new InvalidOperationException("Revit bridge session is expired or invalid.");
-            if (string.IsNullOrEmpty(bearerToken) || !FixedTimeEquals(bearerToken, session.Token))
-                throw new InvalidOperationException("Revit bridge bearer token is invalid.");
+            ValidateRead(origin, bearerToken, session, now);
             if (!Guid.TryParse(requestId, out _)) throw new InvalidOperationException("Revit bridge mutation requires a UUID request identity.");
             Prune(now);
             if (_acceptedRequests.Count >= MaximumAcceptedRequests) throw new InvalidOperationException("Revit bridge replay registry is at capacity.");
             if (!_acceptedRequests.TryAdd(requestId, session.ExpiresAt)) throw new InvalidOperationException("Revit bridge rejected a replayed request identity.");
+        }
+
+        public void ValidateRead(string origin, string bearerToken, LensNextRevitBridgeSession session, DateTimeOffset now)
+        {
+            if (!IsOriginAllowed(origin)) throw new InvalidOperationException("Revit bridge origin is not authorized.");
+            if (session == null || now < session.IssuedAt || now >= session.ExpiresAt || session.ExpiresAt > session.IssuedAt.AddMinutes(MaximumSessionMinutes)) throw new InvalidOperationException("Revit bridge session is expired or invalid.");
+            if (string.IsNullOrEmpty(bearerToken) || !FixedTimeEquals(bearerToken, session.Token)) throw new InvalidOperationException("Revit bridge bearer token is invalid.");
         }
 
         private void Prune(DateTimeOffset now)

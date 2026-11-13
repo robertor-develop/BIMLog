@@ -26,7 +26,7 @@ import { serializeLensNextCreateFailure } from "../lib/lens-next-create-failure-
 import { storage } from "../lib/storage-adapter";
 import { reportOperationalFailure } from "../lib/operational-failure";
 import { LENS_REFERENCE_MAX_BYTES, validateLensReferenceFile } from "../lib/lens-next-reference-attachment";
-import { createRevitNavigationRequest, validateRevitNavigationTarget } from "../lib/lens-next-revit-navigation";
+import { buildRevitNavigationTarget, createRevitNavigationRequest } from "../lib/lens-next-revit-navigation";
 import {
   chunkClashSource, clashImportFormat, clashStatusPresentation, deduplicateClashRows,
   emptyClashColumnMapping, mapClashSpreadsheetRows, nextClashReportNumber,
@@ -833,10 +833,10 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/:serverId/revit
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    const issueResult = await client.query(`SELECT id,viewpoint_id,visual_state_digest FROM lens_viewpoints WHERE id=$1 AND project_id=$2 AND lifecycle_status='active' FOR SHARE`, [issueId, projectId]);
+    const issueResult = await client.query(`SELECT id,viewpoint_id,visual_state_json,visual_state_digest FROM lens_viewpoints WHERE id=$1 AND project_id=$2 AND lifecycle_status='active' FOR SHARE`, [issueId, projectId]);
     const issue = issueResult.rows[0];
     if (!issue?.visual_state_digest) throw Object.assign(new Error("The exact active Lens visual package is unavailable."), { status: 409, code: "revit_visual_state_unavailable" });
-    const validated = validateRevitNavigationTarget(req.body?.target, { projectId, issueId, viewpointId: String(issue.viewpoint_id), visualStateDigest: String(issue.visual_state_digest) });
+    const validated = buildRevitNavigationTarget({ projectId, issueId, viewpointId:String(issue.viewpoint_id), visualStateDigest:String(issue.visual_state_digest), visualState:typeof issue.visual_state_json==="string"?JSON.parse(issue.visual_state_json):issue.visual_state_json, model:req.body?.model, revitElementIds:req.body?.revitElementIds });
     const created = await createRevitNavigationRequest(client, { projectId, issueId, userId: req.user!.userId, target: validated.target, digest: validated.digest });
     await client.query("COMMIT");
     res.status(201).json({ success: true, contractVersion: validated.target.contractVersion, ...created, targetDigest: validated.digest, target: validated.target });

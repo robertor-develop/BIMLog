@@ -42,6 +42,7 @@ export type RevitNavigationTarget = {
   revitInternalPoint: { x: number; y: number; z: number };
   revitElementIds: number[];
 };
+export type RevitModelBinding=RevitNavigationTarget["model"];
 
 const finite = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
 const sha256 = (value: string) => createHash("sha256").update(value, "utf8").digest("hex");
@@ -56,6 +57,17 @@ export function validateRevitNavigationTarget(value: unknown, expected: { projec
   if (!target.revitInternalPoint || ![target.revitInternalPoint.x, target.revitInternalPoint.y, target.revitInternalPoint.z].every(finite) || !Array.isArray(target.revitElementIds) || target.revitElementIds.length > 5000 || target.revitElementIds.some(id => !Number.isSafeInteger(id) || id <= 0) || new Set(target.revitElementIds).size !== target.revitElementIds.length)
     throw Object.assign(new Error("Revit navigation point or element identities are invalid."), { status: 422, code: "revit_navigation_geometry_invalid" });
   return { target, digest: sha256(JSON.stringify(target)) };
+}
+
+export function buildRevitNavigationTarget(input:{projectId:number;issueId:number;viewpointId:string;visualStateDigest:string;visualState:unknown;model:unknown;revitElementIds?:unknown}):{target:RevitNavigationTarget;digest:string}{
+  const model=input.model as RevitModelBinding, state=input.visualState as any, position=state?.Camera?.Position??state?.camera?.position, matrix=model?.navisworksToRevitTransform;
+  if(!model||model.revitMajorVersion!==2026||model.coordinateFrame!=="revit-internal"||!model.documentGuid||!model.fileNameNormalized||!Array.isArray(matrix)||matrix.length!==16||!matrix.every(finite))throw Object.assign(new Error("Revit navigation requires an exact verified Revit 2026 model binding."),{status:422,code:"revit_model_binding_invalid"});
+  const source=[position?.X??position?.x,position?.Y??position?.y,position?.Z??position?.z];
+  if(!source.every(finite))throw Object.assign(new Error("The exact Lens visual package does not contain a finite navigation position."),{status:409,code:"revit_visual_position_unavailable"});
+  const x=matrix[0]*source[0]+matrix[1]*source[1]+matrix[2]*source[2]+matrix[3],y=matrix[4]*source[0]+matrix[5]*source[1]+matrix[6]*source[2]+matrix[7],z=matrix[8]*source[0]+matrix[9]*source[1]+matrix[10]*source[2]+matrix[11],w=matrix[12]*source[0]+matrix[13]*source[1]+matrix[14]*source[2]+matrix[15];
+  if(!finite(w)||w===0)throw Object.assign(new Error("The governed coordinate transform produced an invalid homogeneous coordinate."),{status:422,code:"revit_transform_invalid"});
+  const target={contractVersion:LENS_NEXT_REVIT_CONTRACT,projectId:input.projectId,issueId:input.issueId,viewpointId:input.viewpointId,visualStateDigest:input.visualStateDigest,model,revitInternalPoint:{x:x/w,y:y/w,z:z/w},revitElementIds:Array.isArray(input.revitElementIds)?input.revitElementIds:[]} as RevitNavigationTarget;
+  return validateRevitNavigationTarget(target,{projectId:input.projectId,issueId:input.issueId,viewpointId:input.viewpointId,visualStateDigest:input.visualStateDigest});
 }
 
 export async function createRevitNavigationRequest(client: PoolClient, input: { projectId: number; issueId: number; userId: number; target: RevitNavigationTarget; digest: string; now?: Date }): Promise<{ requestId: string; expiresAt: string }> {
