@@ -3107,6 +3107,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/history",
         ))
         .orderBy(desc(activityLogTable.createdAt));
       const publishEvents = await pool.query(`SELECT r.id,r.action_type,r.viewpoint_id,r.before_snapshot,r.after_snapshot,r.reason,r.comment,r.created_at,r.actor_user_id,u.full_name,c.name company_name FROM lens_next_publish_receipts r JOIN users u ON u.id=r.actor_user_id JOIN companies c ON c.id=u.company_id WHERE r.project_id=$1 AND r.viewpoint_id = ANY($2::int[]) ORDER BY r.created_at DESC,r.id DESC`, [projectId, chainIds]);
+      const responses = await pool.query(`SELECT r.id,r.issue_id,r.outcome,r.response,r.recommended_company,r.review_status,r.actor_user_id,r.actor_company_name,r.reviewer_user_id,r.review_decision,r.review_reason,r.reviewed_at,r.created_at,u.full_name actor_full_name FROM lens_issue_responses r JOIN users u ON u.id=r.actor_user_id WHERE r.project_id=$1 AND r.issue_id = ANY($2::int[]) ORDER BY r.created_at DESC,r.id DESC`, [projectId, chainIds]);
       res.json({
         success: true,
         // Newest revision first.
@@ -3120,6 +3121,14 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/history",
           supersedesId: c.supersedesId,
           updatedAt: c.updatedAt,
           createdAt: c.createdAt,
+        })),
+        responses: responses.rows.map(row => ({
+          id: Number(row.id), issueId: Number(row.issue_id), outcome: row.outcome, response: row.response,
+          recommendedCompany: row.recommended_company, reviewStatus: row.review_status,
+          actorUserId: Number(row.actor_user_id), actorFullName: row.actor_full_name, actorCompanyName: row.actor_company_name,
+          reviewerUserId: row.reviewer_user_id == null ? null : Number(row.reviewer_user_id), reviewDecision: row.review_decision,
+          reviewReason: row.review_reason, reviewedAt: row.reviewed_at instanceof Date ? row.reviewed_at.toISOString() : row.reviewed_at,
+          createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
         })),
         events: [...publishEvents.rows.map(e => ({
           id: Number(e.id),

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, Fragment } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw, FileDown, History, Pencil, ArrowLeftRight, Ban, Layers, HelpCircle, Wrench } from "lucide-react";
+import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw, FileDown, History, Pencil, ArrowLeftRight, Ban, Layers, HelpCircle, Wrench, MessageSquareReply } from "lucide-react";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { bootstrapLensNextBridgeSession, createLensNextApiClient, createLensNextBridgeClient } from "@/features/lens-next/lens-next-client";
@@ -33,6 +33,7 @@ interface LensViewpoint {
   supersedesId?: number | null;
   supersedesCode?: string | null;
   revisionNumber?: number | null;
+  mutationVersion?: number | null;
 }
 
 // Platform display code matches the plugin's short code exactly: "{2-letter trade}-{seq:000}"
@@ -109,10 +110,11 @@ const LENS_STATUS: Record<string, { bg: string; text: string; label: string }> =
   open: { bg: "#FEE2E2", text: "#DC2626", label: "Open" },
   follow_up: { bg: "#FEF3C7", text: "#D97706", label: "Follow Up" },
   waiting_design: { bg: "#EDE9FE", text: "#7C3AED", label: "Waiting Design" },
+  under_review: { bg: "#DBEAFE", text: "#1D4ED8", label: "Under Review" },
   approved: { bg: "#D1FAE5", text: "#059669", label: "Approved" },
   resolved: { bg: "#DCFCE7", text: "#16A34A", label: "Resolved" },
 };
-const LENS_STATUS_ORDER = ["open", "follow_up", "waiting_design", "approved", "resolved"];
+const LENS_STATUS_ORDER = ["open", "follow_up", "waiting_design", "under_review", "approved", "resolved"];
 
 function lensStatusLabel(s: string) {
   return LENS_STATUS[s]?.label ?? s;
@@ -200,7 +202,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const [linksOpen, setLinksOpen] = useState<Record<number, boolean>>({});
   const [groupOpen, setGroupOpen] = useState<Record<number, boolean>>({});
   const [historyOpen, setHistoryOpen] = useState<Record<number, boolean>>({});
-  const [historyData, setHistoryData] = useState<Record<number, { chain: any[]; events: any[] } | "loading" | "error">>({});
+  const [historyData, setHistoryData] = useState<Record<number, { chain: any[]; events: any[]; responses: any[] } | "loading" | "error">>({});
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [jumpTarget, setJumpTarget] = useState<LensViewpoint | null>(null);
   const [actionModal, setActionModal] = useState<
@@ -211,6 +213,9 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   >(null);
   const [actionPhase, setActionPhase] = useState<"input" | "submitting">("input");
   const [actionError, setActionError] = useState("");
+  const [responseModal, setResponseModal] = useState<{ v: LensViewpoint; outcome: "cannot_complete" | "recommend_reassignment" | "needs_information" | "completed_work"; response: string; recommendedCompany: string; clientRequestId: string } | null>(null);
+  const [responsePhase, setResponsePhase] = useState<"input" | "submitting">("input");
+  const [responseError, setResponseError] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set());
   const [floorLevels, setFloorLevels] = useState<string[]>([]);
   const [floorCorrectionOpen, setFloorCorrectionOpen] = useState(false);
@@ -349,7 +354,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     }
   };
 
-  useEffect(() => {contextEpoch.current++;actionLock.current=false;exportLock.current=false;setExporting(false);setRepairing(false);setFloorCorrectionOpen(false);setResponsibleOpen(false);setFloorCorrectionPhase("input");setResponsiblePhase("input");setViewpoints([]);setSelectedIds(new Set());setHistoryData({});setHistoryOpen({});setActionModal(null);setActionError("");setActionPhase("input");void loadViewpoints();return()=>{contextEpoch.current++;}; }, [projectId,token]);
+  useEffect(() => {contextEpoch.current++;actionLock.current=false;exportLock.current=false;setExporting(false);setRepairing(false);setFloorCorrectionOpen(false);setResponsibleOpen(false);setFloorCorrectionPhase("input");setResponsiblePhase("input");setViewpoints([]);setSelectedIds(new Set());setHistoryData({});setHistoryOpen({});setActionModal(null);setActionError("");setActionPhase("input");setResponseModal(null);setResponseError("");setResponsePhase("input");void loadViewpoints();return()=>{contextEpoch.current++;}; }, [projectId,token]);
 
   // Silently refetch the viewpoint list (no loading spinner) so the table can
   // be refreshed on demand (manual refresh banner) without a loading flicker.
@@ -700,6 +705,39 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     setActionModal({ type: "void", v, reason: "" });
   };
 
+  const respondToIssue = (v: LensViewpoint) => {
+    const clientRequestId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now().toString(16).padStart(8, "0").slice(-8)}-0000-4000-8000-${Math.random().toString(16).slice(2).padEnd(12, "0").slice(0, 12)}`;
+    setResponseError("");
+    setResponsePhase("input");
+    setResponseModal({ v, outcome: "cannot_complete", response: "", recommendedCompany: "", clientRequestId });
+  };
+
+  const submitIssueResponse = async () => {
+    if (!responseModal || actionLock.current) return;
+    const context = contextEpoch.current, draft = responseModal;
+    if (draft.response.trim().length < 3) { setResponseError(t("Explain the response before sending it.", "Explique la respuesta antes de enviarla.")); return; }
+    if (draft.outcome === "recommend_reassignment" && !draft.recommendedCompany.trim()) { setResponseError(t("Choose the company you recommend.", "Seleccione la empresa que recomienda.")); return; }
+    actionLock.current = true; setResponsePhase("submitting"); setResponseError("");
+    try {
+      const response = await fetch(`${API}/projects/${projectId}/clash-reports/lens-next/issues/${draft.v.id}/responses`, {
+        method: "POST", headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ contractVersion: "lens-issue-response.v1", clientRequestId: draft.clientRequestId, mutationVersion: draft.v.mutationVersion ?? 1, outcome: draft.outcome, response: draft.response, recommendedCompany: draft.outcome === "recommend_reassignment" ? draft.recommendedCompany : null }),
+      });
+      const receipt = await response.json().catch(() => ({}));
+      if (context !== contextEpoch.current) return;
+      if (!response.ok) throw new Error(receipt.message || receipt.error || t("The response could not be saved.", "No se pudo guardar la respuesta."));
+      if (receipt.success !== true || receipt.issue?.serverId !== draft.v.id || receipt.issue?.status !== "under_review") throw new Error(t("The server returned an invalid response receipt.", "El servidor devolvió una confirmación inválida."));
+      if (!await loadViewpoints(draft.v.id)) throw new Error(t("Response saved, but the issue could not be reopened.", "La respuesta se guardó, pero no se pudo reabrir la incidencia."));
+      if (context !== contextEpoch.current) return;
+      setResponseModal(null); setResponsePhase("input");
+      showToast(t("Response saved. The issue remains open for coordinator review.", "Respuesta guardada. La incidencia sigue abierta para revisión del coordinador."));
+    } catch (error) {
+      if (context === contextEpoch.current) { setResponsePhase("input"); setResponseError(error instanceof Error ? error.message : String(error)); }
+    } finally { if (context === contextEpoch.current) actionLock.current = false; }
+  };
+
   // Single submit path for Edit/Reassign/Void: always shows a submitting state,
   // then either a success toast + reload or an inline error inside the modal.
   // No native dialogs and no silent success - every click ends in a visible result.
@@ -813,8 +851,8 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         if (r.ok) {
           const d = await r.json();
           if(context!==contextEpoch.current)return;
-          if(d.success!==true||!Array.isArray(d.chain)||!Array.isArray(d.events))throw new Error("Invalid revision history");
-          setHistoryData(p => ({ ...p, [id]: { chain: d.chain ?? [], events: d.events ?? [] } }));
+          if(d.success!==true||!Array.isArray(d.chain)||!Array.isArray(d.events)||!Array.isArray(d.responses))throw new Error("Invalid revision history");
+          setHistoryData(p => ({ ...p, [id]: { chain: d.chain ?? [], events: d.events ?? [], responses: d.responses ?? [] } }));
         } else {
           if(context===contextEpoch.current)setHistoryData(p => ({ ...p, [id]: "error" }));
         }
@@ -1220,7 +1258,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center", marginBottom: 14, padding: "8px 14px", background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 8, fontSize: 12, color: "#374151" }}>
           <span style={{ fontWeight: 700, color: "#1E3A5F" }}>{activeStats.length} {t("active", "activas")}</span>
           <span style={{ color: "#6B7280" }}>
-            {t("Open", "Abiertas")} {st("open")} - {t("Follow Up", "Seguimiento")} {st("follow_up")} - {t("Waiting", "Esperando")} {st("waiting_design")} - {t("Approved", "Aprobadas")} {st("approved")} - {t("Resolved", "Resueltas")} {st("resolved")}
+            {t("Open", "Abiertas")} {st("open")} - {t("Follow Up", "Seguimiento")} {st("follow_up")} - {t("Waiting", "Esperando")} {st("waiting_design")} - {t("Under Review", "En revisión")} {st("under_review")} - {t("Approved", "Aprobadas")} {st("approved")} - {t("Resolved", "Resueltas")} {st("resolved")}
           </span>
           <span style={{ marginLeft: "auto", color: "#92400E" }}>{t("Superseded", "Reemplazadas")} {lc("superseded")}</span>
           <span style={{ color: "#6B7280" }}>{t("Voided", "Anuladas")} {lc("voided")}</span>
@@ -1400,6 +1438,9 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
                         <button className="btn btn-sm btn-outline" onClick={() => toggleHistory(v.id)} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
                           <History size={12} /> {t("History", "Historial")}
                         </button>
+                        <button className="btn btn-sm btn-outline" onClick={() => respondToIssue(v)} disabled={(v.lifecycleStatus != null && v.lifecycleStatus !== "active") || v.status === "resolved"} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4, color: "#1D4ED8", borderColor: "#BFDBFE" }}>
+                          <MessageSquareReply size={12} /> {t("Respond", "Responder")}
+                        </button>
                         {canWrite && (
                           <>
                             <button className="btn btn-sm btn-outline" onClick={() => editViewpoint(v)} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
@@ -1474,10 +1515,25 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
                           <div style={{ fontSize: 12, color: "#DC2626" }}>{t("Failed to load history.", "No se pudo cargar el historial.")}</div>
                         )}
                         {historyData[v.id] && historyData[v.id] !== "loading" && historyData[v.id] !== "error" && (() => {
-                          const h = historyData[v.id] as { chain: any[]; events: any[] };
+                          const h = historyData[v.id] as { chain: any[]; events: any[]; responses: any[] };
                           const ACTION_LABEL: Record<string, string> = { edit: t("Edited", "Editado"), reassign: t("Reassigned", "Reasignado"), voided: t("Voided", "Anulado") };
                           return (
                             <>
+                              {h.responses.length > 0 && (
+                                <div style={{ marginBottom: 12 }}>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", marginBottom: 6 }}>{t("Contractor responses — issue remains open until coordinator decision", "Respuestas del contratista — la incidencia sigue abierta hasta la decisión del coordinador")}</div>
+                                  {h.responses.map((response: any) => (
+                                    <div key={response.id} style={{ border: "1px solid #BFDBFE", background: "#EFF6FF", borderRadius: 8, padding: "9px 11px", marginBottom: 6, fontSize: 12 }}>
+                                      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontWeight: 700, color: "#1E3A8A" }}>
+                                        <span>{response.actorFullName || response.actorCompanyName} · {String(response.outcome).replaceAll("_", " ")}</span>
+                                        <span>{response.reviewStatus === "pending_review" ? t("Under review", "En revisión") : response.reviewStatus}</span>
+                                      </div>
+                                      <div style={{ marginTop: 5, color: "#1F2937", whiteSpace: "pre-wrap" }}>{response.response}</div>
+                                      {response.recommendedCompany && <div style={{ marginTop: 5, color: "#475569" }}>{t("Recommended reassignment", "Reasignación recomendada")}: <strong>{response.recommendedCompany}</strong></div>}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                               {h.chain.length > 1 && (
                                 <div style={{ marginBottom: 12 }}>
                                   <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 4 }}>{t("Revisions", "Revisiones")}</div>
@@ -1713,6 +1769,51 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
               <button className="btn btn-sm btn-outline" onClick={() => setResponsibleOpen(false)} disabled={responsiblePhase === "submitting"} style={{ fontSize: 13, padding: "6px 14px" }}>{t("Cancel", "Cancelar")}</button>
               <button className="btn btn-sm btn-primary" onClick={submitResponsibleCompany} disabled={responsiblePhase === "submitting"} style={{ fontSize: 13, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6 }}>
                 {responsiblePhase === "submitting" ? <><RefreshCw size={14} /> {t("Saving...", "Guardando...")}</> : <><CheckCircle2 size={14} /> {t("Apply", "Aplicar")}</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {responseModal && (
+        <div onClick={() => responsePhase !== "submitting" && setResponseModal(null)} style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div onClick={event => event.stopPropagation()} role="dialog" aria-modal="true" aria-label={t("Respond to issue", "Responder a la incidencia")} style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 560, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+              <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827", display: "flex", alignItems: "center", gap: 8 }}><MessageSquareReply size={17} /> {t("Respond — issue stays open", "Responder — la incidencia sigue abierta")}</h3>
+              <button onClick={() => responsePhase !== "submitting" && setResponseModal(null)} aria-label={t("Close", "Cerrar")} disabled={responsePhase === "submitting"} style={{ background: "transparent", border: "none", cursor: "pointer", color: "#6B7280", padding: 4 }}><X size={20} /></button>
+            </div>
+            <div style={{ marginTop: 12, background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 12px", color: "#1E3A8A", fontSize: 12.5, lineHeight: 1.5 }}>
+              {t("Your answer will be recorded and sent to the coordinator for review. It will not close the issue. The coordinator can accept the work, ask for follow-up, wait for design, or reassign it.", "Su respuesta quedará registrada y se enviará al coordinador para revisión. No cerrará la incidencia. El coordinador puede aceptar el trabajo, pedir seguimiento, esperar diseño o reasignarla.")}
+            </div>
+            <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
+              <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600, color: "#374151" }}>
+                {t("Response type", "Tipo de respuesta")}
+                <select value={responseModal.outcome} onChange={event => setResponseModal({ ...responseModal, outcome: event.target.value as typeof responseModal.outcome, recommendedCompany: event.target.value === "recommend_reassignment" ? responseModal.recommendedCompany : "" })} style={{ fontSize: 13, padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, background: "white" }}>
+                  <option value="cannot_complete">{t("Cannot complete as directed", "No se puede completar según lo indicado")}</option>
+                  <option value="recommend_reassignment">{t("Recommend reassignment", "Recomendar reasignación")}</option>
+                  <option value="needs_information">{t("Need more information", "Se necesita más información")}</option>
+                  <option value="completed_work">{t("Work completed — ready for review", "Trabajo completado — listo para revisión")}</option>
+                </select>
+              </label>
+              {responseModal.outcome === "recommend_reassignment" && (
+                <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600, color: "#374151" }}>
+                  {t("Recommended responsible company", "Empresa responsable recomendada")}
+                  <select value={responseModal.recommendedCompany} onChange={event => setResponseModal({ ...responseModal, recommendedCompany: event.target.value })} style={{ fontSize: 13, padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, background: "white" }}>
+                    <option value="">{t("Select company", "Seleccione empresa")}</option>
+                    {responsibleCompanies.filter(company => company !== responseModal.v.responsibleCompany).map(company => <option key={company} value={company}>{company}</option>)}
+                  </select>
+                </label>
+              )}
+              <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600, color: "#374151" }}>
+                {t("Explanation", "Explicación")}
+                <textarea value={responseModal.response} onChange={event => setResponseModal({ ...responseModal, response: event.target.value })} rows={5} maxLength={4000} placeholder={t("Explain what prevents the work, what changed, or what the coordinator should review.", "Explique qué impide el trabajo, qué cambió o qué debe revisar el coordinador.")} style={{ fontSize: 13, padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, resize: "vertical", fontWeight: 400 }} />
+              </label>
+            </div>
+            {responseError && <div style={{ marginTop: 12, background: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C", fontSize: 12.5, fontWeight: 600, padding: "8px 12px", borderRadius: 8 }}>{responseError}</div>}
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 18 }}>
+              <button className="btn btn-sm btn-outline" onClick={() => setResponseModal(null)} disabled={responsePhase === "submitting"}>{t("Cancel", "Cancelar")}</button>
+              <button className="btn btn-sm btn-primary" onClick={submitIssueResponse} disabled={responsePhase === "submitting"} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {responsePhase === "submitting" ? <><RefreshCw size={14} /> {t("Saving...", "Guardando...")}</> : <><MessageSquareReply size={14} /> {t("Send for review", "Enviar a revisión")}</>}
               </button>
             </div>
           </div>
