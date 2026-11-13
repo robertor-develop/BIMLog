@@ -11,6 +11,7 @@ export type LensIssueResponseOutcome = typeof LENS_ISSUE_RESPONSE_OUTCOMES[numbe
 
 export type LensIssueResponseDraft = Readonly<{
   contractVersion: typeof LENS_ISSUE_RESPONSE_CONTRACT;
+  clientRequestId: string;
   mutationVersion: number;
   outcome: LensIssueResponseOutcome;
   response: string;
@@ -38,13 +39,15 @@ export function parseLensIssueResponseDraft(value: unknown): LensIssueResponseDr
   if (!value || typeof value !== "object" || Array.isArray(value))
     throw new LensIssueResponseError("LENS_ISSUE_RESPONSE_INVALID", "The response contract is invalid.", 400);
   const body = value as Record<string, unknown>;
-  const allowed = new Set(["contractVersion", "mutationVersion", "outcome", "response", "recommendedCompany"]);
+  const allowed = new Set(["contractVersion", "clientRequestId", "mutationVersion", "outcome", "response", "recommendedCompany"]);
   if (body.contractVersion !== LENS_ISSUE_RESPONSE_CONTRACT || Object.keys(body).some(key => !allowed.has(key)))
     throw new LensIssueResponseError("LENS_ISSUE_RESPONSE_INVALID", "The response contract is invalid.", 400);
   const mutationVersion = Number(body.mutationVersion);
+  const clientRequestId = String(body.clientRequestId ?? "").trim().toLowerCase();
   const outcome = String(body.outcome ?? "") as LensIssueResponseOutcome;
-  if (!Number.isSafeInteger(mutationVersion) || mutationVersion < 1 || !(LENS_ISSUE_RESPONSE_OUTCOMES as readonly string[]).includes(outcome))
-    throw new LensIssueResponseError("LENS_ISSUE_RESPONSE_INVALID", "A current issue version and valid response outcome are required.", 400);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(clientRequestId)
+    || !Number.isSafeInteger(mutationVersion) || mutationVersion < 1 || !(LENS_ISSUE_RESPONSE_OUTCOMES as readonly string[]).includes(outcome))
+    throw new LensIssueResponseError("LENS_ISSUE_RESPONSE_INVALID", "A retry-safe request ID, current issue version, and valid response outcome are required.", 400);
   const response = boundedText(body.response, "response", 3, 4000);
   const recommendedCompany = body.recommendedCompany == null || String(body.recommendedCompany).trim() === ""
     ? null
@@ -53,7 +56,11 @@ export function parseLensIssueResponseDraft(value: unknown): LensIssueResponseDr
     throw new LensIssueResponseError("LENS_ISSUE_RESPONSE_COMPANY_REQUIRED", "A recommended responsible company is required.", 422);
   if (outcome !== "recommend_reassignment" && recommendedCompany)
     throw new LensIssueResponseError("LENS_ISSUE_RESPONSE_COMPANY_FORBIDDEN", "A recommended company is only valid for reassignment recommendations.", 422);
-  return Object.freeze({ contractVersion: LENS_ISSUE_RESPONSE_CONTRACT, mutationVersion, outcome, response, recommendedCompany });
+  return Object.freeze({ contractVersion: LENS_ISSUE_RESPONSE_CONTRACT, clientRequestId, mutationVersion, outcome, response, recommendedCompany });
+}
+
+export function lensIssueResponseFingerprint(draft: LensIssueResponseDraft): string {
+  return JSON.stringify([draft.contractVersion, draft.clientRequestId, draft.mutationVersion, draft.outcome, draft.response, draft.recommendedCompany]);
 }
 
 export function assertLensIssueCanReceiveResponse(input: {

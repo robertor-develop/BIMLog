@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   assertLensIssueCanReceiveResponse,
+  lensIssueResponseFingerprint,
   LENS_ISSUE_RESPONSE_NEXT_STATUS,
   LensIssueResponseError,
   parseLensIssueResponseDraft,
@@ -8,6 +9,7 @@ import {
 
 const parsed = parseLensIssueResponseDraft({
   contractVersion: "lens-issue-response.v1",
+  clientRequestId: "5bc3d398-065b-4ddd-a13f-07be5d3817a7",
   mutationVersion: 7,
   outcome: "recommend_reassignment",
   response: "The duct cannot move because the rated shaft blocks that route.",
@@ -18,6 +20,7 @@ assert.equal(parsed.recommendedCompany, "Plumbing Partner");
 assert.equal(LENS_ISSUE_RESPONSE_NEXT_STATUS, "under_review");
 assert.equal("status" in parsed, false, "A contractor response must not accept an arbitrary status");
 assert.equal("resolved" in parsed, false, "A contractor response must never close the issue");
+assert.equal(lensIssueResponseFingerprint(parsed), lensIssueResponseFingerprint(parseLensIssueResponseDraft({ ...parsed })), "Unchanged retries must have stable identity");
 
 assert.throws(
   () => parseLensIssueResponseDraft({ ...parsed, recommendedCompany: null }),
