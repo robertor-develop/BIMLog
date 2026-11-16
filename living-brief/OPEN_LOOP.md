@@ -6963,6 +6963,7 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [x] Reconcile stale acceptance evidence for completed Navisworks confirmation, AI inventory lines, authenticated Landing routing and the current approved F-rooted disposable test fixture.
 - [x] Additively prepare and reverify only the dedicated loopback artifact-proof database for the two newly declared tables; production and customer data remain untouched.
 - [x] Reconcile the historical Build 217 regression to Roberto's completed 2026-11-10 Navisworks acceptance record; do not resurrect the superseded Ruben field hold.
+- [x] Reconcile the canonical field-evidence receipt and Blocks 39/45/Build 223 regressions to `ACCEPTED_BY_OWNER` while preserving Build 119 closure and the non-blocking boundary.
 - [ ] Complete the clean exact-head build, performance budgets and production-artifact gates; then push normally and verify canonical remote equality.
 - [ ] Publish the verified web/API source through the existing Replit Shell path without Replit Agents, verify exact deployed identity/version/health, and complete three authenticated visible-Chrome rounds.
 - [ ] Keep the Revit 2026.5+ binary/package/physical model-navigation gate explicit and fail-closed until a controlled licensed workstation with .NET 10 and official Autodesk assemblies is available; do not describe web publication as physical Revit acceptance.

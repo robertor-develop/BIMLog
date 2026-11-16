@@ -83316,7 +83316,7 @@
     {
       "taskId": "LENS_THREE_FEATURE_EXACT_HEAD_RELEASE_RECONCILIATION_20261116",
       "reviewedAt": "2026-11-16T13:45:00Z",
-      "reviewedThroughCommit": "075779137d0a6e1f62926fdc6c8c47aa1aa37184",
+      "reviewedThroughCommit": "708a15c574b5d4c59e39de7a40aa2b8654f1fa41",
       "authorities": [
         {
           "key": "ecosystem_doctrine",
@@ -83381,7 +83381,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "b948e738081a80c3a1163240fc0da1a46e0d11c16bc7927fb5b41c3b97213477"
+      "reviewedChangeSha256": "a2df59f00a55051a97e6633bc614f768ef8e7eff541033b0589d37caa524a822"
     }
   ]
 }

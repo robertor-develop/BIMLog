@@ -5148,3 +5148,5 @@ The complete web/API candidate remains accepted for controlled publication while
 
 The final historical Build 217 regression now consumes Roberto's checked 2026-11-10 Navisworks acceptance record instead of requiring the superseded open Ruben evidence item; post-release Block 44 and the zero-finding blocking audit pass at corrective source `075779137d0a6e1f62926fdc6c8c47aa1aa37184`.
 
+The canonical field-evidence receipt and Blocks 39, 45 and Build 223 regressions are reconciled at `708a15c574b5d4c59e39de7a40aa2b8654f1fa41`: Navisworks 2025 is `ACCEPTED_BY_OWNER`, the result is ingested, Build 119 remains closed, and no Ruben/Navisworks hold is resurrected.
+
