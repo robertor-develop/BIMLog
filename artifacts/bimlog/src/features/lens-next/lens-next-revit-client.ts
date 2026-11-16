@@ -2,7 +2,7 @@ export const DEFAULT_REVIT_BRIDGE_ORIGIN="http://127.0.0.1:8876";
 export type RevitOpenState="idle"|"connecting"|"opening"|"success"|"error";
 
 type FetchLike=(input:RequestInfo|URL,init?:RequestInit)=>Promise<Response>;
-const json=async(response:Response,label:string)=>{const body=await response.json().catch(()=>null) as any;if(!response.ok)throw new Error(`${label} failed (${response.status})${body?.message?`: ${body.message}`:""}`);return body;};
+const json=async(response:Response,label:string)=>{const body=await response.json().catch((error:unknown)=>{console.warn(`[BIMLog Revit] ${label} returned an unreadable response body.`,error instanceof Error?error.message:"Unknown parse error");return null;}) as any;if(!response.ok)throw new Error(`${label} failed (${response.status})${body?.message?`: ${body.message}`:""}`);return body;};
 
 export function validateRevitBridgeOrigin(value:string):string{
   const url=new URL(value);
