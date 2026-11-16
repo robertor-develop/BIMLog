@@ -84,7 +84,7 @@ try {
   assert.equal(integrity.rows[0]!.orphans, "0");
   const runtime = await pool.query<{ encoding: string; data_dir: string }>("SELECT current_setting('server_encoding') encoding,current_setting('data_directory') data_dir");
   assert.equal(runtime.rows[0]!.encoding, "UTF8");
-  assert.match(runtime.rows[0]!.data_dir.replaceAll("/", "\\"), /^F:\\BIMLog\\TestProof\\/i, "restore fixture must remain F-rooted");
+  assert.match(runtime.rows[0]!.data_dir.replaceAll("/", "\\"), /^F:\\BIMLog\\(?:TestProof|\.fixtures)\\/i, "restore fixture must remain in an approved F-rooted test location");
   console.log(`Build 272 Coordination Knowledge migration: PASS schema=v${COORDINATION_KNOWLEDGE_SCHEMA_VERSION} tables=${tables.length} indexes=${indexes.length} triggers=${triggers.length} orphans=0 repeat=PASS rollback=PASS projects=${after.rows[0]!.projects} viewpoints=${after.rows[0]!.viewpoints} revisions=${after.rows[0]!.revisions}`);
 } finally {
   await pool.end();
