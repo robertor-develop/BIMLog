@@ -356,6 +356,12 @@
   border-color: #9bcdb3;
   transform: translateY(-1px);
 }
+.lens-next__issue-card[data-status="open"] { border-left: 3px solid #d97706; }
+.lens-next__issue-card[data-status="follow_up"],
+.lens-next__issue-card[data-status="waiting_design"],
+.lens-next__issue-card[data-status="under_review"] { border-left: 3px solid #2563eb; }
+.lens-next__issue-card[data-status="approved"],
+.lens-next__issue-card[data-status="resolved"] { border-left: 3px solid #168252; }
 .lens-next__issue-open {
   display: grid;
   width: 100%;
@@ -439,7 +445,8 @@
   align-content: center;
 }
 .lens-next__issue-title {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px auto;
   align-items: center;
   justify-content: space-between;
   gap: 6px;
@@ -449,6 +456,37 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.lens-next__quick-status {
+  position: relative;
+  flex: 0 0 112px;
+  width: 112px;
+}
+.lens-next__quick-status select {
+  width: 112px;
+  min-height: 26px;
+  padding: 2px 22px 2px 7px;
+  border: 1px solid #c9d7d0;
+  border-radius: 999px;
+  background: #fff;
+  color: #18382a;
+  font-size: 10px;
+  font-weight: 700;
+}
+.lens-next__quick-status select:disabled { background: #edf1ef; color: #65746c; cursor: not-allowed; }
+.lens-next__quick-status small {
+  position: absolute;
+  top: 100%;
+  right: 2px;
+  z-index: 2;
+  max-width: 210px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(255,255,255,.96);
+  color: #17653f;
+  font-size: 8px;
+  white-space: nowrap;
+}
+.lens-next__quick-status small[role="alert"] { color: #8d302b; }
 .lens-next__issue-note {
   overflow: hidden;
   color: #34483e;

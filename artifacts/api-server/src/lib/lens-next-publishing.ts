@@ -1,4 +1,5 @@
 import { createHash } from "crypto";
+import { assertLensIssueStatusTransition } from "./lens-issue-edit-policy";
 type QueryResult = { rows: any[] };
 type TransactionClient = { query(text: string, values?: unknown[]): Promise<QueryResult>; release(): void };
 type PublishingPool = { query(text: string, values?: unknown[]): Promise<QueryResult>; connect(): Promise<TransactionClient> };
@@ -122,7 +123,11 @@ export async function publishLensNextAction(pool: PublishingPool, actor: LensNex
     const before = snapshot(row);
     if (row.viewpoint_id !== request.identity.viewpointId || row.lifecycle_status !== "active" || row.revision_number !== request.identity.revisionNumber || row.mutation_version !== request.identity.mutationVersion) throw new LensNextPublishError(409, "LENS_NEXT_VERSION_CONFLICT", "The issue changed after this draft was opened.", before);
     let afterRow = row;
-    if (request.action.type === "status") afterRow = (await client.query(`UPDATE lens_viewpoints SET status=$1,mutation_version=mutation_version+1,updated_at=now() WHERE id=$2 RETURNING id,viewpoint_id,lifecycle_status,revision_number,mutation_version,status,responsible_company`, [request.action.status, row.id])).rows[0];
+    if (request.action.type === "status") {
+      try { assertLensIssueStatusTransition(String(row.status), String(request.action.status)); }
+      catch { throw new LensNextPublishError(409, "LENS_NEXT_STATUS_TRANSITION_INVALID", "That status transition is not allowed by the current BIMLog workflow.", before); }
+      afterRow = (await client.query(`UPDATE lens_viewpoints SET status=$1,mutation_version=mutation_version+1,updated_at=now() WHERE id=$2 RETURNING id,viewpoint_id,lifecycle_status,revision_number,mutation_version,status,responsible_company`, [request.action.status, row.id])).rows[0];
+    }
     else if (request.action.type === "assignment") afterRow = (await client.query(`UPDATE lens_viewpoints SET responsible_company=$1,mutation_version=mutation_version+1,updated_at=now() WHERE id=$2 RETURNING id,viewpoint_id,lifecycle_status,revision_number,mutation_version,status,responsible_company`, [request.action.responsibleCompany || null, row.id])).rows[0];
     else afterRow = (await client.query(`UPDATE lens_viewpoints SET mutation_version=mutation_version+1,updated_at=now() WHERE id=$1 RETURNING id,viewpoint_id,lifecycle_status,revision_number,mutation_version,status,responsible_company`, [row.id])).rows[0];
     const after = snapshot(afterRow);
@@ -130,6 +135,10 @@ export async function publishLensNextAction(pool: PublishingPool, actor: LensNex
     await hooks?.beforeAudit?.();
     if (request.action.type === "assignment") {
       await client.query(`INSERT INTO activity_log(project_id,user_id,user_full_name,user_company_name,action_type,entity_type,entity_id,file_name_before,file_name_after,details) VALUES($1,$2,$3,$4,'RESPONSIBLE_COMPANY_CHANGED','lens_issue',$5,$6,$7,$8::jsonb)`, [request.identity.projectId, actor.userId, actor.fullName, actor.companyName, row.id, before.responsibleCompany ?? null, after.responsibleCompany ?? null, JSON.stringify({ previousResponsibleCompany: before.responsibleCompany ?? null, newResponsibleCompany: after.responsibleCompany ?? null, actorUserId: actor.userId, changedAt: response.receipt.recordedAt, projectId: request.identity.projectId, modelFingerprint: request.modelFingerprint ?? null, reason: request.reason, sourceApplication: "Lens Next Issue Browser" })]);
+    }
+    if (request.action.type === "status" && before.status !== after.status) {
+      await client.query(`INSERT INTO activity_log(project_id,user_id,user_full_name,user_company_name,action_type,entity_type,entity_id,file_name_before,file_name_after,details) VALUES($1,$2,$3,$4,'lens_issue_status_changed','lens_issue',$5,$6,$7,$8::jsonb)`, [request.identity.projectId, actor.userId, actor.fullName, actor.companyName, row.id, before.status, after.status, JSON.stringify({ previousStatus: before.status, newStatus: after.status, actorUserId: actor.userId, changedAt: response.receipt.recordedAt, projectId: request.identity.projectId, modelFingerprint: request.modelFingerprint ?? null, reason: request.reason, sourceApplication: "Lens Next Issue Browser" })]);
+      await client.query(`INSERT INTO lens_viewpoint_events(project_id,viewpoint_id,event_type,from_status,to_status,changed_by_id) VALUES($1,$2,'status_changed',$3,$4,$5)`, [request.identity.projectId, row.id, before.status, after.status, actor.userId]);
     }
     await client.query(`INSERT INTO lens_next_publish_receipts(project_id,viewpoint_id,actor_user_id,idempotency_key,request_hash,request_id,action_type,before_snapshot,after_snapshot,reason,comment,model_fingerprint,response_payload) VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9::jsonb,$10,$11,$12,$13::jsonb)`, [request.identity.projectId, row.id, actor.userId, request.idempotencyKey, requestHash, request.requestId, request.action.type, JSON.stringify(before), JSON.stringify(after), request.reason, request.action.comment ?? null, request.modelFingerprint ?? null, JSON.stringify(response)]);
     await client.query("COMMIT");
