@@ -1,11 +1,13 @@
 {
   "schemaVersion": 1,
-  "observedDate": "2026-09-21",
+  "observedDate": "2026-11-10",
   "release": "v1.05.N18-P36",
   "sourceDigest": "225976b6ef9217ed941d532a16868679ec0b176e974587c4712b58ff8ff472f2",
   "rubenPhysical2025": {
-    "status": "DEFERRED_TO_RUBEN",
-    "resultIngested": false,
+    "status": "ACCEPTED_BY_OWNER",
+    "resultIngested": true,
+    "acceptedBy": "Roberto",
+    "acceptedDate": "2026-11-10",
     "reopensBuild119": false,
     "blocksPlatformPublication": false
   },
@@ -57,6 +59,6 @@
     "rollbackCapture": "PASS",
     "legacySavedViewpointsUntouched": "PASS",
     "physical2021InstalledTopology": "PASS_PULSE_AND_LENS_NEXT_ONLY",
-    "physical2025AffectedModel": "DEFERRED_TO_RUBEN"
+    "physical2025AffectedModel": "ACCEPTED_BY_OWNER"
   }
 }
