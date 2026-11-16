@@ -10,7 +10,8 @@ const help = readBimlogSource("pages/HelpCenter.tsx");
 for (const route of ["/", "/features", "/pricing", "/register", "/login", "/help"]) {
   assert.ok(app.includes(`path=\"${route}\"`), `missing route ${route}`);
 }
-assert.match(landing, /href="\/register"/);
+assert.match(landing, /href=\{user \? "\/dashboard" : "\/register"\}/);
+assert.match(landing, /Continue to your projects/);
 assert.match(register, /setLocation\("\/dashboard"\)/);
 assert.match(onboarding, /Save and open full Intake/);
 assert.match(onboarding, /role="dialog"/);
