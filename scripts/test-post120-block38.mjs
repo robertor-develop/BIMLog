@@ -21,7 +21,7 @@ for (const item of inventory.items) {
 }
 
 const currentItems = validateCurrentOpenLoopAuthority(inventory);
-assert.ok(currentItems.some(item => item.statement.includes("Navisworks 2025") && item.statement.includes("Ruben")), "Ruben's 2025 confirmation remains explicit");
+assert.match(openLoop, /- \[x\] Roberto confirmed physical Navisworks 2025 acceptance on 2026-11-10\./, "the current authority preserves the explicit completed Navisworks 2025 acceptance");
 assert.ok(inventory.items.some(item => item.statement.includes("Build 160") && item.workClass === "STALE_CONTRADICTION"), "obsolete Build 160 publication marker is closed");
 assert.ok(inventory.items.some(item => item.statement.includes("Builds 166–170") && item.workClass === "STALE_CONTRADICTION"), "obsolete Build 170 marker is closed");
 
