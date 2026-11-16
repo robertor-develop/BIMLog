@@ -6958,3 +6958,11 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [ ] Build and checksum the guarded Revit package, install it for the test user, restart Revit, bind the exact BIMLog project/model transform, and prove one positive navigation plus wrong-model, expired-request, replay, cross-project and unauthorized negative cases on a non-customer test model.
 - [ ] Only after those native gates pass: rerun the clean repository build, push the complete 20-build candidate, publish through the established Replit Shell path without Replit Agents, verify exact deployment identity, and complete three authenticated Chrome rounds. No customer data may be used for destructive or synthetic validation.
 
+## Exact-head web publication continuation — 2026-11-16
+
+- [x] Reconcile stale acceptance evidence for completed Navisworks confirmation, AI inventory lines, authenticated Landing routing and the current approved F-rooted disposable test fixture.
+- [x] Additively prepare and reverify only the dedicated loopback artifact-proof database for the two newly declared tables; production and customer data remain untouched.
+- [ ] Complete the clean exact-head build, performance budgets and production-artifact gates; then push normally and verify canonical remote equality.
+- [ ] Publish the verified web/API source through the existing Replit Shell path without Replit Agents, verify exact deployed identity/version/health, and complete three authenticated visible-Chrome rounds.
+- [ ] Keep the Revit 2026.5+ binary/package/physical model-navigation gate explicit and fail-closed until a controlled licensed workstation with .NET 10 and official Autodesk assemblies is available; do not describe web publication as physical Revit acceptance.
+

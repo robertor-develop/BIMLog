@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "95e46a1df9f533a3443f8918b3941d41d6316eeaf7ee688c41d70c8ab797d3dc",
-  "itemCount": 586,
+  "sourceSha256": "0bd1e58dbf1e42c1ed3139bac83ddb79e56c80b4ceb32910bb4d76bcb466ba37",
+  "itemCount": 589,
   "counts": {
-    "ACTIVE": 526,
+    "ACTIVE": 529,
     "SUPERSEDED": 48,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 409,
+    "ACTIVE_DEFECT": 412,
     "VALID_FUTURE_ROADMAP": 13,
     "EXTERNAL_OWNER_INPUT": 104,
     "ACCEPTED_LIMITATION": 3,
@@ -11236,6 +11236,63 @@
       "evidence": [
         "OPEN_LOOP.md:6959",
         "Current Revit 2026.5+ release gate — 2026-11-13"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "5f8a48e829ded5ce",
+      "sourceLine": 6965,
+      "heading": "Exact-head web publication continuation — 2026-11-16",
+      "statement": "Complete the clean exact-head build, performance budgets and production-artifact gates; then push normally and verify canonical remote equality.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6965",
+        "Exact-head web publication continuation — 2026-11-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "0b3743724efc896e",
+      "sourceLine": 6966,
+      "heading": "Exact-head web publication continuation — 2026-11-16",
+      "statement": "Publish the verified web/API source through the existing Replit Shell path without Replit Agents, verify exact deployed identity/version/health, and complete three authenticated visible-Chrome rounds.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6966",
+        "Exact-head web publication continuation — 2026-11-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "1784ad3b95ac8662",
+      "sourceLine": 6967,
+      "heading": "Exact-head web publication continuation — 2026-11-16",
+      "statement": "Keep the Revit 2026.5+ binary/package/physical model-navigation gate explicit and fail-closed until a controlled licensed workstation with .NET 10 and official Autodesk assemblies is available; do not describe web publication as physical Revit acceptance.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6967",
+        "Exact-head web publication continuation — 2026-11-16"
       ],
       "currentAuthority": false
     }
