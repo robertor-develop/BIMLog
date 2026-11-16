@@ -853,8 +853,8 @@ export function LensNextPanel({
 
   const quickUpdateStatus = useCallback(async (issue: LensNextIssue, status: LensNextStatus) => {
     if (!apiClient || !issue.publishingAllowed) throw new Error("Your current project role cannot update Issue status.");
-    if (issue.status === "under_review" || status === "under_review" || status === "approved" || status === "resolved") {
-      throw new Error("Use the existing Issue workflow for review, approval, or resolution transitions.");
+    if (issue.status === "under_review" || status === "under_review" || status === "approved") {
+      throw new Error("Use the existing Issue workflow for review or approval transitions.");
     }
     const action: LensNextPublishAction = { type: "status", status };
     const reason = "Quick status update from Lens Next Issue Browser";

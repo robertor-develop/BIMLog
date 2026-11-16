@@ -223,7 +223,7 @@ const IssueCard = React.memo(function IssueCard({
             <strong>{displayCode(issue)}</strong>
             <span className="lens-next__quick-status" onClick={event => event.stopPropagation()} onPointerDown={event => event.stopPropagation()}>
               <select aria-label={`Status ${displayCode(issue)}`} value={draftStatus} disabled={!issue.publishingAllowed || statusState === "saving" || issue.status === "under_review"} onChange={event => void updateStatus(event.target.value as LensNextStatus)}>
-                {LENS_NEXT_STATUSES.map(status => <option key={status} value={status} disabled={status === "under_review" || status === "approved" || status === "resolved"}>{STATUS_LABELS[status]}{status === "under_review" || status === "approved" || status === "resolved" ? " · workflow" : ""}</option>)}
+                {LENS_NEXT_STATUSES.map(status => <option key={status} value={status} disabled={status === "under_review" || status === "approved"}>{STATUS_LABELS[status]}{status === "under_review" || status === "approved" ? " · workflow" : ""}</option>)}
               </select>
               {statusState === "saving" && <small role="status">{labels.saving}</small>}
               {statusState === "saved" && <small role="status">{labels.statusSaved}</small>}
