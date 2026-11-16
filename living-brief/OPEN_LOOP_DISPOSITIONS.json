@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "0bd1e58dbf1e42c1ed3139bac83ddb79e56c80b4ceb32910bb4d76bcb466ba37",
+  "sourceSha256": "62fc8ef8d9fd12824cd9ff1b01413e41b00a0bb066b46f6ed7fe08dd54024d72",
   "itemCount": 589,
   "counts": {
     "ACTIVE": 529,
@@ -11241,7 +11241,7 @@
     },
     {
       "id": "5f8a48e829ded5ce",
-      "sourceLine": 6965,
+      "sourceLine": 6966,
       "heading": "Exact-head web publication continuation — 2026-11-16",
       "statement": "Complete the clean exact-head build, performance budgets and production-artifact gates; then push normally and verify canonical remote equality.",
       "classification": "ACTIVE",
@@ -11253,14 +11253,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:6965",
+        "OPEN_LOOP.md:6966",
         "Exact-head web publication continuation — 2026-11-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "0b3743724efc896e",
-      "sourceLine": 6966,
+      "sourceLine": 6967,
       "heading": "Exact-head web publication continuation — 2026-11-16",
       "statement": "Publish the verified web/API source through the existing Replit Shell path without Replit Agents, verify exact deployed identity/version/health, and complete three authenticated visible-Chrome rounds.",
       "classification": "ACTIVE",
@@ -11272,14 +11272,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:6966",
+        "OPEN_LOOP.md:6967",
         "Exact-head web publication continuation — 2026-11-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "1784ad3b95ac8662",
-      "sourceLine": 6967,
+      "sourceLine": 6968,
       "heading": "Exact-head web publication continuation — 2026-11-16",
       "statement": "Keep the Revit 2026.5+ binary/package/physical model-navigation gate explicit and fail-closed until a controlled licensed workstation with .NET 10 and official Autodesk assemblies is available; do not describe web publication as physical Revit acceptance.",
       "classification": "ACTIVE",
@@ -11291,7 +11291,7 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:6967",
+        "OPEN_LOOP.md:6968",
         "Exact-head web publication continuation — 2026-11-16"
       ],
       "currentAuthority": false
