@@ -23,6 +23,10 @@
       <HintPath>$(RevitInstallDir)\RevitAPIUI.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Compile Include="..\..\src\BridgeContracts.cs" Link="Core\BridgeContracts.cs" />
+    <Compile Include="..\..\src\LensNextConstants.cs" Link="Core\LensNextConstants.cs" />
+    <Compile Include="..\..\src\ReleaseIdentity.g.cs" Link="Core\ReleaseIdentity.g.cs" />
+    <Compile Include="..\..\src\LensNextRevitBridgeSecurity.cs" Link="Core\LensNextRevitBridgeSecurity.cs" />
     <Compile Include="..\..\src\LensNextRevitNavigationContracts.cs" Link="Core\LensNextRevitNavigationContracts.cs" />
     <Compile Include="..\..\src\LensNextRevitNavigator.cs" Link="Core\LensNextRevitNavigator.cs" />
     <Compile Include="..\..\src\LensNextVisualStateContracts.cs" Link="Core\LensNextVisualStateContracts.cs" />

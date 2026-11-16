@@ -16,10 +16,10 @@ public sealed class AutodeskRevit2026Host : ILensNextRevitHost
         _uiDocument = application.ActiveUIDocument ?? throw new InvalidOperationException("Open in Revit requires an active project document.");
     }
 
-    public string ActiveDocumentGuid => _uiDocument.Document.GetDocumentVersion().VersionGUID.ToString("D");
+    public string ActiveDocumentGuid => Document.GetDocumentVersion(_uiDocument.Document).VersionGUID.ToString("D");
 
     public string ActiveCentralModelGuid => _uiDocument.Document.IsWorkshared
-        ? WorksharingUtils.GetCentralGUID(_uiDocument.Document).ToString("D")
+        ? _uiDocument.Document.WorksharingCentralGUID.ToString("D")
         : string.Empty;
 
     public int RevitMajorVersion => int.TryParse(_application.Application.VersionNumber, out var version) ? version : 0;

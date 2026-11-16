@@ -27,9 +27,9 @@ foreach ($needle in $required) { if (-not $source.Contains($needle)) { throw "Mi
 if ($source -match 'fallback transform|assume shared coordinates') { throw 'The Revit navigation contract must not guess coordinate conversion.' }
 $navigatorRequired = @('ILensNextRevitHost','EnsureDocumentMatch','ActivateCoordinationView','ShowPoint','SelectElements','ValidateReceipt','"blocked"','"opened"')
 foreach ($needle in $navigatorRequired) { if (-not $navigator.Contains($needle)) { throw "Missing Revit navigator boundary: $needle" } }
-$adapterRequired = @('Autodesk.Revit.DB','Autodesk.Revit.UI','WorksharingUtils.GetCentralGUID','GetDocumentVersion().VersionGUID','ZoomAndCenterRectangle','SetElementIds','ShowElements')
+$adapterRequired = @('Autodesk.Revit.DB','Autodesk.Revit.UI','WorksharingCentralGUID','Document.GetDocumentVersion','ZoomAndCenterRectangle','SetElementIds','ShowElements')
 foreach ($needle in $adapterRequired) { if (-not $adapter.Contains($needle)) { throw "Missing official Revit 2026 adapter behavior: $needle" } }
-if (-not $project.Contains('net8.0-windows') -or -not $project.Contains('RevitAPI.dll') -or -not $project.Contains('RevitAPIUI.dll') -or -not $project.Contains('will not compile against a fake SDK')) { throw 'Revit 2026 project must hard-gate on the official Autodesk API.' }
+if (-not $project.Contains('net10.0-windows') -or -not $project.Contains('RevitAPI.dll') -or -not $project.Contains('RevitAPIUI.dll') -or -not $project.Contains('will not compile against a fake SDK')) { throw 'Revit 2026.5+ project must hard-gate on the official Autodesk API.' }
 if (-not $manifest.Contains('BIMLogLensNext.Revit2026.LensNextRevitApplication') -or -not $manifest.Contains('<UseRevitContext>False</UseRevitContext>')) { throw 'Revit 2026 manifest registration or dependency isolation is missing.' }
 $securityRequired = @('explicit BIMLog origin','MaximumSessionMinutes = 30','RandomNumberGenerator.Create','FixedTimeEquals','replayed request identity','MaximumAcceptedRequests')
 foreach ($needle in $securityRequired) { if (-not $security.Contains($needle)) { throw "Missing secure Revit bridge behavior: $needle" } }
