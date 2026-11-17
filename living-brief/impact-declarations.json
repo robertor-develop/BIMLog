@@ -83449,6 +83449,76 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "BIMTECH_SETUP_PACKAGE_GOVERNED_INTAKE_20261117",
+      "reviewedAt": "2026-11-17T23:50:00Z",
+      "reviewedThroughCommit": "34157c46225376915a0e5be646ca9b1ae2785af8",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The importer remains within BIMLog project intake, authorization, evidence and activation boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No repository operating instruction changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Fail-closed integrity, authorization, isolation, persistence and release gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The capability makes governed project setup discoverable without removing or collapsing existing workflows."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform inventory now includes the setup-package route, service, persistence and schema surfaces."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the new governed setup-package intake candidate and its unperformed external release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Push, publication, deployment and authenticated production acceptance remain explicit independent gates."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks or Revit plugin contract changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report rendering or export-design contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No delivery or information-management standard changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Automated candidate evidence remains separate from production and customer acceptance."
+        }
+      ],
+      "reason": "Reconcile the exact five-build BIMTECH setup-package intake candidate without claiming activation, deployment or production acceptance.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9fea74cf42ae4953ea042d31e8f98cfe21ac7c2ff9e58ea13e67f6e33a096849"
     }
   ]
 }

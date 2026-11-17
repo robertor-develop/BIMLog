@@ -71,6 +71,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/ai-control-plane.ts
 - artifacts/api-server/src/routes/auth.ts
 - artifacts/api-server/src/routes/autodesk.ts
+- artifacts/api-server/src/routes/bimtech-setup-packages.ts
 - artifacts/api-server/src/routes/change_orders.ts
 - artifacts/api-server/src/routes/clash_reports.ts
 - artifacts/api-server/src/routes/commercial-billing-history-route.behavior.ts
@@ -252,6 +253,7 @@ It changes only when the code structure or curated architectural facts change.
 - financialApuRouter
 - coordinatorActionsRouter
 - jobIntakeRouter
+- bimtechSetupPackagesRouter
 - contractItemWorkflowsRouter
 - jobOperationsRouter
 - teamPerformanceRouter
@@ -311,6 +313,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/bimlog-configuration-authorities.ts
 - artifacts/api-server/src/lib/bimlog-default-configuration-contract.behavior.ts
 - artifacts/api-server/src/lib/bimtech-coordination-starter-library.ts
+- artifacts/api-server/src/lib/bimtech-setup-package-integration.behavior.ts
+- artifacts/api-server/src/lib/bimtech-setup-package-migration.ts
+- artifacts/api-server/src/lib/bimtech-setup-package-service.ts
+- artifacts/api-server/src/lib/bimtech-setup-package.behavior.ts
+- artifacts/api-server/src/lib/bimtech-setup-package.ts
 - artifacts/api-server/src/lib/bimtech-template-repair-definitions.behavior.ts
 - artifacts/api-server/src/lib/bimtech-template-repair-definitions.ts
 - artifacts/api-server/src/lib/block10-controlled-acceptance.behavior.ts
@@ -1659,6 +1666,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/agent-insights.ts
 - lib/db/src/schema/ai-control-plane.ts
 - lib/db/src/schema/ai-usage-events.ts
+- lib/db/src/schema/bimtech-setup-packages.ts
 - lib/db/src/schema/change-orders.ts
 - lib/db/src/schema/clash_reports.ts
 - lib/db/src/schema/commercial-entitlements.ts
@@ -1738,6 +1746,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/AdminPanel.tsx
 - artifacts/bimlog/src/pages/AllTools.tsx
 - artifacts/bimlog/src/pages/ApuBudgetReview.tsx
+- artifacts/bimlog/src/pages/BimtechSetupPackageImport.behavior.tsx
+- artifacts/bimlog/src/pages/BimtechSetupPackageImport.tsx
 - artifacts/bimlog/src/pages/BudgetDecisionReview.tsx
 - artifacts/bimlog/src/pages/CommercialWorkspace.tsx
 - artifacts/bimlog/src/pages/CompanyDeliveryWorkflows.tsx
@@ -1976,6 +1986,7 @@ It changes only when the code structure or curated architectural facts change.
 - /project-user-assignment
 - /project-briefing-review
 - /lens-import-plan
+- /bimtech-setup-package
 - /lens-import-context
 - /lens-sequence-status
 - /lens-next-snapshot-replay
