@@ -16,6 +16,8 @@ namespace BIMLogLensNext
         public int RevisionNumber { get; set; }
         public string DisplayId { get; set; }
         public string Note { get; set; }
+        public string Floor { get; set; }
+        public string ResponsibleCompany { get; set; }
         public int? Priority { get; set; }
         public DateTimeOffset? CapturedAt { get; set; }
         public string VisualStateDigest { get; set; }

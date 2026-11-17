@@ -5150,3 +5150,7 @@ The final historical Build 217 regression now consumes Roberto's checked 2026-11
 
 The canonical field-evidence receipt and Blocks 39, 45 and Build 223 regressions are reconciled at `708a15c574b5d4c59e39de7a40aa2b8654f1fa41`: Navisworks 2025 is `ACCEPTED_BY_OWNER`, the result is ingested, Build 119 remains closed, and no Ruben/Navisworks hold is resurrected.
 
+## 2026-11-17 — Lens XML viewpoint organization correction
+
+The authoritative XML export now carries each issue's current floor and responsible company into the native exporter and emits the restored hierarchy `BIMLog Viewpoints / Open|Resolved / Floor / Responsible Company / Viewpoint`. Missing values remain visible under `Unspecified Floor` and `Unassigned`; viewpoint identity, GUIDs, camera, sectioning, filtered-project scope, diagnostics and existing Saved Viewpoints remain unchanged. Core XML regression passes 139/139, the exact browser-to-native export contract passes, and both Navisworks 2021 and 2025 native projects compile with zero warnings and zero errors. Push, package publication and live Navisworks import remain separate release operations and are not claimed by this source checkpoint.
+

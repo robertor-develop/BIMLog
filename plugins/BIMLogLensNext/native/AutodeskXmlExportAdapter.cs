@@ -19,6 +19,8 @@ namespace BIMLogLensNext.Native
             public int RevisionNumber { get; set; }
             public string DisplayId { get; set; }
             public string Note { get; set; }
+            public string Floor { get; set; }
+            public string ResponsibleCompany { get; set; }
             public int? Priority { get; set; }
             public string CapturedAt { get; set; }
             public string VisualStateDigest { get; set; }
@@ -87,6 +89,8 @@ namespace BIMLogLensNext.Native
                 RevisionNumber = wire.RevisionNumber,
                 DisplayId = wire.DisplayId,
                 Note = wire.Note,
+                Floor = wire.Floor,
+                ResponsibleCompany = wire.ResponsibleCompany,
                 Priority = wire.Priority,
                 CapturedAt = DateTimeOffset.TryParse(wire.CapturedAt, out capturedAt) ? capturedAt : (DateTimeOffset?)null,
                 VisualStateDigest = wire.VisualStateDigest,

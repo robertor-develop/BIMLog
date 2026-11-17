@@ -15,6 +15,8 @@ namespace BIMLogLensNext
         public const string ViewFolderName = "BIMLog Viewpoints";
         public const string OpenFolderName = "Open";
         public const string ResolvedFolderName = "Resolved";
+        public const string UnspecifiedFloorFolderName = "Unspecified Floor";
+        public const string UnassignedCompanyFolderName = "Unassigned";
         public const string XmlSchemaInstanceNamespace = "http://www.w3.org/2001/XMLSchema-instance";
         public const string NavisworksExchangeSchemaLocation = "http://download.autodesk.com/us/navisworks/schemas/nw-exchange-12.0.xsd";
 
@@ -53,7 +55,9 @@ namespace BIMLogLensNext
                     LensNextXmlProjection.FromValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlCameraScale.FromOptionalValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlSectioning.FromOptionalJson(ordered[index].PackageSectioningJson, LensNextXmlLinearUnit.FromCamera(ordered[index].PackageCamera)),
-                    string.Equals(ordered[index].WorkflowStatus, "resolved", StringComparison.Ordinal) ? ResolvedFolderName : OpenFolderName);
+                    string.Equals(ordered[index].WorkflowStatus, "resolved", StringComparison.Ordinal) ? ResolvedFolderName : OpenFolderName,
+                    NormalizeFolderName(ordered[index].Floor, UnspecifiedFloorFolderName),
+                    NormalizeFolderName(ordered[index].ResponsibleCompany, UnassignedCompanyFolderName));
             WriteDocument(destinationPath, views);
             var outputPath = Path.GetFullPath(destinationPath);
             ValidateWrittenDocument(outputPath, result.SerializedCount);
@@ -91,13 +95,15 @@ namespace BIMLogLensNext
                     StringComparison.Ordinal))
                 throw new InvalidDataException("The written BIMLog XML export Navisworks schema declaration is invalid.");
             var viewpoints = document.DocumentElement.SelectNodes(ViewpointsElementName);
-            var folders = document.DocumentElement.SelectNodes(ViewpointsElementName + "//" + ViewFolderElementName);
-            if (viewpoints.Count != 1 || folders.Count != 3 ||
-                !string.Equals(((XmlElement)folders[0]).GetAttribute("name"), ViewFolderName, StringComparison.Ordinal) ||
-                !string.Equals(((XmlElement)folders[1]).GetAttribute("name"), OpenFolderName, StringComparison.Ordinal) ||
-                !string.Equals(((XmlElement)folders[2]).GetAttribute("name"), ResolvedFolderName, StringComparison.Ordinal))
+            var rootFolder = document.DocumentElement.SelectSingleNode(ViewpointsElementName + "/" + ViewFolderElementName + "[@name='" + ViewFolderName + "']") as XmlElement;
+            var openFolder = rootFolder?.SelectSingleNode("./" + ViewFolderElementName + "[@name='" + OpenFolderName + "']") as XmlElement;
+            var resolvedFolder = rootFolder?.SelectSingleNode("./" + ViewFolderElementName + "[@name='" + ResolvedFolderName + "']") as XmlElement;
+            if (viewpoints.Count != 1 || rootFolder == null || openFolder == null || resolvedFolder == null)
                 throw new InvalidDataException("The written BIMLog XML export structure is invalid.");
-            if (((XmlElement)folders[0]).SelectNodes(".//view").Count != expectedViewCount)
+            if (rootFolder.SelectNodes(".//view").Count != expectedViewCount ||
+                rootFolder.SelectNodes("./viewfolder/view").Count != 0 ||
+                rootFolder.SelectNodes("./viewfolder/viewfolder/view").Count != 0 ||
+                rootFolder.SelectNodes("./viewfolder/viewfolder/viewfolder/view").Count != expectedViewCount)
                 throw new InvalidDataException("The written BIMLog XML export viewpoint count does not match the serialized result.");
 
             if (!string.Equals(document.DocumentElement.GetAttribute("units"), "ft", StringComparison.Ordinal))
@@ -148,8 +154,19 @@ namespace BIMLogLensNext
                     {
                       writer.WriteStartElement(ViewFolderElementName);
                       writer.WriteAttributeString("name", folderName);
-                      foreach (var view in views.Where(candidate => string.Equals(candidate.FolderName, folderName, StringComparison.Ordinal)))
+                      var statusViews = views.Where(candidate => string.Equals(candidate.FolderName, folderName, StringComparison.Ordinal)).ToArray();
+                      foreach (var floorGroup in statusViews.GroupBy(view => view.FloorFolderName, StringComparer.Ordinal)
+                          .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase).ThenBy(group => group.Key, StringComparer.Ordinal))
                       {
+                        writer.WriteStartElement(ViewFolderElementName);
+                        writer.WriteAttributeString("name", floorGroup.Key);
+                        foreach (var companyGroup in floorGroup.GroupBy(view => view.CompanyFolderName, StringComparer.Ordinal)
+                            .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase).ThenBy(group => group.Key, StringComparer.Ordinal))
+                        {
+                          writer.WriteStartElement(ViewFolderElementName);
+                          writer.WriteAttributeString("name", companyGroup.Key);
+                          foreach (var view in companyGroup)
+                          {
                         writer.WriteStartElement("view");
                         writer.WriteAttributeString("name", view.Name);
                         writer.WriteAttributeString("guid", view.Guid.ToString("D"));
@@ -227,6 +244,10 @@ namespace BIMLogLensNext
                             writer.WriteEndElement();
                         }
                         writer.WriteEndElement();
+                          }
+                          writer.WriteEndElement();
+                        }
+                        writer.WriteEndElement();
                       }
                       writer.WriteEndElement();
                     }
@@ -269,9 +290,16 @@ namespace BIMLogLensNext
             writer.WriteEndElement();
         }
 
+        private static string NormalizeFolderName(string value, string fallback)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return fallback;
+            var normalized = new string(value.Trim().Where(XmlConvert.IsXmlChar).ToArray()).Trim();
+            return normalized.Length == 0 ? fallback : normalized;
+        }
+
         private sealed class LensNextXmlExportView
         {
-            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position, LensNextXmlRotation rotation, LensNextXmlUpVector upVector, LensNextXmlProjection projection, LensNextXmlCameraScale cameraScale, LensNextXmlSectioning sectioning, string folderName)
+            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position, LensNextXmlRotation rotation, LensNextXmlUpVector upVector, LensNextXmlProjection projection, LensNextXmlCameraScale cameraScale, LensNextXmlSectioning sectioning, string folderName, string floorFolderName, string companyFolderName)
             {
                 Name = name;
                 Guid = guid;
@@ -282,6 +310,8 @@ namespace BIMLogLensNext
                 CameraScale = cameraScale;
                 Sectioning = sectioning;
                 FolderName = folderName;
+                FloorFolderName = floorFolderName;
+                CompanyFolderName = companyFolderName;
             }
             public string Name { get; }
             public Guid Guid { get; }
@@ -292,6 +322,8 @@ namespace BIMLogLensNext
             public LensNextXmlCameraScale CameraScale { get; }
             public LensNextXmlSectioning Sectioning { get; }
             public string FolderName { get; }
+            public string FloorFolderName { get; }
+            public string CompanyFolderName { get; }
         }
     }
 }
