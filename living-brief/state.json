@@ -120,7 +120,7 @@
       "reconciledThroughCommit": "760699089e68cc52f6991d4fdada9d34277cc6d2",
       "semanticReviewedThroughCommit": "760699089e68cc52f6991d4fdada9d34277cc6d2",
       "semanticReviewTask": "LENS_XML_GROUPING_RELEASE_RECONCILIATION_20261117",
-      "semanticReviewResult": "updated",
+      "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-11-17T17:20:00Z"
     },
     {
@@ -132,7 +132,7 @@
       "reconciledThroughCommit": "760699089e68cc52f6991d4fdada9d34277cc6d2",
       "semanticReviewedThroughCommit": "760699089e68cc52f6991d4fdada9d34277cc6d2",
       "semanticReviewTask": "LENS_XML_GROUPING_RELEASE_RECONCILIATION_20261117",
-      "semanticReviewResult": "updated",
+      "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-11-17T17:20:00Z"
     },
     {

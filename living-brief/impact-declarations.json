@@ -83415,13 +83415,13 @@
         },
         {
           "key": "status",
-          "result": "updated",
-          "reason": "Records the accepted Lens quick-status, Revit packageability, XML grouping and release-schema reconciliation work."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing status record already captures the accepted Lens quick-status, Revit packageability, XML grouping and release-schema reconciliation work."
         },
         {
           "key": "open_loop",
-          "result": "updated",
-          "reason": "Retains publication, live acceptance and physical host validation as explicit independent gates."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing open-loop record already retains publication, live acceptance and physical host validation as explicit independent gates."
         },
         {
           "key": "plugin",
