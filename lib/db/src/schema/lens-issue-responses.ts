@@ -23,6 +23,6 @@ export const lensIssueResponsesTable = pgTable("lens_issue_responses", {
   projectIssueRequestUnique: uniqueIndex("lens_issue_responses_project_issue_request_unique")
     .on(table.projectId, table.issueId, table.clientRequestId),
   projectIssueCreatedIndex: index("lens_issue_responses_project_issue_created_idx")
-    .on(table.projectId, table.issueId, table.createdAt.desc()),
+    .on(table.projectId, table.issueId, table.createdAt.desc().nullsFirst()),
 }));
 

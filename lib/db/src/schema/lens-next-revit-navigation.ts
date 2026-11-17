@@ -18,7 +18,7 @@ export const lensNextRevitNavigationEventsTable=pgTable("lens_next_revit_navigat
   expiresAt:timestamp("expires_at",{withTimezone:true}).notNull(),
   completedAt:timestamp("completed_at",{withTimezone:true}),
 },table=>({
-  projectIssueIndex:index("lens_next_revit_navigation_project_issue_idx").on(table.projectId,table.lensViewpointId,table.requestedAt.desc()),
+  projectIssueIndex:index("lens_next_revit_navigation_project_issue_idx").on(table.projectId,table.lensViewpointId,table.requestedAt.desc().nullsFirst()),
   digestCheck:check("lens_next_revit_navigation_digest_chk",sql`${table.targetDigest} ~ '^[a-f0-9]{64}$'`),
   outcomeCheck:check("lens_next_revit_navigation_outcome_chk",sql`${table.outcome} IN ('requested','opened','already-opened','blocked','expired')`),
   expiryCheck:check("lens_next_revit_navigation_expiry_chk",sql`${table.expiresAt} > ${table.requestedAt}`),
