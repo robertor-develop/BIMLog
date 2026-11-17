@@ -71,6 +71,7 @@ import repairsRouter from "./repairs";
 import publicLegalIdentityRouter from "./public-legal-identity";
 import publicCommercialAvailabilityRouter from "./public-commercial-availability";
 import launchConfigurationRouter from "./launch-configuration";
+import bimtechSetupPackagesRouter from "./bimtech-setup-packages";
 
 const router: IRouter = Router();
 
@@ -133,6 +134,7 @@ router.use(genericApuBudgetControlsRouter);
 router.use(financialApuRouter);
 router.use(coordinatorActionsRouter);
 router.use(jobIntakeRouter);
+router.use(bimtechSetupPackagesRouter);
 router.use(contractItemWorkflowsRouter);
 router.use(jobOperationsRouter);
 router.use(teamPerformanceRouter);

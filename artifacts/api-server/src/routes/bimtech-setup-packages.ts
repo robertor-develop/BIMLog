@@ -1,0 +1,12 @@
+import {Router} from "express";
+import {authMiddleware,requireProjectMember} from "../middlewares/auth";
+import {BimtechSetupPackageError} from "../lib/bimtech-setup-package";
+import {applyBimtechSetupPackage,listBimtechSetupPackages,mapBimtechSetupPackage,previewBimtechSetupPackage,stageBimtechSetupPackage} from "../lib/bimtech-setup-package-service";
+const router=Router(),admins=["owner","admin","project_admin","project_manager","bim_manager","manager"];
+const run=(handler:(req:any,res:any)=>Promise<void>|void)=>async(req:any,res:any)=>{try{await handler(req,res);}catch(error){if(error instanceof BimtechSetupPackageError){res.status(error.status).json({code:error.code,error:{en:error.message,es:error.message}});return;}console.error("[bimtech-setup-package]",error);res.status(500).json({code:"BIMTECH_PACKAGE_INTERNAL",error:{en:"Setup package processing failed safely.",es:"El procesamiento del paquete falló de forma segura."}});}};
+router.post("/projects/:projectId/bimtech-setup-packages/preview",authMiddleware,requireProjectMember(),run((req,res)=>{res.json({preview:previewBimtechSetupPackage(req.body)});}));
+router.post("/projects/:projectId/bimtech-setup-packages",authMiddleware,requireProjectMember(...admins),run(async(req,res)=>{const result=await stageBimtechSetupPackage({actorUserId:req.user.userId,companyId:req.user.companyId,projectId:req.params.projectId,raw:req.body});res.status(result.idempotent?200:201).json(result);}));
+router.get("/projects/:projectId/bimtech-setup-packages",authMiddleware,requireProjectMember(),run(async(req,res)=>{res.json({imports:await listBimtechSetupPackages({actorUserId:req.user.userId,companyId:req.user.companyId,projectId:req.params.projectId})});}));
+router.put("/projects/:projectId/bimtech-setup-packages/:importId/mappings",authMiddleware,requireProjectMember(...admins),run(async(req,res)=>{res.json(await mapBimtechSetupPackage({actorUserId:req.user.userId,companyId:req.user.companyId,projectId:req.params.projectId,importId:req.params.importId,mappings:req.body?.users}));}));
+router.post("/projects/:projectId/bimtech-setup-packages/:importId/apply",authMiddleware,requireProjectMember(...admins),run(async(req,res)=>{res.json(await applyBimtechSetupPackage({actorUserId:req.user.userId,companyId:req.user.companyId,projectId:req.params.projectId,importId:req.params.importId,confirmed:req.body?.confirmed}));}));
+export default router;
