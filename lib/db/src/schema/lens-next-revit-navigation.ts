@@ -8,7 +8,7 @@ export const lensNextRevitNavigationEventsTable=pgTable("lens_next_revit_navigat
   id:bigserial("id",{mode:"number"}).primaryKey(),
   projectId:integer("project_id").notNull().references(()=>projectsTable.id),
   lensViewpointId:integer("lens_viewpoint_id").notNull().references(()=>lensViewpointsTable.id),
-  requestId:uuid("request_id").notNull().unique(),
+  requestId:uuid("request_id").notNull().unique("lens_next_revit_navigation_events_request_id_key"),
   requestedById:integer("requested_by_id").notNull().references(()=>usersTable.id),
   targetDigest:text("target_digest").notNull(),
   targetJson:jsonb("target_json").$type<Record<string,unknown>>().notNull(),
@@ -18,7 +18,7 @@ export const lensNextRevitNavigationEventsTable=pgTable("lens_next_revit_navigat
   expiresAt:timestamp("expires_at",{withTimezone:true}).notNull(),
   completedAt:timestamp("completed_at",{withTimezone:true}),
 },table=>({
-  projectIssueIndex:index("lens_next_revit_navigation_project_issue_idx").on(table.projectId,table.lensViewpointId,table.requestedAt),
+  projectIssueIndex:index("lens_next_revit_navigation_project_issue_idx").on(table.projectId,table.lensViewpointId,table.requestedAt.desc()),
   digestCheck:check("lens_next_revit_navigation_digest_chk",sql`${table.targetDigest} ~ '^[a-f0-9]{64}$'`),
   outcomeCheck:check("lens_next_revit_navigation_outcome_chk",sql`${table.outcome} IN ('requested','opened','already-opened','blocked','expired')`),
   expiryCheck:check("lens_next_revit_navigation_expiry_chk",sql`${table.expiresAt} > ${table.requestedAt}`),
