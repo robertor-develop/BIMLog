@@ -113,7 +113,7 @@ function Harness() {
     history: null, historyError: null, lastRefreshedAt: "2026-09-16T14:10:00.000Z", bridgeOpenEnabled: true,
     workingViewState: "idle", workingViewUnavailable: false, visualRepairState: "idle", visualRepairMessage: null, onRepairCurrentWorkingView: noop,
     onRefresh: noop, onRegisterProjectCompany: async () => true, companyRegistrationState: "idle", companyRegistrationMessage: null,
-    onSelectIssue: setSelectedServerId, onCloseIssue: () => setSelectedServerId(null), onOpenWorkingView: noop, onLoadHistory: noop,
+    onSelectIssue: setSelectedServerId, onCloseIssue: () => setSelectedServerId(null), onOpenWorkingView: noop, onOpenIssueWorkingView: noop, onLoadHistory: noop,
     onSubmitIssueResponse: async () => {}, onReviewIssueResponse: async () => {},
     publishState: "idle", publishMessage: null, onPublishAction: noop, onQuickAssignResponsibleCompany: async () => {}, onQuickUpdateStatus: async () => {},
   };

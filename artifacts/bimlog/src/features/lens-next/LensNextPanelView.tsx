@@ -169,6 +169,9 @@ const IssueCard = React.memo(function IssueCard({
   catalogCurrent,
   onAssignResponsibleCompany,
   onUpdateStatus,
+  workingViewEnabled,
+  workingViewOpening,
+  onOpenWorkingView,
   labels,
 }: {
   issue: LensNextIssue;
@@ -178,6 +181,9 @@ const IssueCard = React.memo(function IssueCard({
   catalogCurrent: boolean;
   onAssignResponsibleCompany(issue: LensNextIssue, responsibleCompany: string): Promise<void>;
   onUpdateStatus(issue: LensNextIssue, status: LensNextStatus): Promise<void>;
+  workingViewEnabled: boolean;
+  workingViewOpening: boolean;
+  onOpenWorkingView(issue: LensNextIssue): void;
   labels: { responsibleCompany: string; unassigned: string; assign: string; saving: string; saved: string; statusSaved: string; unavailable: string };
 }) {
   const cardRef=React.useRef<HTMLElement|null>(null);
@@ -216,7 +222,7 @@ const IssueCard = React.memo(function IssueCard({
       data-priority={issue.priority ?? "none"}
       data-status={issue.status}
     >
-      <button type="button" className="lens-next__issue-open" onClick={onSelect} aria-pressed={selected} aria-label={lensNextIssueAccessibleLabel(issue)}>
+      <div role="button" tabIndex={0} className="lens-next__issue-open" onClick={onSelect} onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(); } }} aria-pressed={selected} aria-label={lensNextIssueAccessibleLabel(issue)}>
         <Thumbnail issue={issue} />
         <span className="lens-next__issue-summary">
           <span className="lens-next__issue-title">
@@ -229,6 +235,17 @@ const IssueCard = React.memo(function IssueCard({
               {statusState === "saved" && <small role="status">{labels.statusSaved}</small>}
               {statusState === "error" && <small role="alert">{statusError}</small>}
             </span>
+            <button
+              type="button"
+              className="lens-next__quick-view"
+              aria-label={`Open Working View ${displayCode(issue)}`}
+              title="Open Working View"
+              disabled={!workingViewEnabled || !issue.visualStateAvailable || !issue.visualStateDigest || workingViewOpening}
+              onPointerDown={event => event.stopPropagation()}
+              onClick={event => { event.stopPropagation(); onOpenWorkingView(issue); }}
+            >
+              <Eye aria-hidden="true" size={14} />
+            </button>
             <span className={`lens-next__priority lens-next__priority--${issue.priority ?? "none"}`}>
               {lensNextPriorityLabel(issue.priority)}
             </span>
@@ -242,7 +259,7 @@ const IssueCard = React.memo(function IssueCard({
             <span>{issue.floor ?? "Floor not recorded"}</span>
           </span>
         </span>
-      </button>
+      </div>
       <div className="lens-next__quick-assignment" onClick={event => event.stopPropagation()}>
         <label><span>{labels.responsibleCompany}</span><select aria-label={`${labels.responsibleCompany} ${displayCode(issue)}`} value={draftCompany} disabled={!catalogCurrent || assignmentState === "saving" || !issue.publishingAllowed} onChange={event => { setDraftCompany(event.target.value); setAssignmentState("idle"); setAssignmentError(null); }}><option value="">{labels.unassigned}</option>{persistedCompany && !responsibleCompanies.includes(persistedCompany) && <option value={persistedCompany}>{persistedCompany} · historical</option>}{responsibleCompanies.map(company => <option key={company} value={company}>{company}</option>)}</select></label>
         <button type="button" onClick={() => void assign()} disabled={!catalogCurrent || !issue.publishingAllowed || assignmentState === "saving" || draftCompany === persistedCompany}>{assignmentState === "saving" ? labels.saving : labels.assign}</button>
@@ -262,6 +279,9 @@ function IssueGroups({
   catalogCurrent,
   onAssignResponsibleCompany,
   onUpdateStatus,
+  workingViewEnabled,
+  workingViewOpening,
+  onOpenWorkingView,
   labels,
   depth = 0,
 }: {
@@ -272,6 +292,9 @@ function IssueGroups({
   catalogCurrent: boolean;
   onAssignResponsibleCompany(issue: LensNextIssue, responsibleCompany: string): Promise<void>;
   onUpdateStatus(issue: LensNextIssue, status: LensNextStatus): Promise<void>;
+  workingViewEnabled: boolean;
+  workingViewOpening: boolean;
+  onOpenWorkingView(issue: LensNextIssue): void;
   labels: { responsibleCompany: string; unassigned: string; assign: string; saving: string; saved: string; statusSaved: string; unavailable: string };
   depth?: number;
 }) {
@@ -291,6 +314,9 @@ function IssueGroups({
               catalogCurrent={catalogCurrent}
               onAssignResponsibleCompany={onAssignResponsibleCompany}
               onUpdateStatus={onUpdateStatus}
+              workingViewEnabled={workingViewEnabled}
+              workingViewOpening={workingViewOpening}
+              onOpenWorkingView={onOpenWorkingView}
               labels={labels}
               depth={depth + 1}
             />
@@ -305,6 +331,9 @@ function IssueGroups({
                 catalogCurrent={catalogCurrent}
                 onAssignResponsibleCompany={onAssignResponsibleCompany}
                 onUpdateStatus={onUpdateStatus}
+                workingViewEnabled={workingViewEnabled}
+                workingViewOpening={workingViewOpening}
+                onOpenWorkingView={onOpenWorkingView}
                 labels={labels}
               />
             ))
@@ -513,6 +542,7 @@ export interface LensNextPanelViewProps {
   onSelectIssue(serverId: number): void;
   onCloseIssue(): void;
   onOpenWorkingView(): void;
+  onOpenIssueWorkingView(issue: LensNextIssue): void;
   onLoadHistory(): void;
   onSubmitIssueResponse(draft: LensNextIssueResponseDraft): Promise<void>;
   onReviewIssueResponse(draft: LensNextIssueResponseReviewDraft): Promise<void>;
@@ -621,6 +651,7 @@ export function LensNextPanelView({
   onSelectIssue,
   onCloseIssue,
   onOpenWorkingView,
+  onOpenIssueWorkingView,
   onLoadHistory,
   onSubmitIssueResponse,
   onReviewIssueResponse,
@@ -1282,6 +1313,9 @@ export function LensNextPanelView({
             catalogCurrent={catalogState === "current"}
             onAssignResponsibleCompany={quickAssignResponsibleCompany}
             onUpdateStatus={onQuickUpdateStatus}
+            workingViewEnabled={bridgeState === "connected"}
+            workingViewOpening={workingViewState === "opening"}
+            onOpenWorkingView={onOpenIssueWorkingView}
             labels={{ responsibleCompany: tt("Responsible company", "Empresa responsable", "Empresa responsável"), unassigned: tt("Unassigned", "Sin asignar", "Não atribuído"), assign: tt("Assign", "Asignar", "Atribuir"), saving: tt("Saving…", "Guardando…", "Salvando…"), saved: tt("Assigned", "Asignado", "Atribuído"), statusSaved: tt("Saved", "Guardado", "Salvo"), unavailable: tt("Refresh the governed catalog", "Actualice el catálogo autorizado", "Atualize o catálogo autorizado") }}
           />
         ) : (

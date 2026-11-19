@@ -732,16 +732,16 @@ export function LensNextPanel({
     catch (error) { setLinkedItemsError(error instanceof Error ? error.message : "BIMLog item unlink failed"); }
   }, [apiClient, authorizedProjectId, selectedIssue]);
 
-  const openWorkingView = useCallback(async () => {
+  const openWorkingView = useCallback(async (targetIssue: LensNextIssue | null = selectedIssue) => {
     if (workingViewInFlight.current) return;
     if (
       !bridgeClient ||
       !bridgeContext ||
-      !selectedIssue ||
+      !targetIssue ||
       authorizedProjectId === null
     )
       return;
-    if (selectedIssue.identity.projectId !== authorizedProjectId) {
+    if (targetIssue.identity.projectId !== authorizedProjectId) {
       setBridgeError(
         "Selected issue identity does not belong to the authenticated project.",
       );
@@ -762,7 +762,7 @@ export function LensNextPanel({
         { apiClient, bridgeClient, confirmLegacyModelContinuity: (issue, context) => window.confirm(
           `BIMLog issue ${issue.displayId ?? issue.identity.viewpointId} was captured before this model file changed. Is ${context.displayName} the same project model?\n\nConfirm only if it is the same model. This opens a temporary Working View and does not change the BIMLog package or save the Navisworks file.`
         ) },
-        selectedIssue,
+        targetIssue,
         bridgeContext,
       );
       if (result.migratedHistoricalIssue) {
@@ -1206,6 +1206,7 @@ export function LensNextPanel({
         setWorkingViewState("idle");
       }}
       onOpenWorkingView={() => void openWorkingView()}
+      onOpenIssueWorkingView={(issue) => void openWorkingView(issue)}
       onLoadHistory={() => void loadHistory()}
       onSubmitIssueResponse={submitIssueResponse}
       onReviewIssueResponse={reviewIssueResponse}

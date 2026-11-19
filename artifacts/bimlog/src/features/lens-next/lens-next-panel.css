@@ -446,11 +446,25 @@
 }
 .lens-next__issue-title {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 112px auto;
+  grid-template-columns: minmax(0, 1fr) 112px 28px auto;
   align-items: center;
   justify-content: space-between;
   gap: 6px;
 }
+.lens-next__quick-view {
+  display: inline-grid;
+  width: 28px;
+  height: 26px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #9bcdb3;
+  border-radius: 999px;
+  background: #edf8f2;
+  color: #116b43;
+  cursor: pointer;
+}
+.lens-next__quick-view:hover:not(:disabled) { background: #dff2e8; border-color: #168252; }
+.lens-next__quick-view:disabled { border-color: #d5ded9; background: #edf1ef; color: #87968e; cursor: not-allowed; }
 .lens-next__issue-title strong {
   overflow: hidden;
   text-overflow: ellipsis;
