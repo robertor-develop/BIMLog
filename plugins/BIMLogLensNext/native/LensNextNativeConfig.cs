@@ -8,6 +8,8 @@ namespace BIMLogLensNext.Native
 {
     public sealed class LensNextNativeConfig
     {
+        private static readonly string WebSessionCacheKey = Guid.NewGuid().ToString("N");
+
         public string BimLogWebUrl { get; set; } = "https://bimlog.app";
         public int ProjectId { get; set; }
         public int AutoRefreshSeconds { get; set; } = 10;
@@ -63,7 +65,8 @@ namespace BIMLogLensNext.Native
         public string LensNextUrl(string bridgeOrigin)
         {
             var baseUri = WebUri().ToString().TrimEnd('/');
-            return baseUri + "/lens-next?launch=navisworks&bridgeOrigin=" + Uri.EscapeDataString(bridgeOrigin);
+            return baseUri + "/lens-next?launch=navisworks&bridgeOrigin=" + Uri.EscapeDataString(bridgeOrigin) +
+                "&clientBuild=" + Uri.EscapeDataString(WebSessionCacheKey);
         }
 
         public IReadOnlyCollection<string> EffectiveAllowedOrigins()

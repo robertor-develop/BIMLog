@@ -31,6 +31,7 @@ namespace BIMLogLensNext.Native.Tests
                 Run("health_tick_never_restarts_or_navigates_for_expiry", HealthTickNeverRestartsOrNavigatesForExpiry);
                 Run("session_renews_in_place_without_runtime_rotation", SessionRenewsInPlaceWithoutRuntimeRotation);
                 Run("saved_viewpoint_publishing_config_defaults_off_and_is_honored", SavedViewpointPublishingConfigDefaultsOffAndIsHonored);
+                Run("lens_next_webview_url_bypasses_stale_session_cache", LensNextWebViewUrlBypassesStaleSessionCache);
                 Run("missing_or_zero_guid_denies", MissingOrZeroGuidDenies);
                 Run("legacy_metadata_fallback_is_exact", LegacyMetadataFallbackIsExact);
                 Run("original_lens_split_merge_comments_resolve_exact_identity", OriginalLensSplitMergeCommentsResolveExactIdentity);
@@ -221,6 +222,14 @@ namespace BIMLogLensNext.Native.Tests
             True(runtime.Contains("Config.ViewpointPublishingEnabled"));
             False(runtime.Contains("new ImmutableIdentityResolver(),\n                    true,"));
             False(runtime.Contains("new ImmutableIdentityResolver(),\r\n                    true,"));
+        }
+
+        private static void LensNextWebViewUrlBypassesStaleSessionCache()
+        {
+            var config = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\LensNextNativeConfig.cs")));
+            True(config.Contains("WebSessionCacheKey = Guid.NewGuid().ToString(\"N\")"));
+            True(config.Contains("&clientBuild="));
+            True(config.Contains("Uri.EscapeDataString(WebSessionCacheKey)"));
         }
 
         private static void ExactLegacyGuidDoesNotRequireLensNextComments()
