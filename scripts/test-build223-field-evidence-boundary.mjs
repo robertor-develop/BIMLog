@@ -8,12 +8,13 @@ const current = validateCurrentOpenLoopAuthority(open);
 const currentField = current.filter((item) => item.workClass === "FIELD_EVIDENCE");
 const currentProvider = current.filter((item) => item.workClass === "PROVIDER_EVIDENCE");
 
-assert.equal(currentField.filter(item => /Navisworks 2025/.test(item.statement) && /Ruben/.test(item.statement)).length, 1);
+assert.equal(currentField.filter(item => /Navisworks 2025/.test(item.statement) && /Ruben/.test(item.statement)).length, 0);
 assert.equal(field.installed2021.retiredDirectLoad.state, "REMOVED_WITH_ROLLBACK_EVIDENCE");
 assert.equal(field.installed2021.retiredDirectLoad.activeAfterCutover, false);
 assert.equal(field.workflowAndRollback.physical2021InstalledTopology, "PASS_PULSE_AND_LENS_NEXT_ONLY");
-assert.equal(field.rubenPhysical2025.status, "DEFERRED_TO_RUBEN");
+assert.equal(field.rubenPhysical2025.status, "ACCEPTED_BY_OWNER");
+assert.equal(field.rubenPhysical2025.resultIngested, true);
 assert.equal(field.rubenPhysical2025.reopensBuild119, false);
 assert.equal(field.rubenPhysical2025.blocksPlatformPublication, false);
 
-console.log(`BUILD223_FIELD_EVIDENCE_BOUNDARY=PASS currentOpen=${current.length} currentProvider=${currentProvider.length} currentField=${currentField.length} historicalPhysical2021=PASS physical2025=DEFERRED_TO_RUBEN`);
+console.log(`BUILD223_FIELD_EVIDENCE_BOUNDARY=PASS currentOpen=${current.length} currentProvider=${currentProvider.length} currentField=${currentField.length} historicalPhysical2021=PASS physical2025=ACCEPTED_BY_OWNER`);

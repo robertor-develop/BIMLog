@@ -182,7 +182,7 @@ export const enterpriseTradesTable = pgTable(
   "enterprise_trades",
   {
     id: serial("id").primaryKey(),
-    code: text("code").notNull().unique(),
+    code: text("code").notNull().unique("enterprise_trades_code_key"),
     name: text("name").notNull(),
     state: text("state").default("active").notNull(),
     createdById: integer("created_by_id").notNull(),
@@ -210,7 +210,7 @@ export const enterpriseTradesTable = pgTable(
 function enterpriseClassificationColumns() {
   return {
     id: text("id").primaryKey(),
-    code: text("code").notNull().unique(),
+    code: text("code").notNull(),
     name: text("name").notNull(),
     state: text("state").default("active").notNull(),
     version: integer("version").default(1).notNull(),
@@ -230,6 +230,7 @@ export const enterpriseServicesTable = pgTable(
   "enterprise_services",
   () => enterpriseClassificationColumns(),
   (t) => [
+    unique("enterprise_services_code_key").on(t.code),
     foreignKey({
       columns: [t.createdById],
       foreignColumns: [usersTable.id],
@@ -259,6 +260,7 @@ export const enterprisePhasesTable = pgTable(
   "enterprise_phases",
   () => enterpriseClassificationColumns(),
   (t) => [
+    unique("enterprise_phases_code_key").on(t.code),
     foreignKey({
       columns: [t.createdById],
       foreignColumns: [usersTable.id],

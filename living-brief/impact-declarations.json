@@ -83233,6 +83233,292 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ef365bc8ab7569b888f44a5d53f8d394527044efff728b6d7c3ae60ae87430ea"
+    },
+    {
+      "taskId": "LENS_THREE_FEATURE_REVIT_2026_5_CORRECTION_20261113",
+      "reviewedAt": "2026-11-13T21:15:00Z",
+      "reviewedThroughCommit": "f7dfb13083c4f5502a97edef5f18f2f4be0b8fb2",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The change remains inside BIMLog Lens coordination and model-navigation workflows."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No repository operating instruction changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact identity, authorization, isolation, persistence, negative, recovery, packaging and physical-gate evidence are required."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reports, responses and model navigation improve the existing complete coordination journey."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The route relocation preserves the accepted additive evidence, authorization, frontend action and Revit adapter contracts."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the verified web/API acceptance, latest-Revit compatibility correction and truthful unreleased state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Defines the exact .NET 10, official Autodesk API, physical navigation, push, publication and live acceptance gates."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records the corrected Revit 2026.5+ .NET 10 adapter boundary and the outstanding official compile and physical validation gates."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Marked report captures preserve the governed report visual-evidence contract."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform naming, delivery, or information-management standard changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release evidence records the mandatory official Autodesk compile and physical acceptance hold."
+        }
+      ],
+      "reason": "Close the three requested Lens workflows without guessing Autodesk coordinates or claiming unperformed physical validation.",
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-revit-ui.behavior.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/revit/2026/BIMLogLensNext.Revit2026.csproj",
+        "plugins/BIMLogLensNext/revit/2026/Build-Revit2026Package.ps1",
+        "plugins/BIMLogLensNext/revit/2026/Install-Revit2026.ps1",
+        "plugins/BIMLogLensNext/revit/2026/Test-Revit2026Package.ps1",
+        "plugins/BIMLogLensNext/revit/2026/Uninstall-Revit2026.ps1"
+      ],
+      "reviewedChangeSha256": "b2346e8818e98daa7ca43971c31ef1a45da71b9074950db7235ee5f27cd9e234"
+    },
+    {
+      "taskId": "LENS_THREE_FEATURE_EXACT_HEAD_RELEASE_RECONCILIATION_20261116",
+      "reviewedAt": "2026-11-16T13:45:00Z",
+      "reviewedThroughCommit": "708a15c574b5d4c59e39de7a40aa2b8654f1fa41",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The corrections remain within BIMLog release evidence and Lens workflows."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No repository operating instruction changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Stale assertions were made exact while all security, isolation, recovery and release gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted marked-report, contractor-review and governed navigation journeys are preserved."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform boundary, schema contract or customer workflow was removed or weakened."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact-head gate corrections and separates web publication from pending physical Revit validation."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains push, publication, live acceptance and Revit physical validation as explicit independent gates."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Revit adapter remains fail-closed pending official compile and physical acceptance."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Marked-image report evidence requirements are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No delivery or information-management standard changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Web release evidence stays separate from the unperformed licensed Revit physical gate."
+        }
+      ],
+      "reason": "Reconcile exact-head release evidence without weakening gates or claiming unavailable physical Revit validation.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a2df59f00a55051a97e6633bc614f768ef8e7eff541033b0589d37caa524a822"
+    },
+    {
+      "taskId": "LENS_XML_GROUPING_RELEASE_RECONCILIATION_20261117",
+      "reviewedAt": "2026-11-17T17:20:00Z",
+      "reviewedThroughCommit": "760699089e68cc52f6991d4fdada9d34277cc6d2",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release remains within BIMLog Lens coordination, governed issue workflow and model-viewpoint export boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No repository operating instruction changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact identity, authorization, persistence, XML structure, native compilation and regression gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted Lens workflows are preserved while XML viewpoints become easier to navigate by status, floor and responsible company."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The changes preserve existing web, API, database and native-plugin contracts without removing capabilities."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing status record already captures the accepted Lens quick-status, Revit packageability, XML grouping and release-schema reconciliation work."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing open-loop record already retains publication, live acceptance and physical host validation as explicit independent gates."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and Revit adapters retain governed identity and host-validation requirements."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Marked-image report evidence requirements are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No delivery or information-management standard changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Automated release evidence remains separate from physical Autodesk-host acceptance."
+        }
+      ],
+      "reason": "Reconcile the accepted Lens release candidate after proving XML grouping, native builds and production-safe database identity alignment.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "BIMTECH_SETUP_PACKAGE_GOVERNED_INTAKE_20261117",
+      "reviewedAt": "2026-11-17T23:50:00Z",
+      "reviewedThroughCommit": "34157c46225376915a0e5be646ca9b1ae2785af8",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The importer remains within BIMLog project intake, authorization, evidence and activation boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No repository operating instruction changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Fail-closed integrity, authorization, isolation, persistence and release gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The capability makes governed project setup discoverable without removing or collapsing existing workflows."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform inventory now includes the setup-package route, service, persistence and schema surfaces."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the new governed setup-package intake candidate and its unperformed external release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Push, publication, deployment and authenticated production acceptance remain explicit independent gates."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks or Revit plugin contract changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report rendering or export-design contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No delivery or information-management standard changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Automated candidate evidence remains separate from production and customer acceptance."
+        }
+      ],
+      "reason": "Reconcile the exact five-build BIMTECH setup-package intake candidate without claiming activation, deployment or production acceptance.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9fea74cf42ae4953ea042d31e8f98cfe21ac7c2ff9e58ea13e67f6e33a096849"
     }
   ]
 }

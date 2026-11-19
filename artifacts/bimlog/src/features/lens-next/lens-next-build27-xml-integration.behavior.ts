@@ -38,7 +38,7 @@ const fetchImpl: typeof fetch = async (_input, init) => {
   } }), { status: 200, headers: { "Content-Type": "application/json" } });
 };
 const context: LensNextBridgeProjectContext = { sessionId: "session", projectId: 26, modelFingerprint: "a".repeat(64), modelBindingKey: "binding", displayName: "controlled.nwd", bindingSource: "managed-marker", managedViewpointCount: 0 };
-const issue = (serverId: number): LensNextIssue => ({ identity: { projectId: 26, serverId, viewpointId: `vp-${serverId}`, lifecycleStatus: "active", revisionNumber: 1 }, mutationVersion: 1, publishingAllowed: false, displayId: `VP-${serverId}`, navisworksGuid: null, bimlogPhysicalId: null, issueGroupId: null, note: null, openItems: null, trade: null, floor: null, responsibleCompany: null, reportType: null, priority: 1, status: "open", capturedAt: null, syncedAt: null, supersedesId: null, supersedesCode: null, screenshotUrl: null, visualStateAvailable: true, visualStateDigest: "b".repeat(64) });
+const issue = (serverId: number): LensNextIssue => ({ identity: { projectId: 26, serverId, viewpointId: `vp-${serverId}`, lifecycleStatus: "active", revisionNumber: 1 }, mutationVersion: 1, publishingAllowed: false, displayId: `VP-${serverId}`, navisworksGuid: null, bimlogPhysicalId: null, issueGroupId: null, note: null, openItems: null, trade: null, floor: "L14", responsibleCompany: "BAM", reportType: null, priority: 1, status: "open", capturedAt: null, syncedAt: null, supersedesId: null, supersedesCode: null, screenshotUrl: null, visualStateAvailable: true, visualStateDigest: "b".repeat(64) });
 const packageJson = JSON.stringify({ ProjectId: 26, ServerId: 160, ViewpointId: "vp-160", LifecycleStatus: "active", RevisionNumber: 1, Camera: {}, SectioningJson: null, DigestSha256: "b".repeat(64) });
 const bridge = createLensNextBridgeClient({ sessionToken: "token", bridgeOrigin: "http://127.0.0.1:8766", fetchImpl, requestIdFactory: () => "build27-request" });
 const result = await bridge.exportViewpointsXml([issue(160), issue(161)], new Map([[160, { visualStateJson: packageJson, visualStateDigest: "b".repeat(64) }], [161, { visualStateJson: packageJson.replaceAll("160", "161"), visualStateDigest: "b".repeat(64) }]]), context);
@@ -48,5 +48,7 @@ const fields = (requests[0]?.fields ?? {}) as Record<string, unknown>;
 assert.equal(fields.projectId, "26");
 assert.equal(fields.modelFingerprint, "a".repeat(64));
 assert.doesNotMatch(String(fields.recordsJson), /ScreenshotDataUrl|SavedViewpoints/);
+assert.match(String(fields.recordsJson), /"Floor":"L14"/);
+assert.match(String(fields.recordsJson), /"ResponsibleCompany":"BAM"/);
 
 console.log("PASS Build 27 authoritative XML product integration contract");

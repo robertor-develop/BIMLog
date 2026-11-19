@@ -47,6 +47,7 @@ import {
   type LensNextResolutionDraft,
   type LensNextResolutionRecord,
   type LensNextResolutionEvidence,
+  type LensNextStatus,
 } from "./lens-next-types";
 import {
   buildLensNextIssueGroups,
@@ -59,6 +60,7 @@ import "./lens-next-panel.css";
 import { openBimlogWorkingView, repairBimlogWorkingViewFromCurrent } from "./lens-next-working-view";
 import { loadExportableLensNextPackages, lensNextXmlSkippedSummary } from "./lens-next-xml-export-selection";
 import { mergeLensTradeOptions } from "./lens-trade-options";
+import { DEFAULT_REVIT_BRIDGE_ORIGIN, openLensIssueInRevit, type RevitOpenState } from "./lens-next-revit-client";
 
 const LENS_NEXT_REPORT_TYPE_OPTIONS = ["SHOP", "SLEEVE", "COORDINATION", "FIELD", "OTHER"] as const;
 const LENS_NEXT_FALLBACK_FLOORS = ["CELLAR", "1", "2", "3", "4", "5", "ROOF", "Other"] as const;
@@ -213,6 +215,7 @@ export function LensNextPanel({
   const refreshSequence = useRef(0);
   const publishAttempt = useRef<{ fingerprint: string; idempotencyKey: string } | null>(null);
   const quickAssignmentAttempts = useRef(new Map<number, { fingerprint: string; idempotencyKey: string }>());
+  const quickStatusAttempts = useRef(new Map<number, { fingerprint: string; idempotencyKey: string }>());
   const [publishState, setPublishState] = useState<"idle" | "publishing" | "published" | "error">("idle");
   const [publishMessage, setPublishMessage] = useState<string | null>(null);
   const [localUploadState, setLocalUploadState] = useState<"idle" | "capturing" | "uploading" | "success" | "error">("idle");
@@ -234,6 +237,8 @@ export function LensNextPanel({
   const [visualRepairMessage, setVisualRepairMessage] = useState<string | null>(null);
   const workingViewInFlight = useRef(false);
   const [workingViewState, setWorkingViewState] = useState<"idle" | "opening" | "success" | "error">("idle");
+  const [revitOpenState,setRevitOpenState]=useState<RevitOpenState>("idle");
+  const [revitOpenMessage,setRevitOpenMessage]=useState<string|null>(null);
   const [knowledgeContext,setKnowledgeContext]=useState<LensNextKnowledgeContext|"loading"|null>(null);
   const [knowledgeError,setKnowledgeError]=useState<string|null>(null);
   const [resolutionRecord,setResolutionRecord]=useState<LensNextResolutionRecord|"loading"|null>(null);
@@ -259,6 +264,15 @@ export function LensNextPanel({
       null,
     [issues, selectedServerId],
   );
+  const openInRevit=useCallback(async()=>{
+    if(!selectedIssue||!selectedIssue.visualStateDigest||!authorizedProjectId)return;
+    setRevitOpenState("connecting");setRevitOpenMessage(null);
+    try{
+      setRevitOpenState("opening");
+      const result=await openLensIssueInRevit({apiBaseUrl,authToken,bridgeOrigin:DEFAULT_REVIT_BRIDGE_ORIGIN,projectId:authorizedProjectId,issueId:selectedIssue.identity.serverId,viewpointId:selectedIssue.identity.viewpointId,visualStateDigest:selectedIssue.visualStateDigest,fetchImpl});
+      setRevitOpenState("success");setRevitOpenMessage(`Opened the exact Revit 2026.5+ location${result.elementsSelected?` and selected ${result.elementsSelected} element(s)`:""}.`);
+    }catch(error){setRevitOpenState("error");setRevitOpenMessage(error instanceof Error?error.message:"Open in Revit failed");}
+  },[apiBaseUrl,authToken,authorizedProjectId,fetchImpl,selectedIssue]);
   const activeIssues = useMemo(() => activeLensNextIssues(issues), [issues]);
   const creationContextScope=useRef({client:apiClient,project:authorizedProjectId,bridge:bridgeContext});
   if(creationContextScope.current.client!==apiClient||creationContextScope.current.project!==authorizedProjectId||creationContextScope.current.bridge!==bridgeContext)creationContextScope.current={client:apiClient,project:authorizedProjectId,bridge:bridgeContext};
@@ -837,6 +851,32 @@ export function LensNextPanel({
     }
   }, [apiClient, bridgeContext?.modelFingerprint]);
 
+  const quickUpdateStatus = useCallback(async (issue: LensNextIssue, status: LensNextStatus) => {
+    if (!apiClient || !issue.publishingAllowed) throw new Error("Your current project role cannot update Issue status.");
+    if (issue.status === "under_review" || status === "under_review" || status === "approved") {
+      throw new Error("Use the existing Issue workflow for review or approval transitions.");
+    }
+    const action: LensNextPublishAction = { type: "status", status };
+    const reason = "Quick status update from Lens Next Issue Browser";
+    const fingerprint = JSON.stringify({ serverId: issue.identity.serverId, mutationVersion: issue.mutationVersion, action, reason });
+    const pending = quickStatusAttempts.current.get(issue.identity.serverId);
+    const attempt = pending?.fingerprint === fingerprint ? pending : { fingerprint, idempotencyKey: `lens-next-ui-${crypto.randomUUID()}` };
+    quickStatusAttempts.current.set(issue.identity.serverId, attempt);
+    try {
+      const result = await apiClient.publishAction(issue, action, reason, attempt.idempotencyKey, bridgeContext?.modelFingerprint ?? null);
+      setIssues(current => current.map(currentIssue => currentIssue.identity.serverId === result.issue.serverId ? {
+        ...currentIssue,
+        mutationVersion: result.issue.mutationVersion,
+        status: result.issue.status,
+        responsibleCompany: result.issue.responsibleCompany,
+      } : currentIssue));
+      quickStatusAttempts.current.delete(issue.identity.serverId);
+      setHistory(null);
+    } catch (error) {
+      throw error instanceof Error ? error : new Error("Issue status update failed.");
+    }
+  }, [apiClient, bridgeContext?.modelFingerprint]);
+
   const uploadLocalViewpoint = useCallback(async (viewpoint: LensNextLocalViewpoint) => {
     if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || uploadInFlight.current) return;
     if (viewpoint.projectId !== authorizedProjectId || bridgeContext.projectId !== authorizedProjectId) { setLocalUploadState("error"); setLocalUploadMessage("Project/model identity mismatch; upload refused."); return; }
@@ -1006,7 +1046,7 @@ export function LensNextPanel({
       const serverSkipped = lensNextXmlSkippedSummary(loaded.skipped);
       const skipped = [serverSkipped, nativeSkipped].filter(Boolean).join("; ");
       const skippedCount = loaded.skipped.length + (summary.skippedCount ?? 0);
-      setXmlExportMessage(`${skippedCount ? "Partial XML V2 export" : "XML V2 export complete"}: ${summary.serializedCount} filtered primary Issue viewpoint(s) organized under Open/Resolved, ${skippedCount} skipped.${skipped ? ` ${skipped}.` : ""} Additional Issue viewpoints are listed in the Excel export; XML V2 currently exports only each Issue's primary viewpoint. ${summary.outputPath}`);
+      setXmlExportMessage(`${skippedCount ? "Partial XML V2 export" : "XML V2 export complete"}: ${summary.serializedCount} filtered primary Issue viewpoint(s) organized by status, floor, and responsible contractor, ${skippedCount} skipped.${skipped ? ` ${skipped}.` : ""} Additional Issue viewpoints are listed in the Excel export; XML V2 currently exports only each Issue's primary viewpoint. ${summary.outputPath}`);
     } catch (error) {
       setXmlExportState("error"); setXmlExportMessage(error instanceof Error ? error.message : "XML export failed");
     }
@@ -1133,6 +1173,10 @@ export function LensNextPanel({
         selectedIssue !== null &&
         (!selectedIssue.visualStateAvailable || !selectedIssue.visualStateDigest)
       }
+      revitOpenEnabled={apiState==="connected"&&Boolean(selectedIssue?.visualStateAvailable&&selectedIssue.visualStateDigest)&&revitOpenState!=="connecting"&&revitOpenState!=="opening"}
+      revitOpenState={revitOpenState}
+      revitOpenMessage={revitOpenMessage}
+      onOpenInRevit={()=>void openInRevit()}
       visualRepairState={visualRepairState}
       visualRepairMessage={visualRepairMessage}
       onRepairCurrentWorkingView={() => void repairCurrentWorkingView()}
@@ -1169,6 +1213,7 @@ export function LensNextPanel({
       publishMessage={publishMessage}
       onPublishAction={(action, reason) => void publishAction(action, reason)}
       onQuickAssignResponsibleCompany={quickAssignResponsibleCompany}
+      onQuickUpdateStatus={quickUpdateStatus}
     />
   );
 }

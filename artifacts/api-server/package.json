@@ -144,6 +144,7 @@
     "test:lens-import": "tsx ./scripts/test-lens-import-contract.ts",
     "test:lens-import-api": "tsx ./scripts/test-lens-import-api-evidence.ts",
     "test:lens-next-publishing": "tsx ./src/lib/lens-next-publishing.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-publishing-ui.behavior.ts",
+    "test:lens-next-revit": "tsx ./src/lib/lens-next-revit-navigation.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-revit-ui.behavior.ts",
     "test:lens-next-model-binding": "tsx ./src/lib/lens-next-model-binding.behavior.ts",
     "test:lens-next-linking": "tsx ../bimlog/src/features/lens-next/lens-next-linking.behavior.ts",
     "test:lens-next-attachments": "tsx ../bimlog/src/features/lens-next/lens-next-attachments.behavior.ts",

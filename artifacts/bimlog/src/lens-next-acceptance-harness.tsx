@@ -90,6 +90,7 @@ function Harness() {
     inventorySummary: { matched: 63, platformOnly: 37, navisworksOnly: 0, conflicted: 0, unresolved: 0 },
     synchronizationPlan: { items: synchronizationItems, inSync: synchronizedCount, confirmLocalIdentity: 0, pullFromBimlog: pullCount, uploadToBimlog: 0, manualConflict: 0, blocked: 0, executable: pullCount > 0 }, uploadableLocalViewpoints: [], localUploadState: "idle", localUploadMessage: null, onUploadLocalViewpoint: noop,
     createEnabled: true, createState: "idle", createMessage: null, createdIssueServerId: null, onCreateIssue: noop,
+    revitOpenEnabled: false, revitOpenState: "idle", revitOpenMessage: null, onOpenInRevit: noop,
     editState: "idle", editMessage: null, onEditIssue: noop,
     layoutEnabled: true, layoutState: "idle", layoutMessage: null, onMaterializeMyView: noop,
     reconciliationState: "idle", reconciliationMessage: null, onRunReconciliation: noop,
@@ -114,7 +115,7 @@ function Harness() {
     onRefresh: noop, onRegisterProjectCompany: async () => true, companyRegistrationState: "idle", companyRegistrationMessage: null,
     onSelectIssue: setSelectedServerId, onCloseIssue: () => setSelectedServerId(null), onOpenWorkingView: noop, onLoadHistory: noop,
     onSubmitIssueResponse: async () => {}, onReviewIssueResponse: async () => {},
-    publishState: "idle", publishMessage: null, onPublishAction: noop, onQuickAssignResponsibleCompany: async () => {},
+    publishState: "idle", publishMessage: null, onPublishAction: noop, onQuickAssignResponsibleCompany: async () => {}, onQuickUpdateStatus: async () => {},
   };
   return <div className="lens-next-acceptance-shell">
     <div className="lens-next-acceptance-toolbar">

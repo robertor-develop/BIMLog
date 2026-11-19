@@ -76,6 +76,7 @@ const PluginProjectDirectory = namedPage(() => import("@/pages/PluginProjectDire
 const ProjectUserAssignment = namedPage(() => import("@/pages/ProjectUserAssignment"), "ProjectUserAssignment");
 const ProjectBriefingReview = namedPage(() => import("@/pages/ProjectBriefingReview"), "ProjectBriefingReview");
 const LensImportPlan = namedPage(() => import("@/pages/LensImportPlan"), "LensImportPlan");
+const BimtechSetupPackageImport = namedPage(() => import("@/pages/BimtechSetupPackageImport"), "BimtechSetupPackageImport");
 const LensImportContext = namedPage(() => import("@/pages/LensImportContext"), "LensImportContext");
 const LensSequenceStatus = namedPage(() => import("@/pages/LensSequenceStatus"), "LensSequenceStatus");
 const LensSyncReview = namedPage(() => import("@/pages/LensSyncReview"), "LensSyncReview");
@@ -497,6 +498,9 @@ function Router() {
       </Route>
       <Route path="/lens-import-plan">
         {() => <ProtectedRoute component={LensImportPlan} />}
+      </Route>
+      <Route path="/bimtech-setup-package">
+        {() => <ProtectedRoute component={BimtechSetupPackageImport} />}
       </Route>
       <Route path="/lens-import-context">
         {() => <ProtectedRoute component={LensImportContext} />}

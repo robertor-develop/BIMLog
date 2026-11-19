@@ -73,6 +73,7 @@ import { startFeedbackPackageSnapshotWorker } from "./lib/feedback-package-worke
 import { startFeedbackTelegramDeliveryWorker } from "./lib/feedback-telegram-worker";
 import { storage as feedbackStorage } from "./lib/storage-adapter";
 import { ensureLensNextPublishingSchema } from "./lib/lens-next-publishing";
+import { ensureLensNextRevitNavigationSchema } from "./lib/lens-next-revit-navigation";
 import { ensureLensIssueViewpointsSchema } from "./lib/lens-issue-viewpoints-migration";
 import { startEnterpriseIdentityMigration, waitForEnterpriseIdentityMigration } from "./lib/enterprise-identity-migration";
 import { ensureCompanyMasterCatalogSchema } from "./lib/company-master-catalog-migration";
@@ -169,6 +170,7 @@ const lensNextPublishingStartupBarrier = queueDatabaseStartup(() =>
     );
   }),
 );
+void queueDatabaseStartup(() => ensureLensNextRevitNavigationSchema(pool).then(() => console.log("[migration] Lens Next Revit navigation evidence ensured")));
 void queueDatabaseStartup(() => startOnboardingMigration().then(() => console.log("[migration] onboarding profiles ensured")));
 void queueDatabaseStartup(() => startCommercialSubscriptionMigration().then(() => console.log("[migration] commercial subscription authority ensured")));
 void queueDatabaseStartup(() => ensureLaunchConfigurationSchema(pool).then(() => console.log("[migration] launch configuration authority ensured")));

@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "generatedFrom": "tracked source; deterministic",
   "counts": {
-    "frontendRoutes": 138,
+    "frontendRoutes": 139,
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 805,
-    "frontendApiReferences": 410,
+    "apiRoutes": 812,
+    "frontendApiReferences": 412,
     "routeOwnedTables": 76
   },
   "compatibilityRedirects": [
@@ -527,324 +527,330 @@
     },
     {
       "order": 85,
+      "path": "/bimtech-setup-package",
+      "guard": "authenticated",
+      "target": "BimtechSetupPackageImport"
+    },
+    {
+      "order": 86,
       "path": "/lens-import-context",
       "guard": "authenticated",
       "target": "LensImportContext"
     },
     {
-      "order": 86,
+      "order": 87,
       "path": "/lens-sequence-status",
       "guard": "authenticated",
       "target": "LensSequenceStatus"
     },
     {
-      "order": 87,
+      "order": 88,
       "path": "/lens-next-snapshot-replay",
       "guard": "authenticated",
       "target": "LensSyncReview"
     },
     {
-      "order": 88,
+      "order": 89,
       "path": "/plugin-pull-review",
       "guard": "authenticated",
       "target": "PluginPullReview"
     },
     {
-      "order": 89,
+      "order": 90,
       "path": "/find-original-clash",
       "guard": "authenticated",
       "target": "FindOriginalClash"
     },
     {
-      "order": 90,
+      "order": 91,
       "path": "/procore-connection-status",
       "guard": "authenticated",
       "target": "ProcoreConnectionStatus"
     },
     {
-      "order": 91,
+      "order": 92,
       "path": "/coordination-operations",
       "guard": "authenticated",
       "target": "CoordinationOperations"
     },
     {
-      "order": 92,
+      "order": 93,
       "path": "/meeting-link-actions",
       "guard": "authenticated",
       "target": "MeetingLinkActions"
     },
     {
-      "order": 93,
+      "order": 94,
       "path": "/project-document-search",
       "guard": "authenticated",
       "target": "ProjectDocumentSearch"
     },
     {
-      "order": 94,
+      "order": 95,
       "path": "/edt-activation",
       "guard": "authenticated",
       "target": "EdtActivation"
     },
     {
-      "order": 95,
+      "order": 96,
       "path": "/edt-permissions",
       "guard": "authenticated",
       "target": "EdtCapabilities"
     },
     {
-      "order": 96,
+      "order": 97,
       "path": "/edt-changes",
       "guard": "authenticated",
       "target": "EdtChanges"
     },
     {
-      "order": 97,
+      "order": 98,
       "path": "/edt-intake-previews",
       "guard": "authenticated",
       "target": "EdtIntakePreviews"
     },
     {
-      "order": 98,
+      "order": 99,
       "path": "/edt-qc-review",
       "guard": "authenticated",
       "target": "EdtQcReview"
     },
     {
-      "order": 99,
+      "order": 100,
       "path": "/edt-director-authority",
       "guard": "authenticated",
       "target": "EdtDirectorAuthority"
     },
     {
-      "order": 100,
+      "order": 101,
       "path": "/edt-time-review",
       "guard": "authenticated",
       "target": "EdtTimeReview"
     },
     {
-      "order": 101,
+      "order": 102,
       "path": "/edt-issuances",
       "guard": "authenticated",
       "target": "EdtIssuances"
     },
     {
-      "order": 102,
+      "order": 103,
       "path": "/file-custody-review",
       "guard": "authenticated",
       "target": "FileCustodyReview"
     },
     {
-      "order": 103,
+      "order": 104,
       "path": "/manual-bonus-review",
       "guard": "authenticated",
       "target": "ManualBonusReview"
     },
     {
-      "order": 104,
+      "order": 105,
       "path": "/budget-decision-review",
       "guard": "authenticated",
       "target": "BudgetDecisionReview"
     },
     {
-      "order": 105,
+      "order": 106,
       "path": "/apu-budget-review",
       "guard": "authenticated",
       "target": "ApuBudgetReview"
     },
     {
-      "order": 106,
+      "order": 107,
       "path": "/plugin-sync-review",
       "guard": "authenticated",
       "target": "PluginSyncReview"
     },
     {
-      "order": 107,
+      "order": 108,
       "path": "/admin",
       "guard": "access",
       "target": "AdminPanel"
     },
     {
-      "order": 108,
+      "order": 109,
       "path": "/feedback",
       "guard": "authenticated",
       "target": "Dashboard"
     },
     {
-      "order": 109,
+      "order": 110,
       "path": "/total-control",
       "guard": "access",
       "target": "TotalControl"
     },
     {
-      "order": 110,
+      "order": 111,
       "path": "/admin/project-company-bindings",
       "guard": "access",
       "target": "ProjectCompanyBindings"
     },
     {
-      "order": 111,
+      "order": 112,
       "path": "/admin/fix-specific-link",
       "guard": "access",
       "target": "FixSpecificLink"
     },
     {
-      "order": 112,
+      "order": 113,
       "path": "/admin/launch-configuration",
       "guard": "access",
       "target": "LaunchConfiguration"
     },
     {
-      "order": 113,
+      "order": 114,
       "path": "/admin/master-catalogs",
       "guard": "access",
       "target": "AdminMasterCatalogs"
     },
     {
-      "order": 114,
+      "order": 115,
       "path": "/admin/overview",
       "guard": "access",
       "target": "AdminOverview"
     },
     {
-      "order": 115,
+      "order": 116,
       "path": "/admin/platform-capabilities",
       "guard": "access",
       "target": "AdminPlatformCapabilities"
     },
     {
-      "order": 116,
+      "order": 117,
       "path": "/admin/platform-stats",
       "guard": "access",
       "target": "AdminPlatformStats"
     },
     {
-      "order": 117,
+      "order": 118,
       "path": "/admin/projects-list",
       "guard": "access",
       "target": "AdminProjectsList"
     },
     {
-      "order": 118,
+      "order": 119,
       "path": "/admin/support-operations",
       "guard": "access",
       "target": "AdminSupport"
     },
     {
-      "order": 119,
+      "order": 120,
       "path": "/ai-control/budgets",
       "guard": "authenticated",
       "target": "AiControlBudgets"
     },
     {
-      "order": 120,
+      "order": 121,
       "path": "/ai-control/companies",
       "guard": "access",
       "target": "AiControlCompanies"
     },
     {
-      "order": 121,
+      "order": 122,
       "path": "/ai-control/company-ai-administrators",
       "guard": "access",
       "target": "AiControlCompanyAdministrators"
     },
     {
-      "order": 122,
+      "order": 123,
       "path": "/ai-control/company-users",
       "guard": "authenticated",
       "target": "AiControlCompanyUsers"
     },
     {
-      "order": 123,
+      "order": 124,
       "path": "/ai-control/entitlements",
       "guard": "authenticated",
       "target": "AiControlEntitlements"
     },
     {
-      "order": 124,
+      "order": 125,
       "path": "/ai-control/estimates",
       "guard": "authenticated",
       "target": "AiControlEstimates"
     },
     {
-      "order": 125,
+      "order": 126,
       "path": "/ai-control/prices",
       "guard": "access",
       "target": "AiControlPrices"
     },
     {
-      "order": 126,
+      "order": 127,
       "path": "/ai-control/provider-connections",
       "guard": "authenticated",
       "target": "AiControlProviderConnections"
     },
     {
-      "order": 127,
+      "order": 128,
       "path": "/ai-control/runs",
       "guard": "authenticated",
       "target": "AiControlRuns"
     },
     {
-      "order": 128,
+      "order": 129,
       "path": "/ai-control/status",
       "guard": "authenticated",
       "target": "AiControlStatus"
     },
     {
-      "order": 129,
+      "order": 130,
       "path": "/ai-control/usage",
       "guard": "authenticated",
       "target": "AiControlUsage"
     },
     {
-      "order": 130,
+      "order": 131,
       "path": "/auth/launch-step-up",
       "guard": "access",
       "target": "AuthLaunchStepUp"
     },
     {
-      "order": 131,
+      "order": 132,
       "path": "/living-brief",
       "guard": "access",
       "target": "LivingBrief"
     },
     {
-      "order": 132,
+      "order": 133,
       "path": "/pricing",
       "guard": "public",
       "target": "Pricing"
     },
     {
-      "order": 133,
+      "order": 134,
       "path": "/features",
       "guard": "public",
       "target": "Features"
     },
     {
-      "order": 134,
+      "order": 135,
       "path": "/about",
       "guard": "public",
       "target": "About"
     },
     {
-      "order": 135,
+      "order": 136,
       "path": "/contact",
       "guard": "public",
       "target": "Contact"
     },
     {
-      "order": 136,
+      "order": 137,
       "path": "*",
       "guard": "public",
       "target": "NotFound"
     },
     {
-      "order": 137,
+      "order": 138,
       "path": "*",
       "guard": "public",
       "target": "inline"
     },
     {
-      "order": 138,
+      "order": 139,
       "path": "*",
       "guard": "public",
       "target": "inline"
@@ -1962,6 +1968,36 @@
       "tables": []
     },
     {
+      "method": "POST",
+      "path": "/projects/:projectId/bimtech-setup-packages/preview",
+      "owner": "artifacts/api-server/src/routes/bimtech-setup-packages.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/bimtech-setup-packages",
+      "owner": "artifacts/api-server/src/routes/bimtech-setup-packages.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/bimtech-setup-packages",
+      "owner": "artifacts/api-server/src/routes/bimtech-setup-packages.ts",
+      "tables": []
+    },
+    {
+      "method": "PUT",
+      "path": "/projects/:projectId/bimtech-setup-packages/:importId/mappings",
+      "owner": "artifacts/api-server/src/routes/bimtech-setup-packages.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/bimtech-setup-packages/:importId/apply",
+      "owner": "artifacts/api-server/src/routes/bimtech-setup-packages.ts",
+      "tables": []
+    },
+    {
       "method": "GET",
       "path": "/projects/:projectId/change-orders",
       "owner": "artifacts/api-server/src/routes/change_orders.ts",
@@ -2204,6 +2240,42 @@
     {
       "method": "POST",
       "path": "/projects/:projectId/clash-reports/lens-next/issues/:serverId/local-viewpoint",
+      "owner": "artifacts/api-server/src/routes/clash_reports.ts",
+      "tables": [
+        "clashReportsTable",
+        "clashesTable",
+        "lensViewpointsTable",
+        "lensViewpointReportsTable",
+        "lensViewpointEventsTable",
+        "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensIssueResponsesTable",
+        "lensNextPublishReceiptsTable",
+        "filesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/clash-reports/lens-next/issues/:serverId/revit-navigation",
+      "owner": "artifacts/api-server/src/routes/clash_reports.ts",
+      "tables": [
+        "clashReportsTable",
+        "clashesTable",
+        "lensViewpointsTable",
+        "lensViewpointReportsTable",
+        "lensViewpointEventsTable",
+        "lensViewpointSequenceCountersTable",
+        "lensIssueViewpointsTable",
+        "lensIssueViewpointRevisionsTable",
+        "lensIssueResponsesTable",
+        "lensNextPublishReceiptsTable",
+        "filesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/clash-reports/lens-next/issues/:serverId/revit-navigation/:requestId/receipt",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
         "clashReportsTable",
@@ -11364,6 +11436,14 @@
     {
       "screen": "artifacts/bimlog/src/pages/AdminPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/feedback/admin/export.csv"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/BimtechSetupPackageImport.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/bimtech-setup-packages"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/BimtechSetupPackageImport.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/members"
     },
     {
       "screen": "artifacts/bimlog/src/pages/BudgetDecisionReview.tsx",

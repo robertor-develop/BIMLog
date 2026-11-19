@@ -14,7 +14,7 @@ assert.match(page, /Clear search/);
 assert.match(page, /Administrator only/);
 assert.match(page, /aria-disabled=\{!entry\.href\}/);
 assert.match(page, /aria-describedby=/);
-assert.match(page, /groupLabel/);
+assert.match(page, /group\.label\[lang\]/);
 const styles = fs.readFileSync(new URL("./AllTools.css", import.meta.url), "utf8");
 assert.match(styles, /@media \(max-width: 720px\)/);
 assert.match(styles, /overflow-x: hidden/);

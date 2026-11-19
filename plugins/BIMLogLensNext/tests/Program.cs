@@ -89,6 +89,7 @@ namespace BIMLogLensNext.Tests
                 Run("xml_document_shell_rejects_invalid_output_path", XmlDocumentShellRejectsInvalidOutputPath);
                 Run("xml_export_inputs_are_stably_ordered", XmlExportInputsAreStablyOrdered);
                 Run("xml_v2_organizes_open_and_resolved_workflow_status", XmlV2OrganizesOpenAndResolvedWorkflowStatus);
+                Run("xml_v2_organizes_by_floor_and_responsible_contractor", XmlV2OrganizesByFloorAndResponsibleContractor);
                 Run("xml_export_input_ties_use_server_id", XmlExportInputTiesUseServerId);
                 Run("xml_export_inputs_reject_cross_project_and_invalid_package", XmlExportInputsRejectCrossProjectAndInvalidPackage);
                 Run("xml_export_inputs_preserve_active_lifecycle_policy", XmlExportInputsPreserveActiveLifecyclePolicy);
@@ -252,7 +253,7 @@ namespace BIMLogLensNext.Tests
                 Equal("13,12,11", string.Join(",", ordered.Select(value => value.ServerId)));
                 var xml = File.ReadAllText(path);
                 True(xml.Contains("<position>"));
-                Equal(3, new XmlDocumentShell(path).ViewFolderCount);
+                Equal(5, new XmlDocumentShell(path).ViewFolderCount);
                 Equal("VP-13,VP-12,VP-11", string.Join(",", new XmlDocumentShell(path).ViewNames));
                 True(new XmlDocumentShell(path).ViewGuids.All(value => Guid.TryParseExact(value, "D", out _)));
             }
@@ -284,8 +285,8 @@ namespace BIMLogLensNext.Tests
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { resolved, open });
                 var document = new XmlDocument { XmlResolver = null };
                 document.Load(path);
-                Equal("VP-41", ((XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder[@name='BIMLog Viewpoints']/viewfolder[@name='Open']/view")).GetAttribute("name"));
-                Equal("VP-42", ((XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder[@name='BIMLog Viewpoints']/viewfolder[@name='Resolved']/view")).GetAttribute("name"));
+                Equal("VP-41", ((XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder[@name='BIMLog Viewpoints']/viewfolder[@name='Open']/viewfolder[@name='L01']/viewfolder[@name='BIM']/view")).GetAttribute("name"));
+                Equal("VP-42", ((XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder[@name='BIMLog Viewpoints']/viewfolder[@name='Resolved']/viewfolder[@name='L01']/viewfolder[@name='BIM']/view")).GetAttribute("name"));
                 Equal(2, document.SelectNodes("/exchange/viewpoints//view").Count);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -311,6 +312,31 @@ namespace BIMLogLensNext.Tests
             var wrongDigest = ExportInput(12, 1, null);
             wrongDigest.PackageDigest = new string('b', 64);
             Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { wrongDigest }));
+        }
+
+        private static void XmlV2OrganizesByFloorAndResponsibleContractor()
+        {
+            var l14Bam = ExportInput(44, 1, null); l14Bam.Floor = "L14"; l14Bam.ResponsibleCompany = "BAM";
+            var l14Rl = ExportInput(45, 2, null); l14Rl.Floor = "L14"; l14Rl.ResponsibleCompany = "RL";
+            var ugdDds = ExportInput(46, 3, null); ugdDds.Floor = "UGD"; ugdDds.ResponsibleCompany = "DDS";
+            var unassigned = ExportInput(47, 4, null); unassigned.Floor = null; unassigned.ResponsibleCompany = " ";
+            var resolved = ExportInput(48, 5, null); resolved.WorkflowStatus = "resolved"; resolved.Floor = "L15"; resolved.ResponsibleCompany = "SUPREME";
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-xml-grouping-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "grouped.xml");
+                LensNextXmlDocumentShellWriter.Write(path, 26, new[] { resolved, unassigned, ugdDds, l14Rl, l14Bam });
+                var document = new XmlDocument { XmlResolver = null }; document.Load(path);
+                var root = "/exchange/viewpoints/viewfolder[@name='BIMLog Viewpoints']";
+                Equal("VP-44", ((XmlElement)document.SelectSingleNode(root + "/viewfolder[@name='Open']/viewfolder[@name='L14']/viewfolder[@name='BAM']/view")).GetAttribute("name"));
+                Equal("VP-45", ((XmlElement)document.SelectSingleNode(root + "/viewfolder[@name='Open']/viewfolder[@name='L14']/viewfolder[@name='RL']/view")).GetAttribute("name"));
+                Equal("VP-46", ((XmlElement)document.SelectSingleNode(root + "/viewfolder[@name='Open']/viewfolder[@name='UGD']/viewfolder[@name='DDS']/view")).GetAttribute("name"));
+                Equal("VP-47", ((XmlElement)document.SelectSingleNode(root + "/viewfolder[@name='Open']/viewfolder[@name='Unspecified Floor']/viewfolder[@name='Unassigned']/view")).GetAttribute("name"));
+                Equal("VP-48", ((XmlElement)document.SelectSingleNode(root + "/viewfolder[@name='Resolved']/viewfolder[@name='L15']/viewfolder[@name='SUPREME']/view")).GetAttribute("name"));
+                Equal(5, document.SelectNodes(root + "//view").Count);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
         }
 
         private static void XmlExportInputsPreserveActiveLifecyclePolicy()
@@ -1638,6 +1664,7 @@ namespace BIMLogLensNext.Tests
             {
                 ProjectId = 26, ServerId = serverId, ViewpointId = "VP-" + serverId,
                 WorkflowStatus = "open",
+                Floor = "L01", ResponsibleCompany = "BIM",
                 LifecycleStatus = "active", RevisionNumber = 1, Priority = priority, CapturedAt = capturedAt,
                 VisualStateDigest = digest, PackageProjectId = 26, PackageServerId = serverId,
                 PackageViewpointId = "VP-" + serverId, PackageLifecycleStatus = "active",

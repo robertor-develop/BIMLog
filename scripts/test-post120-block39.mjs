@@ -6,8 +6,8 @@ const installer = fs.readFileSync("plugins/BIMLogLensNext/Install-BIMLogLensNext
 const canonicalBuilder = fs.readFileSync("plugins/BIMLogLensNext/Build-CanonicalLensNextPackages.ps1", "utf8");
 
 assert.equal(evidence.release, "v1.05.N18-P36");
-assert.equal(evidence.rubenPhysical2025.status, "DEFERRED_TO_RUBEN");
-assert.equal(evidence.rubenPhysical2025.resultIngested, false);
+assert.equal(evidence.rubenPhysical2025.status, "ACCEPTED_BY_OWNER");
+assert.equal(evidence.rubenPhysical2025.resultIngested, true);
 assert.equal(evidence.rubenPhysical2025.reopensBuild119, false);
 assert.equal(evidence.installed2021.retiredDirectLoad.containsRetiredLensPanel, true);
 assert.equal(evidence.installed2021.retiredDirectLoad.state, "REMOVED_WITH_ROLLBACK_EVIDENCE");
@@ -28,6 +28,6 @@ for (const candidate of evidence.packageCandidates) {
 }
 
 for (const result of Object.values(evidence.workflowAndRollback))
-  assert.ok(result === "PASS" || result === "DEFERRED_TO_RUBEN" || result === "PASS_PULSE_AND_LENS_NEXT_ONLY");
+  assert.ok(result === "PASS" || result === "ACCEPTED_BY_OWNER" || result === "PASS_PULSE_AND_LENS_NEXT_ONLY");
 
-console.log("POST120_BLOCK39=PASS years=2021,2025 physical2021=closed physical2025=deferred-to-ruben");
+console.log("POST120_BLOCK39=PASS years=2021,2025 physical2021=closed physical2025=accepted-by-owner");

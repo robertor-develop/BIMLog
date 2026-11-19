@@ -1,0 +1,27 @@
+import assert from "node:assert/strict";
+import { buildRevitNavigationTarget, LENS_NEXT_REVIT_CONTRACT, validateRevitNavigationTarget } from "./lens-next-revit-navigation";
+import { readFileSync } from "node:fs";
+
+const expected={projectId:7,issueId:91,viewpointId:"VP-91",visualStateDigest:"a".repeat(64)};
+const target={contractVersion:LENS_NEXT_REVIT_CONTRACT,projectId:7,issueId:91,viewpointId:"VP-91",visualStateDigest:"a".repeat(64),model:{documentGuid:"2b119d42-f632-43de-a3a7-1fa98e51599a",centralModelGuid:null,fileNameNormalized:"model.rvt",revitMajorVersion:2026 as const,coordinateFrame:"revit-internal" as const,navisworksToRevitTransform:[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]},revitInternalPoint:{x:1,y:2,z:3},revitElementIds:[8,13]};
+const validated=validateRevitNavigationTarget(target,expected);
+assert.match(validated.digest,/^[a-f0-9]{64}$/);
+assert.throws(()=>validateRevitNavigationTarget({...target,projectId:8},expected),/exact authorized BIMLog issue revision/);
+assert.throws(()=>validateRevitNavigationTarget({...target,model:{...target.model,navisworksToRevitTransform:[1]}},expected),/finite 4x4 transform/);
+assert.throws(()=>validateRevitNavigationTarget({...target,revitElementIds:[8,8]},expected),/element identities/);
+const built=buildRevitNavigationTarget({...expected,visualState:{Camera:{Position:{X:10,Y:20,Z:30}}},model:target.model});
+assert.deepEqual(built.target.revitInternalPoint,{x:10,y:20,z:30});
+assert.throws(()=>buildRevitNavigationTarget({...expected,visualState:{},model:target.model}),/finite navigation position/);
+const routes=readFileSync(new URL("../routes/clash_reports.ts",import.meta.url),"utf8");
+const start=routes.indexOf('router.post("/projects/:projectId/clash-reports/lens-next/issues/:serverId/revit-navigation"');
+const receipt=routes.indexOf('router.post("/projects/:projectId/clash-reports/lens-next/issues/:serverId/revit-navigation/:requestId/receipt"');
+assert.ok(start>0&&receipt>start);
+const requestBlock=routes.slice(start,receipt);
+assert.match(requestBlock,/authMiddleware, requirePermission\("admin", "write"\)/);
+assert.match(requestBlock,/project_id=\$2/);
+assert.match(requestBlock,/visual_state_digest/);
+const receiptBlock=routes.slice(receipt,receipt+3500);
+assert.match(receiptBlock,/requested_by_id=\$6/);
+assert.match(receiptBlock,/outcome='requested'/);
+assert.match(receiptBlock,/expires_at>NOW\(\)/);
+console.log("Lens Next Revit API contract: PASS");

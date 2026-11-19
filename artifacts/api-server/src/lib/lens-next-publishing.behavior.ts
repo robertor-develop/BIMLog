@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { LensNextPublishError, parseLensNextPublishRequest, publishLensNextAction } from "./lens-next-publishing";
 
-type State = { issue: any; receipts: any[]; activity: any[]; member: boolean };
+type State = { issue: any; receipts: any[]; activity: any[]; events: any[]; member: boolean };
 class MemoryPool {
-  state: State = { issue: { id: 7, viewpoint_id: "vp-7", lifecycle_status: "active", revision_number: 2, mutation_version: 3, status: "open", responsible_company: "Trade A" }, receipts: [], activity: [], member: true };
+  state: State = { issue: { id: 7, viewpoint_id: "vp-7", lifecycle_status: "active", revision_number: 2, mutation_version: 3, status: "open", responsible_company: "Trade A" }, receipts: [], activity: [], events: [], member: true };
   async query() { return { rows: [] }; }
   async connect() {
     const saved = structuredClone(this.state);
@@ -18,7 +18,8 @@ class MemoryPool {
       if (sql.startsWith("UPDATE lens_viewpoints SET status")) { this.state.issue.status = values[0]; this.state.issue.mutation_version++; return { rows: [structuredClone(this.state.issue)] }; }
       if (sql.startsWith("UPDATE lens_viewpoints SET responsible_company")) { this.state.issue.responsible_company = values[0]; this.state.issue.mutation_version++; return { rows: [structuredClone(this.state.issue)] }; }
       if (sql.startsWith("UPDATE lens_viewpoints SET mutation_version")) { this.state.issue.mutation_version++; return { rows: [structuredClone(this.state.issue)] }; }
-      if (sql.startsWith("INSERT INTO activity_log")) { this.state.activity.push({ action_type: "RESPONSIBLE_COMPANY_CHANGED", values }); return { rows: [] }; }
+      if (sql.startsWith("INSERT INTO activity_log")) { this.state.activity.push({ action_type: sql.includes("RESPONSIBLE_COMPANY_CHANGED") ? "RESPONSIBLE_COMPANY_CHANGED" : "lens_issue_status_changed", values }); return { rows: [] }; }
+      if (sql.startsWith("INSERT INTO lens_viewpoint_events")) { this.state.events.push({ values }); return { rows: [] }; }
       if (sql.startsWith("INSERT INTO lens_next_publish_receipts")) { this.state.receipts.push({ actor_user_id: values[2], idempotency_key: values[3], request_hash: values[4], response_payload: JSON.parse(String(values[12])) }); return { rows: [] }; }
       throw new Error(`unexpected SQL: ${sql}`);
     }};
@@ -44,12 +45,15 @@ const pool = new MemoryPool();
 const first = await publishLensNextAction(pool as any, actor, parsed);
 assert.equal(first.issue.status, "follow_up");
 assert.equal(first.issue.mutationVersion, 4);
-assert.equal(pool.state.receipts.length, 1); checks.push("status and immutable receipt commit together");
+assert.equal(pool.state.receipts.length, 1); assert.equal(pool.state.activity[0].action_type, "lens_issue_status_changed"); assert.equal(pool.state.events.length, 1); checks.push("status, immutable receipt, activity audit, and status event commit together");
 const replay = await publishLensNextAction(pool as any, actor, parsed);
 assert.equal(replay.replayed, true); assert.equal(pool.state.receipts.length, 1); checks.push("identical retry replays once");
 await assert.rejects(() => publishLensNextAction(pool as any, actor, parseLensNextPublishRequest(body("publish-key-0001", { type: "comment", comment: "different" }), 3, 7)), /idempotency key/); checks.push("divergent retry conflicts");
 await assert.rejects(() => publishLensNextAction(pool as any, actor, parseLensNextPublishRequest(body("publish-key-0002", { type: "comment", comment: "stale" }), 3, 7)), (error: any) => error.code === "LENS_NEXT_VERSION_CONFLICT" && error.current.mutationVersion === 4); checks.push("stale version returns safe current snapshot");
 await assert.rejects(() => publishLensNextAction(new MemoryPool() as any, { ...actor, permission: "read" }, parsed), (error: any) => error.status === 403); checks.push("read-only role denied");
+const invalidTransitionPool = new MemoryPool(); invalidTransitionPool.state.issue.status = "resolved";
+await assert.rejects(() => publishLensNextAction(invalidTransitionPool as any, actor, parseLensNextPublishRequest(body("publish-key-invalid", { type: "status", status: "follow_up" }), 3, 7)), (error: any) => error.code === "LENS_NEXT_STATUS_TRANSITION_INVALID");
+assert.equal(invalidTransitionPool.state.issue.status, "resolved"); assert.equal(invalidTransitionPool.state.receipts.length, 0); checks.push("authoritative transition matrix rejects invalid quick status without mutation");
 const rollbackPool = new MemoryPool();
 await assert.rejects(() => publishLensNextAction(rollbackPool as any, actor, parsed, { beforeAudit: async () => { throw new Error("forced audit failure"); } }), /forced audit failure/);
 assert.equal(rollbackPool.state.issue.status, "open"); assert.equal(rollbackPool.state.receipts.length, 0); checks.push("audit failure rolls mutation back");

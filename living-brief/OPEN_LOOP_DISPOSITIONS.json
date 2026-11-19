@@ -1,17 +1,17 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "30f45c9d33dde0a34e7e663928ee017c7753dacee6b97d2852146b216556c5ab",
-  "itemCount": 581,
+  "sourceSha256": "51468984287fcd631dafe6e76896a1678f7e71d8097680504bf1cf8ef7af8d12",
+  "itemCount": 589,
   "counts": {
-    "ACTIVE": 521,
+    "ACTIVE": 529,
     "SUPERSEDED": 48,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 405,
-    "VALID_FUTURE_ROADMAP": 12,
+    "ACTIVE_DEFECT": 412,
+    "VALID_FUTURE_ROADMAP": 13,
     "EXTERNAL_OWNER_INPUT": 104,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 48,
@@ -11141,6 +11141,158 @@
       "evidence": [
         "OPEN_LOOP.md:6945",
         "2026-11-13 — Lens contractor-response production correction"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "fd2641906419ab0b",
+      "sourceLine": 6952,
+      "heading": "Lens three-feature release gate — 2026-11-13",
+      "statement": "On a licensed Revit 2026 workstation, compile against the installed official Autodesk API assemblies, build the package, install it, configure the exact project/document/shared-coordinate binding, and navigate a real BIMLog issue to the expected model location. This is a physical validation gate; do not replace it with a fake SDK or a source-only claim.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Lens Next",
+        "route": "/lens-next",
+        "module": "artifacts/bimlog/src/features/lens-next"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6952",
+        "Lens three-feature release gate — 2026-11-13"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "35709747ea7fce20",
+      "sourceLine": 6953,
+      "heading": "Lens three-feature release gate — 2026-11-13",
+      "statement": "After that physical gate passes, rerun the full production build and security/regression suites, push the exact candidate, publish it, verify migrations and immutable deployment identity, then complete three authenticated visible Chrome rounds without mutating customer records beyond an explicitly identified test record.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6953",
+        "Lens three-feature release gate — 2026-11-13"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "26f55744a7cebea7",
+      "sourceLine": 6957,
+      "heading": "Current Revit 2026.5+ release gate — 2026-11-13",
+      "statement": "On a controlled Windows workstation with .NET 10 SDK and licensed Revit 2026.5 or later, compile the adapter against the installed official `RevitAPI.dll` and `RevitAPIUI.dll`; do not substitute copied or fake SDK assemblies.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "VALID_FUTURE_ROADMAP",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6957",
+        "Current Revit 2026.5+ release gate — 2026-11-13"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "666ecd2265f08445",
+      "sourceLine": 6958,
+      "heading": "Current Revit 2026.5+ release gate — 2026-11-13",
+      "statement": "Build and checksum the guarded Revit package, install it for the test user, restart Revit, bind the exact BIMLog project/model transform, and prove one positive navigation plus wrong-model, expired-request, replay, cross-project and unauthorized negative cases on a non-customer test model.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6958",
+        "Current Revit 2026.5+ release gate — 2026-11-13"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "cc6387180355b114",
+      "sourceLine": 6959,
+      "heading": "Current Revit 2026.5+ release gate — 2026-11-13",
+      "statement": "Only after those native gates pass: rerun the clean repository build, push the complete 20-build candidate, publish through the established Replit Shell path without Replit Agents, verify exact deployment identity, and complete three authenticated Chrome rounds. No customer data may be used for destructive or synthetic validation.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6959",
+        "Current Revit 2026.5+ release gate — 2026-11-13"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "5f8a48e829ded5ce",
+      "sourceLine": 6967,
+      "heading": "Exact-head web publication continuation — 2026-11-16",
+      "statement": "Complete the clean exact-head build, performance budgets and production-artifact gates; then push normally and verify canonical remote equality.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6967",
+        "Exact-head web publication continuation — 2026-11-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "0b3743724efc896e",
+      "sourceLine": 6968,
+      "heading": "Exact-head web publication continuation — 2026-11-16",
+      "statement": "Publish the verified web/API source through the existing Replit Shell path without Replit Agents, verify exact deployed identity/version/health, and complete three authenticated visible-Chrome rounds.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6968",
+        "Exact-head web publication continuation — 2026-11-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "1784ad3b95ac8662",
+      "sourceLine": 6969,
+      "heading": "Exact-head web publication continuation — 2026-11-16",
+      "statement": "Keep the Revit 2026.5+ binary/package/physical model-navigation gate explicit and fail-closed until a controlled licensed workstation with .NET 10 and official Autodesk assemblies is available; do not describe web publication as physical Revit acceptance.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6969",
+        "Exact-head web publication continuation — 2026-11-16"
       ],
       "currentAuthority": false
     }

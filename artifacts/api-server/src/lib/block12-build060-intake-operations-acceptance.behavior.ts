@@ -9,7 +9,7 @@ const chain = [
   [intake, /INSERT INTO job_activation_work_items/],
   [intake, /INSERT INTO job_activation_tasks/],
   [intake, /INSERT INTO job_activation_resource_assignments/],
-  [operations, /identity, financialAuthority, operationalProjection, activity/],
+  [operations, /identity, financialAuthority, internalCostGovernance, floorHourCostGovernance, operationalProjection, activity/],
   [operations, /WHERE id=\$1 AND version=\$2/],
   [operations, /WITH RECURSIVE successors/],
   [operations, /job_activation_time_entries/],
