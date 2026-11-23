@@ -10,5 +10,7 @@ if($LASTEXITCODE-ne 0){throw 'Official Revit 2026.5+ .NET 10 adapter compilation
 Copy-Item -LiteralPath (Join-Path $root 'BIMLogLensNext.Revit2026.addin') -Destination $stage
 Copy-Item -LiteralPath (Join-Path $root 'Install-Revit2026.ps1') -Destination $stage
 Copy-Item -LiteralPath (Join-Path $root 'Uninstall-Revit2026.ps1') -Destination $stage
+Copy-Item -LiteralPath (Join-Path $root 'INSTALL-BIMLOG-LENS-REVIT-2026.bat') -Destination $stage
+Copy-Item -LiteralPath (Join-Path $root 'UNINSTALL-BIMLOG-LENS-REVIT-2026.bat') -Destination $stage
 if(Test-Path -LiteralPath $output){Remove-Item -LiteralPath $output -Force};Compress-Archive -LiteralPath (Join-Path $stage '*') -DestinationPath $output
 [pscustomobject]@{Version=$Version;Path=$output;Bytes=(Get-Item $output).Length;Sha256=(Get-FileHash $output -Algorithm SHA256).Hash}|ConvertTo-Json
