@@ -71,6 +71,15 @@ interface Meeting {
   updatedAt?: string;
 }
 
+interface MeetingPublication {
+  id: number;
+  kind: "agenda" | "minutes";
+  version: number;
+  snapshotSha256: string;
+  publishedById: number;
+  publishedAt: string;
+}
+
 interface Attendee {
   id?: number;
   companyId?: number | null;
@@ -639,6 +648,8 @@ export function MeetingsTab({
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [actionSaving, setActionSaving] = useState(false);
   const [publicationSaving, setPublicationSaving] = useState<number | null>(null);
+  const [publicationHistory, setPublicationHistory] = useState<Record<number, MeetingPublication[] | undefined>>({});
+  const [publicationHistoryError, setPublicationHistoryError] = useState<Record<number, string>>({});
   const actionSaveLock = useRef(false);
   const summaryRequestLock = useRef(false);
   const summaryRequestEpoch = useRef(0);
@@ -1465,6 +1476,27 @@ export function MeetingsTab({
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("Could not publish this meeting.", "No se pudo publicar esta reunión."));
     } finally { setPublicationSaving(null); }
+  };
+
+  const togglePublicationHistory = async (meeting: Meeting) => {
+    if (publicationHistory[meeting.id]) {
+      setPublicationHistory((previous) => ({ ...previous, [meeting.id]: undefined }));
+      return;
+    }
+    setPublicationHistoryError((previous) => ({ ...previous, [meeting.id]: "" }));
+    try {
+      const response = await fetch(`${API}/projects/${projectId}/meetings/${meeting.id}/publications`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const rows = await response.json();
+      if (!response.ok) throw new Error(rows.error ?? "meeting_publication_history_failed");
+      setPublicationHistory((previous) => ({ ...previous, [meeting.id]: rows }));
+    } catch (cause) {
+      setPublicationHistoryError((previous) => ({
+        ...previous,
+        [meeting.id]: cause instanceof Error ? cause.message : t("Could not load publication history.", "No se pudo cargar el historial de publicación."),
+      }));
+    }
   };
 
   const meetingPdfUrl = (meetingId: number) =>
@@ -3598,6 +3630,27 @@ export function MeetingsTab({
                       >
                         <Trash2 size={12} />
                       </button>
+                    )}
+                  </div>
+                  <div style={{flexBasis:"100%"}}>
+                    <button className="btn btn-sm btn-outline" onClick={() => void togglePublicationHistory(m)}>
+                      {publicationHistory[m.id]
+                        ? t("Hide publication history", "Ocultar historial de publicación")
+                        : t("View publication history", "Ver historial de publicación")}
+                    </button>
+                    {publicationHistoryError[m.id] && <div role="alert" style={{fontSize:12,color:"#B91C1C",marginTop:6}}>{publicationHistoryError[m.id]}</div>}
+                    {publicationHistory[m.id] && (
+                      <div aria-label={t("Immutable publication history", "Historial inmutable de publicaciones")} style={{display:"grid",gap:6,marginTop:8}}>
+                        {publicationHistory[m.id]!.length === 0 ? (
+                          <div style={{fontSize:12,color:"#64748B"}}>{t("No agenda or minutes have been published yet.", "Aún no se publicó agenda ni acta.")}</div>
+                        ) : publicationHistory[m.id]!.map((publication) => (
+                          <div key={publication.id} style={{fontSize:12,padding:8,border:"1px solid #E2E8F0",borderRadius:8,background:"#F8FAFC"}}>
+                            <strong>{publication.kind === "agenda" ? t("Agenda", "Agenda") : t("Minutes", "Acta")} v{publication.version}</strong>
+                            {" · "}{new Date(publication.publishedAt).toLocaleString()}
+                            {" · "}{t("Evidence", "Evidencia")}: <code>{publication.snapshotSha256.slice(0, 12)}</code>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                   {canWrite && <MeetingActionCreate projectId={projectId} meetingId={m.id} members={memberList} onSaved={loadMeetings} />}
