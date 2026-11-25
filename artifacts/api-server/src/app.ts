@@ -1314,6 +1314,12 @@ const livingBriefAndLensStartupBarrier = queueDatabaseStartup(async () => {
     await pool.query(
       `CREATE INDEX IF NOT EXISTS meeting_attendees_directory_entry_idx ON meeting_attendees (meeting_id, directory_entry_id)`,
     );
+    await pool.query(
+      `ALTER TABLE meeting_attendees ADD COLUMN IF NOT EXISTS invitation_status TEXT NOT NULL DEFAULT 'not_sent'`,
+    );
+    await pool.query(
+      `ALTER TABLE meeting_attendees ADD COLUMN IF NOT EXISTS attendance_status TEXT NOT NULL DEFAULT 'unknown'`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS meeting_drafts (
       id SERIAL PRIMARY KEY,
       project_id INTEGER NOT NULL REFERENCES projects(id),

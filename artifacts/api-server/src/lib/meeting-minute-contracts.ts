@@ -13,6 +13,8 @@ export const meetingParticipantInputSchema = z.object({
   full_name: boundedText(256),
   company: optionalNullableText(256),
   role: optionalNullableText(256),
+  invitation_status: z.enum(["not_sent", "invited", "accepted", "declined", "tentative"]).optional(),
+  attendance_status: z.enum(["unknown", "present", "absent", "excused"]).optional(),
 }).strict();
 
 export const meetingCreateCommandSchema = z.object({

@@ -30,6 +30,8 @@ export function resolveMeetingParticipants(raw: unknown) {
       fullName: normalizedText(input.full_name)!,
       company: normalizedText(input.company),
       role: normalizedText(input.role),
+      invitationStatus: input.invitation_status ?? "not_sent",
+      attendanceStatus: input.attendance_status ?? "unknown",
     };
   });
 }

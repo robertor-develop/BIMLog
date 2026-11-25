@@ -101,6 +101,8 @@ export const meetingAttendeesTable = pgTable(
     fullName: text("full_name").notNull(),
     company: text("company"),
     role: text("role"),
+    invitationStatus: text("invitation_status").default("not_sent").notNull(),
+    attendanceStatus: text("attendance_status").default("unknown").notNull(),
   },
   (t) => [
     foreignKey({

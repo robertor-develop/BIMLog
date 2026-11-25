@@ -2343,6 +2343,8 @@ router.post(
               fullName: attendee.fullName,
               company: attendee.company,
               role: attendee.role,
+              invitationStatus: attendee.invitationStatus,
+              attendanceStatus: attendee.attendanceStatus,
             })),
           );
         }
@@ -3662,6 +3664,8 @@ router.patch(
                 fullName: attendee.fullName,
                 company: attendee.company,
                 role: attendee.role,
+                invitationStatus: attendee.invitationStatus,
+                attendanceStatus: attendee.attendanceStatus,
               })),
             );
           }
