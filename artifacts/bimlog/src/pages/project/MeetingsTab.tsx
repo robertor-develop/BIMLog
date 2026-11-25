@@ -57,6 +57,7 @@ interface Meeting {
   attendeeCount: number;
   openActionItems: number;
   actionItemCount: number;
+  lifecycleStatus: string;
   createdAt: string;
   linkedRfis?: LinkedRfi[];
   legacyRfis?: RFIRow[];
@@ -637,6 +638,7 @@ export function MeetingsTab({
   } | null>(null);
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [actionSaving, setActionSaving] = useState(false);
+  const [publicationSaving, setPublicationSaving] = useState<number | null>(null);
   const actionSaveLock = useRef(false);
   const summaryRequestLock = useRef(false);
   const summaryRequestEpoch = useRef(0);
@@ -1415,6 +1417,54 @@ export function MeetingsTab({
     } finally {
       setActionSaving(false);
     }
+  };
+
+  const lifecycleLabel = (status: string) => ({
+    draft_agenda: t("Draft agenda", "Agenda borrador"),
+    published_agenda: t("Published agenda", "Agenda publicada"),
+    in_progress: t("In progress", "En curso"),
+    draft_minutes: t("Draft minutes", "Acta borrador"),
+    published_minutes: t("Published minutes", "Acta publicada"),
+    cancelled: t("Cancelled", "Cancelada"),
+  } as Record<string, string>)[status] ?? status;
+
+  const changeMeetingLifecycle = async (meeting: Meeting, status: string) => {
+    if (!canWrite || publicationSaving !== null) return;
+    setPublicationSaving(meeting.id); setError(""); setSuccessMessage("");
+    try {
+      const response = await fetch(`${API}/projects/${projectId}/meetings/${meeting.id}/lifecycle`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "meeting_lifecycle_update_failed");
+      await loadMeetings();
+      setSuccessMessage(t("Meeting status updated and audited.", "Estado de la reunión actualizado y auditado."));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("Could not update the meeting status.", "No se pudo actualizar el estado."));
+    } finally { setPublicationSaving(null); }
+  };
+
+  const publishMeeting = async (meeting: Meeting, kind: "agenda" | "minutes") => {
+    if (!canWrite || publicationSaving !== null) return;
+    setPublicationSaving(meeting.id); setError(""); setSuccessMessage("");
+    try {
+      const response = await fetch(`${API}/projects/${projectId}/meetings/${meeting.id}/publications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ kind }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "meeting_publication_failed");
+      await loadMeetings();
+      setSuccessMessage(t(
+        `${kind === "agenda" ? "Agenda" : "Minutes"} version ${result.version} published with immutable evidence.`,
+        `${kind === "agenda" ? "Agenda" : "Acta"} versión ${result.version} publicada con evidencia inmutable.`,
+      ));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("Could not publish this meeting.", "No se pudo publicar esta reunión."));
+    } finally { setPublicationSaving(null); }
   };
 
   const meetingPdfUrl = (meetingId: number) =>
@@ -3398,6 +3448,32 @@ export function MeetingsTab({
                       flexWrap: "wrap",
                     }}
                   >
+                    <span
+                      aria-label={t("Meeting lifecycle", "Ciclo de la reunión")}
+                      style={{fontSize:11,fontWeight:800,padding:"6px 9px",borderRadius:999,background:"#E0E7FF",color:"#3730A3"}}
+                    >
+                      {lifecycleLabel(m.lifecycleStatus)}
+                    </span>
+                    {canWrite && m.lifecycleStatus === "draft_agenda" && (
+                      <button className="btn btn-sm btn-primary" disabled={publicationSaving === m.id} onClick={() => void publishMeeting(m, "agenda")}>
+                        {t("Publish Agenda", "Publicar Agenda")}
+                      </button>
+                    )}
+                    {canWrite && m.lifecycleStatus === "published_agenda" && (
+                      <button className="btn btn-sm btn-primary" disabled={publicationSaving === m.id} onClick={() => void changeMeetingLifecycle(m, "in_progress")}>
+                        {t("Start Meeting", "Iniciar Reunión")}
+                      </button>
+                    )}
+                    {canWrite && m.lifecycleStatus === "in_progress" && (
+                      <button className="btn btn-sm btn-primary" disabled={publicationSaving === m.id} onClick={() => void changeMeetingLifecycle(m, "draft_minutes")}>
+                        {t("Complete Meeting", "Completar Reunión")}
+                      </button>
+                    )}
+                    {canWrite && m.lifecycleStatus === "draft_minutes" && (
+                      <button className="btn btn-sm btn-primary" disabled={publicationSaving === m.id} onClick={() => void publishMeeting(m, "minutes")}>
+                        {t("Publish Minutes", "Publicar Acta")}
+                      </button>
+                    )}
                     {canWrite && (
                       <button
                         className="btn btn-sm btn-primary"
