@@ -148,6 +148,29 @@ export const meetingAgendaItemsTable = pgTable(
   }),
 );
 
+export const meetingPublicationsTable = pgTable(
+  "meeting_publications",
+  {
+    id: serial("id").primaryKey(),
+    projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+    meetingId: integer("meeting_id").references(() => meetingMinutesTable.id).notNull(),
+    kind: text("kind").notNull(),
+    version: integer("version").notNull(),
+    snapshot: jsonb("snapshot").$type<Record<string, unknown>>().notNull(),
+    snapshotSha256: text("snapshot_sha256").notNull(),
+    publishedById: integer("published_by_id").references(() => usersTable.id).notNull(),
+    publishedAt: timestamp("published_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    meetingKindVersionUnique: uniqueIndex("meeting_publications_meeting_kind_version_uidx").on(
+      t.meetingId, t.kind, t.version,
+    ),
+    projectMeetingIdx: index("meeting_publications_project_meeting_idx").on(
+      t.projectId, t.meetingId,
+    ),
+  }),
+);
+
 export const meetingDraftsTable = pgTable(
   "meeting_drafts",
   {

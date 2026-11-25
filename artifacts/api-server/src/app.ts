@@ -880,6 +880,27 @@ queueDatabaseStartup(async () => {
   } catch (e) {
     console.error("[migration] smart meeting agenda items failed:", e);
   }
+
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS meeting_publications (
+      id SERIAL PRIMARY KEY,
+      project_id INTEGER NOT NULL REFERENCES projects(id),
+      meeting_id INTEGER NOT NULL REFERENCES meeting_minutes(id),
+      kind TEXT NOT NULL CHECK (kind IN ('agenda','minutes')),
+      version INTEGER NOT NULL CHECK (version > 0),
+      snapshot JSONB NOT NULL,
+      snapshot_sha256 TEXT NOT NULL,
+      published_by_id INTEGER NOT NULL REFERENCES users(id),
+      published_at TIMESTAMP NOT NULL DEFAULT NOW()
+    )`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_publications_meeting_kind_version_uidx
+      ON meeting_publications (meeting_id, kind, version)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS meeting_publications_project_meeting_idx
+      ON meeting_publications (project_id, meeting_id)`);
+    console.log("[migration] smart meeting publications ensured");
+  } catch (e) {
+    console.error("[migration] smart meeting publications failed:", e);
+  }
 });
 
 queueDatabaseStartup(async () => {
