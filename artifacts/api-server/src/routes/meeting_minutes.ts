@@ -35,6 +35,7 @@ import {
   meetingDraftsTable,
   meetingAgendaItemsTable,
   meetingSeriesTable,
+  meetingPublicationsTable,
   projectsTable,
 } from "@workspace/db/schema";
 import {
@@ -1479,6 +1480,95 @@ router.patch(
     } catch (error) {
       const code = error instanceof Error ? error.message : "meeting_lifecycle_update_failed";
       const status = code === "meeting_lifecycle_transition_denied" ? 409 : code === "meeting_lifecycle_invalid" ? 400 : code === "meeting_lifecycle_stale" ? 409 : 500;
+      res.status(status).json({ error: code });
+    }
+  },
+);
+
+router.get(
+  "/projects/:projectId/meetings/:meetingId/publications",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    const publications = await db.select({
+      id: meetingPublicationsTable.id,
+      kind: meetingPublicationsTable.kind,
+      version: meetingPublicationsTable.version,
+      snapshotSha256: meetingPublicationsTable.snapshotSha256,
+      publishedById: meetingPublicationsTable.publishedById,
+      publishedAt: meetingPublicationsTable.publishedAt,
+    }).from(meetingPublicationsTable).where(and(
+      eq(meetingPublicationsTable.projectId, projectId),
+      eq(meetingPublicationsTable.meetingId, meetingId),
+    )).orderBy(desc(meetingPublicationsTable.publishedAt));
+    res.json(publications);
+  },
+);
+
+router.post(
+  "/projects/:projectId/meetings/:meetingId/publications",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    const kind = String(req.body?.kind ?? "").trim().toLowerCase();
+    if (kind !== "agenda" && kind !== "minutes") {
+      res.status(400).json({ error: "meeting_publication_kind_invalid" });
+      return;
+    }
+    try {
+      const publication = await db.transaction(async (tx) => {
+        const [meeting] = await tx.select().from(meetingMinutesTable).where(and(
+          eq(meetingMinutesTable.id, meetingId),
+          eq(meetingMinutesTable.projectId, projectId),
+          isNull(meetingMinutesTable.deletedAt),
+        )).limit(1).for("update");
+        if (!meeting) return null;
+        const target = kind === "agenda" ? "published_agenda" : "published_minutes";
+        const transition = assertMeetingLifecycleTransition(meeting.lifecycleStatus, target);
+        if (transition.replayed) throw new Error("meeting_publication_already_current");
+        const [attendees, agendaItems, actions, rfiLinks, submittalLinks, lensLinks] = await Promise.all([
+          tx.select().from(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, meetingId)),
+          tx.select().from(meetingAgendaItemsTable).where(eq(meetingAgendaItemsTable.meetingId, meetingId)).orderBy(asc(meetingAgendaItemsTable.sortOrder)),
+          tx.select().from(actionItemsTable).where(eq(actionItemsTable.meetingId, meetingId)),
+          tx.select().from(meetingRfiLinksTable).where(eq(meetingRfiLinksTable.meetingId, meetingId)),
+          tx.select().from(meetingSubmittalLinksTable).where(eq(meetingSubmittalLinksTable.meetingId, meetingId)),
+          tx.select().from(meetingLensViewpointLinksTable).where(eq(meetingLensViewpointLinksTable.meetingId, meetingId)),
+        ]);
+        const snapshot = { meeting, attendees, agendaItems, actions, rfiLinks, submittalLinks, lensLinks };
+        const serialized = JSON.stringify(snapshot);
+        const snapshotSha256 = crypto.createHash("sha256").update(serialized).digest("hex");
+        const versionResult = await tx.execute(sql`SELECT COALESCE(MAX(version), 0) + 1 AS version
+          FROM meeting_publications WHERE meeting_id=${meetingId} AND kind=${kind}`);
+        const version = Number(versionResult.rows[0]?.version ?? 1);
+        const [created] = await tx.insert(meetingPublicationsTable).values({
+          projectId, meetingId, kind, version, snapshot, snapshotSha256,
+          publishedById: req.user!.userId,
+        }).returning();
+        const [updated] = await tx.update(meetingMinutesTable).set({
+          lifecycleStatus: target,
+          updatedAt: new Date(),
+        }).where(and(
+          eq(meetingMinutesTable.id, meetingId),
+          eq(meetingMinutesTable.lifecycleStatus, transition.current),
+        )).returning();
+        if (!updated) throw new Error("meeting_publication_stale");
+        await tx.insert(activityLogTable).values({
+          projectId, userId: req.user!.userId, userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName, actionType: "publish", entityType: "meeting_publication",
+          entityId: created.id, fileNameBefore: null, fileNameAfter: null,
+          details: JSON.stringify({ event: `meeting.${kind}_published`, meetingId, version, snapshotSha256 }),
+        });
+        return { ...created, snapshot: undefined, meeting: updated };
+      });
+      if (!publication) { res.status(404).json({ error: "meeting_not_found" }); return; }
+      res.status(201).json(publication);
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "meeting_publication_failed";
+      const status = code.includes("transition_denied") || code.includes("already_current") || code.includes("stale") ? 409 : 500;
       res.status(status).json({ error: code });
     }
   },
