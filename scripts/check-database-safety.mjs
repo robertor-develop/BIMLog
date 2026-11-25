@@ -230,7 +230,7 @@ function repositoryIdentity(rawRemote) {
 
 export function resolvePublicationBranch(environment = process.env) {
   const explicitBranch = environment.BIMLOG_ACCEPTED_BRANCH?.trim();
-  const branch = explicitBranch ?? "master";
+  const branch = explicitBranch ?? "main";
   if (
     !/^[A-Za-z0-9][A-Za-z0-9._/-]*$/.test(branch) ||
     branch.includes("..") ||

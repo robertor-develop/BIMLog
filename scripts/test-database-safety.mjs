@@ -30,7 +30,7 @@ assert.deepEqual(
 );
 
 const releaseCommit = "a".repeat(40);
-assert.equal(resolvePublicationBranch({}), "master");
+assert.equal(resolvePublicationBranch({}), "main");
 assert.equal(
   resolvePublicationBranch({
     BIMLOG_ACCEPTED_BRANCH: "codex/bimlog-template-gap-block01-20260923",
