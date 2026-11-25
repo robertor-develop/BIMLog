@@ -1,4 +1,5 @@
 import { MeetingImportFailure, normalizeMeetingImportData, meetingImportFileName, meetingImportTimestamp } from "../lib/meeting-import-contract";
+import { buildSmartMeetingAgenda } from "../lib/smart-meeting-agenda";
 import { Router } from "express";
 import crypto from "crypto";
 import * as XLSX from "xlsx";
@@ -1959,6 +1960,48 @@ router.delete(
       eq(meetingDraftsTable.draftKey, draftKeyFor(meetingId)),
     ));
     res.json({ ok: true });
+  },
+);
+
+router.get(
+  "/projects/:projectId/meetings/:meetingId/carry-forward-preview",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    if (!Number.isSafeInteger(meetingId) || meetingId <= 0) {
+      res.status(400).json({ error: "valid_meeting_identity_required" });
+      return;
+    }
+    const [meeting] = await db
+      .select({ id: meetingMinutesTable.id })
+      .from(meetingMinutesTable)
+      .where(and(
+        eq(meetingMinutesTable.id, meetingId),
+        eq(meetingMinutesTable.projectId, projectId),
+        isNull(meetingMinutesTable.deletedAt),
+      ))
+      .limit(1);
+    if (!meeting) {
+      res.status(404).json({ error: "meeting_not_found" });
+      return;
+    }
+    const [attendees, rfis, submittals, actions, viewpoints] = await Promise.all([
+      db.select().from(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, meetingId)),
+      db.select().from(meetingRfiLinksTable).where(and(eq(meetingRfiLinksTable.projectId, projectId), eq(meetingRfiLinksTable.meetingId, meetingId))),
+      db.select().from(meetingSubmittalLinksTable).where(and(eq(meetingSubmittalLinksTable.projectId, projectId), eq(meetingSubmittalLinksTable.meetingId, meetingId))),
+      db.select().from(actionItemsTable).where(and(eq(actionItemsTable.projectId, projectId), eq(actionItemsTable.meetingId, meetingId))),
+      db.select().from(meetingLensViewpointLinksTable).where(and(eq(meetingLensViewpointLinksTable.projectId, projectId), eq(meetingLensViewpointLinksTable.meetingId, meetingId))),
+    ]);
+    const items = buildSmartMeetingAgenda(meetingId, [
+      ...attendees.map((row) => ({ kind: "attendee" as const, sourceId: row.id, title: row.fullName, responsible: row.company })),
+      ...rfis.map((row) => ({ kind: "rfi" as const, sourceId: row.rfiId, title: row.rfiNumberSnapshot, description: row.titleSnapshot, status: row.statusSnapshot, responsible: row.responsibleSnapshot })),
+      ...submittals.map((row) => ({ kind: "submittal" as const, sourceId: row.submittalId, title: row.numberSnapshot, description: row.titleSnapshot, status: row.statusSnapshot, responsible: row.responsibleSnapshot, dueDate: row.deadlineSnapshot })),
+      ...actions.map((row) => ({ kind: "action_item" as const, sourceId: row.id, title: row.description, status: row.status, responsible: row.assignedToName, dueDate: row.dueDate })),
+      ...viewpoints.map((row) => ({ kind: "lens_viewpoint" as const, sourceId: row.lensViewpointId, title: row.displayIdSnapshot ?? row.viewpointIdSnapshot, description: row.noteSnapshot, status: row.lifecycleStatusSnapshot, responsible: row.responsibleSnapshot })),
+    ]);
+    res.json({ sourceMeetingId: meetingId, items, count: items.length });
   },
 );
 
