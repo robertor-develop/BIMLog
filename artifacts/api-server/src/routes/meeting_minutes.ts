@@ -31,6 +31,7 @@ import {
   companiesTable,
   projectDirectoryTable,
   meetingDraftsTable,
+  meetingAgendaItemsTable,
   projectsTable,
 } from "@workspace/db/schema";
 import {
@@ -1346,6 +1347,93 @@ async function insertMeetingLensViewpointLinks(
 }
 
 // ── GET /projects/:projectId/meetings ─────────────────────────────────────────
+router.post(
+  "/projects/:projectId/meetings/:meetingId/create-next",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const sourceMeetingId = Number(req.params.meetingId);
+    const meetingDate = new Date(String(req.body?.meeting_date ?? ""));
+    if (!Number.isSafeInteger(sourceMeetingId) || sourceMeetingId <= 0) {
+      res.status(400).json({ error: "valid_meeting_identity_required" });
+      return;
+    }
+    if (Number.isNaN(meetingDate.getTime())) {
+      res.status(400).json({ error: "valid_meeting_date_required" });
+      return;
+    }
+    try {
+      const result = await db.transaction(async (tx) => {
+        const [source] = await tx.select().from(meetingMinutesTable).where(and(
+          eq(meetingMinutesTable.id, sourceMeetingId),
+          eq(meetingMinutesTable.projectId, projectId),
+          isNull(meetingMinutesTable.deletedAt),
+        )).limit(1).for("share");
+        if (!source) return null;
+        const [existing] = await tx.select().from(meetingMinutesTable).where(and(
+          eq(meetingMinutesTable.projectId, projectId),
+          eq(meetingMinutesTable.previousMeetingId, sourceMeetingId),
+          isNull(meetingMinutesTable.deletedAt),
+        )).limit(1);
+        if (existing) return { meeting: existing, replayed: true, agendaCount: 0 };
+        const [created] = await tx.insert(meetingMinutesTable).values({
+          projectId,
+          title: source.title,
+          meetingDate,
+          location: source.location,
+          createdById: req.user!.userId,
+          seriesId: source.seriesId,
+          previousMeetingId: sourceMeetingId,
+          lifecycleStatus: "draft_agenda",
+        }).returning();
+        const attendees = await tx.select().from(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, sourceMeetingId));
+        if (attendees.length) await tx.insert(meetingAttendeesTable).values(attendees.map(({ id: _id, ...attendee }) => ({ ...attendee, meetingId: created.id })));
+        const priorAgenda = await tx.select().from(meetingAgendaItemsTable).where(and(
+          eq(meetingAgendaItemsTable.projectId, projectId),
+          eq(meetingAgendaItemsTable.meetingId, sourceMeetingId),
+        ));
+        const agenda = buildSmartMeetingAgenda(sourceMeetingId, priorAgenda.map((item) => ({
+          kind: "agenda_topic" as const,
+          sourceId: item.id,
+          title: item.title,
+          description: item.description,
+          responsible: item.responsible,
+          dueDate: item.dueDate,
+          status: item.status,
+          excluded: item.excludedFromNext,
+        })));
+        if (agenda.length) await tx.insert(meetingAgendaItemsTable).values(agenda.map((item, index) => ({
+          projectId,
+          meetingId: created.id,
+          sourceMeetingId,
+          sourceKind: item.kind,
+          sourceId: item.sourceId,
+          title: item.title,
+          description: item.description,
+          responsible: item.responsible,
+          dueDate: item.dueDate,
+          status: item.status ?? "open",
+          sortOrder: index,
+          carriedForward: true,
+          createdById: req.user!.userId,
+        })));
+        await tx.insert(activityLogTable).values({
+          projectId, userId: req.user!.userId, userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName, actionType: "create", entityType: "meeting",
+          entityId: created.id, fileNameBefore: null, fileNameAfter: null,
+          details: JSON.stringify({ event: "meeting.next_created", sourceMeetingId, agendaCount: agenda.length }),
+        });
+        return { meeting: created, replayed: false, agendaCount: agenda.length };
+      });
+      if (!result) { res.status(404).json({ error: "meeting_not_found" }); return; }
+      res.status(result.replayed ? 200 : 201).json(result);
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "meeting_create_next_failed" });
+    }
+  },
+);
+
 router.get(
   "/projects/:projectId/meetings",
   authMiddleware,

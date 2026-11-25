@@ -844,6 +844,9 @@ queueDatabaseStartup(async () => {
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_minutes_provider_event_uidx
       ON meeting_minutes (project_id, source_provider, source_event_id)
       WHERE source_provider IS NOT NULL AND source_event_id IS NOT NULL`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_minutes_previous_meeting_uidx
+      ON meeting_minutes (project_id, previous_meeting_id)
+      WHERE previous_meeting_id IS NOT NULL AND deleted_at IS NULL`);
     console.log("[migration] smart meeting series foundation ensured");
   } catch (e) {
     console.error("[migration] smart meeting series foundation failed:", e);
