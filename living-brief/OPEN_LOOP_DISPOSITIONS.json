@@ -1,20 +1,20 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "51468984287fcd631dafe6e76896a1678f7e71d8097680504bf1cf8ef7af8d12",
-  "itemCount": 589,
+  "sourceSha256": "27ed40127a84c2bd3b8b3e927e4a9792386dea71269ce2dbd55fae04ee85c6c6",
+  "itemCount": 592,
   "counts": {
-    "ACTIVE": 529,
-    "SUPERSEDED": 48,
+    "ACTIVE": 531,
+    "SUPERSEDED": 49,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 412,
+    "ACTIVE_DEFECT": 413,
     "VALID_FUTURE_ROADMAP": 13,
-    "EXTERNAL_OWNER_INPUT": 104,
+    "EXTERNAL_OWNER_INPUT": 105,
     "ACCEPTED_LIMITATION": 3,
-    "SUPERSEDED_HISTORY": 48,
+    "SUPERSEDED_HISTORY": 49,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "allowedClassifications": [
@@ -11293,6 +11293,63 @@
       "evidence": [
         "OPEN_LOOP.md:6969",
         "Exact-head web publication continuation — 2026-11-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "696f9a060d2374c0",
+      "sourceLine": 6976,
+      "heading": "Smart Meetings continuity release gates — 2026-11-25",
+      "statement": "Complete Replit production build and publication for the exact accepted candidate.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6976",
+        "Smart Meetings continuity release gates — 2026-11-25"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "f09c24b47f951c6c",
+      "sourceLine": 6977,
+      "heading": "Smart Meetings continuity release gates — 2026-11-25",
+      "statement": "Complete three-round authenticated production acceptance for affected Meetings workflows, including refresh/reopen, clean reentry, authorization, persistence, console, and relevant network state.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6977",
+        "Smart Meetings continuity release gates — 2026-11-25"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "a6a43ed727300932",
+      "sourceLine": 6978,
+      "heading": "Smart Meetings continuity release gates — 2026-11-25",
+      "statement": "Continue the authorized Smart Meetings program with Builds 11–25 only after this publication gate passes.",
+      "classification": "SUPERSEDED",
+      "dispositionCategory": "SUPERSEDED_HISTORY",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
       ],
       "currentAuthority": false
     }

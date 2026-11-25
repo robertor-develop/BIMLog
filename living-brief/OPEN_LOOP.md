@@ -6968,3 +6968,11 @@ Keep the corrected initial-load performance measurement in every later block. A 
 - [ ] Publish the verified web/API source through the existing Replit Shell path without Replit Agents, verify exact deployed identity/version/health, and complete three authenticated visible-Chrome rounds.
 - [ ] Keep the Revit 2026.5+ binary/package/physical model-navigation gate explicit and fail-closed until a controlled licensed workstation with .NET 10 and official Autodesk assemblies is available; do not describe web publication as physical Revit acceptance.
 
+
+## Smart Meetings continuity release gates — 2026-11-25
+
+- [x] Implement and individually accept Smart Meetings Builds 1–10.
+- [x] Push the accepted ten-build source candidate to canonical `main` through `957cd777553065c584722ea93c9e5de577709767`.
+- [ ] Complete Replit production build and publication for the exact accepted candidate.
+- [ ] Complete three-round authenticated production acceptance for affected Meetings workflows, including refresh/reopen, clean reentry, authorization, persistence, console, and relevant network state.
+- [ ] Continue the authorized Smart Meetings program with Builds 11–25 only after this publication gate passes.

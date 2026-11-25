@@ -5160,3 +5160,10 @@ The canonical field-evidence receipt and Blocks 39, 45 and Build 223 regressions
 
 The authoritative XML export now carries each issue's current floor and responsible company into the native exporter and emits the restored hierarchy `BIMLog Viewpoints / Open|Resolved / Floor / Responsible Company / Viewpoint`. Missing values remain visible under `Unspecified Floor` and `Unassigned`; viewpoint identity, GUIDs, camera, sectioning, filtered-project scope, diagnostics and existing Saved Viewpoints remain unchanged. Core XML regression passes 139/139, the exact browser-to-native export contract passes, and both Navisworks 2021 and 2025 native projects compile with zero warnings and zero errors. Push, package publication and live Navisworks import remain separate release operations and are not claimed by this source checkpoint.
 
+
+## Smart Meetings continuity release — 2026-11-25
+
+- Accepted Builds 1–10 add governed recurring meeting series, deterministic occurrences, unresolved agenda carry-forward, project-scoped preview, durable agenda items, transactional successor creation, bilingual Create Next controls, policy validation, and authorized series APIs.
+- Focused behavior coverage passed 21 assertions across 10 test files. Database workspace generation, API typecheck, and BIMLog frontend typecheck passed before publication.
+- Canonical `main` was pushed through `957cd777553065c584722ea93c9e5de577709767`. Publication and authenticated production acceptance remain independent gates until completed and recorded.
+- Builds 11–25 remain pending and must not be represented as implemented by this checkpoint.

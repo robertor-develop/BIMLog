@@ -83519,6 +83519,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9fea74cf42ae4953ea042d31e8f98cfe21ac7c2ff9e58ea13e67f6e33a096849"
+    },
+    {
+      "taskId": "BIMLOG_SMART_MEETINGS_BLOCKS_01_02_RELEASE_20261125",
+      "reviewedAt": "2026-11-25T18:11:00Z",
+      "reviewedThroughCommit": "957cd777553065c584722ea93c9e5de577709767",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Smart Meetings remains inside BIMLog project, authorization, evidence, and audit boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No repository operating instruction changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authorization, isolation, persistence, fail-closed validation, and independent release gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recurring meetings and agenda continuity expose operational work without removing existing capabilities."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated inventory now includes the Smart Meetings series, agenda, preview, and successor-creation surfaces."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the accepted ten-build Smart Meetings source candidate and its remaining publication gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP records publication, authenticated acceptance, and Builds 11–25 as explicit unfinished gates."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks or Revit plugin contract changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report rendering or export-design contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No delivery or information-management standard changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Automated candidate evidence remains distinct from deployment and authenticated production acceptance."
+        }
+      ],
+      "reason": "Reconcile the accepted Smart Meetings Builds 1–10 candidate without claiming publication or production acceptance before those gates pass.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "982fe36d204f5b86a690e0c8673201fcb009add1db7738b776a61c238890a098"
     }
   ]
 }
