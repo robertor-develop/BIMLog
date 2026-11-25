@@ -121,6 +121,33 @@ export const meetingAttendeesTable = pgTable(
   ],
 );
 
+export const meetingAgendaItemsTable = pgTable(
+  "meeting_agenda_items",
+  {
+    id: serial("id").primaryKey(),
+    projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+    meetingId: integer("meeting_id").references(() => meetingMinutesTable.id).notNull(),
+    sourceMeetingId: integer("source_meeting_id").references(() => meetingMinutesTable.id),
+    sourceKind: text("source_kind").notNull(),
+    sourceId: integer("source_id"),
+    title: text("title").notNull(),
+    description: text("description"),
+    responsible: text("responsible"),
+    dueDate: timestamp("due_date"),
+    status: text("status").default("open").notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    carriedForward: boolean("carried_forward").default(false).notNull(),
+    excludedFromNext: boolean("excluded_from_next").default(false).notNull(),
+    createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    meetingSortIdx: index("meeting_agenda_items_meeting_sort_idx").on(t.projectId, t.meetingId, t.sortOrder),
+    sourceUnique: uniqueIndex("meeting_agenda_items_source_uidx").on(t.meetingId, t.sourceKind, t.sourceId),
+  }),
+);
+
 export const meetingDraftsTable = pgTable(
   "meeting_drafts",
   {
@@ -487,6 +514,7 @@ export const meetingScheduleTaskLinksTable = pgTable(
 export type MeetingMinutes = typeof meetingMinutesTable.$inferSelect;
 export type MeetingSeries = typeof meetingSeriesTable.$inferSelect;
 export type MeetingAttendee = typeof meetingAttendeesTable.$inferSelect;
+export type MeetingAgendaItem = typeof meetingAgendaItemsTable.$inferSelect;
 export type MeetingRfiLink = typeof meetingRfiLinksTable.$inferSelect;
 export type MeetingSubmittalLink =
   typeof meetingSubmittalLinksTable.$inferSelect;

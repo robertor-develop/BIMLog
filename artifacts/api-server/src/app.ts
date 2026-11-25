@@ -852,6 +852,35 @@ queueDatabaseStartup(async () => {
 
 queueDatabaseStartup(async () => {
   try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS meeting_agenda_items (
+      id serial PRIMARY KEY,
+      project_id integer NOT NULL REFERENCES projects(id),
+      meeting_id integer NOT NULL REFERENCES meeting_minutes(id),
+      source_meeting_id integer REFERENCES meeting_minutes(id),
+      source_kind text NOT NULL,
+      source_id integer,
+      title text NOT NULL,
+      description text,
+      responsible text,
+      due_date timestamp,
+      status text NOT NULL DEFAULT 'open',
+      sort_order integer NOT NULL DEFAULT 0,
+      carried_forward boolean NOT NULL DEFAULT false,
+      excluded_from_next boolean NOT NULL DEFAULT false,
+      created_by_id integer NOT NULL REFERENCES users(id),
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS meeting_agenda_items_meeting_sort_idx ON meeting_agenda_items (project_id, meeting_id, sort_order)`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_agenda_items_source_uidx ON meeting_agenda_items (meeting_id, source_kind, source_id) WHERE source_id IS NOT NULL`);
+    console.log("[migration] smart meeting agenda items ensured");
+  } catch (e) {
+    console.error("[migration] smart meeting agenda items failed:", e);
+  }
+});
+
+queueDatabaseStartup(async () => {
+  try {
     await pool.query(`CREATE TABLE IF NOT EXISTS meeting_rfi_links (
       id serial PRIMARY KEY,
       project_id integer NOT NULL REFERENCES projects(id),
