@@ -10,7 +10,9 @@
   foreignKey,
   unique,
   boolean,
+  check,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { projectsTable } from "./projects";
 import { companiesTable, usersTable } from "./users";
 import { projectDirectoryTable } from "./project-directory";
@@ -44,7 +46,24 @@ export const meetingMinutesTable = pgTable("meeting_minutes", {
   sourceProvider: text("source_provider"),
   sourceEventId: text("source_event_id"),
   sourceEventRevision: text("source_event_revision"),
-});
+}, (t) => ({
+  seriesForeignKey: foreignKey({
+    columns: [t.seriesId],
+    foreignColumns: [meetingSeriesTable.id],
+    name: "meeting_minutes_series_id_fkey",
+  }),
+  previousMeetingForeignKey: foreignKey({
+    columns: [t.previousMeetingId],
+    foreignColumns: [t.id],
+    name: "meeting_minutes_previous_meeting_id_fkey",
+  }),
+  previousMeetingUnique: uniqueIndex("meeting_minutes_previous_meeting_uidx")
+    .on(t.projectId, t.previousMeetingId)
+    .where(sql`${t.previousMeetingId} IS NOT NULL AND ${t.deletedAt} IS NULL`),
+  providerEventUnique: uniqueIndex("meeting_minutes_provider_event_uidx")
+    .on(t.projectId, t.sourceProvider, t.sourceEventId)
+    .where(sql`${t.sourceProvider} IS NOT NULL AND ${t.sourceEventId} IS NOT NULL`),
+}));
 
 export const meetingSeriesTable = pgTable(
   "meeting_series",
@@ -146,7 +165,9 @@ export const meetingAgendaItemsTable = pgTable(
   },
   (t) => ({
     meetingSortIdx: index("meeting_agenda_items_meeting_sort_idx").on(t.projectId, t.meetingId, t.sortOrder),
-    sourceUnique: uniqueIndex("meeting_agenda_items_source_uidx").on(t.meetingId, t.sourceKind, t.sourceId),
+    sourceUnique: uniqueIndex("meeting_agenda_items_source_uidx")
+      .on(t.meetingId, t.sourceKind, t.sourceId)
+      .where(sql`${t.sourceId} IS NOT NULL`),
   }),
 );
 
@@ -170,6 +191,8 @@ export const meetingPublicationsTable = pgTable(
     projectMeetingIdx: index("meeting_publications_project_meeting_idx").on(
       t.projectId, t.meetingId,
     ),
+    kindCheck: check("meeting_publications_kind_check", sql`${t.kind} IN ('agenda', 'minutes')`),
+    versionCheck: check("meeting_publications_version_check", sql`${t.version} > 0`),
   }),
 );
 
