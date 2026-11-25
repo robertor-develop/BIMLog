@@ -1,12 +1,11 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
+  "reconciledThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "4a8fd84702978cfe0577e5bf0938b66dce8647bdb274da0f0920657c01cadb45",
+  "bundleSha256": "9833070dd54f5d9622a387934d0f094b79579e776d8262ee61e88cba45a73906",
   "impact": {
-    "baselineCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
+    "baselineCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
     "changedPaths": [
-      "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/PLATFORM.md",
@@ -26,11 +25,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewedThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_03_RELEASE_RECONCILIATION_20261125",
+      "reconciledThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewedThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_04_RELEASE_RECONCILIATION_20261125",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-25T19:00:00Z"
+      "semanticReviewedAt": "2026-11-25T19:18:00Z"
     },
     {
       "key": "claude",
@@ -38,11 +37,11 @@
       "sha256": "493032a5cbf9da05e5a0f1259e2e53e774ee47ad3194adf49329c390a31506d2",
       "sourceChangedAt": "2026-11-04T03:54:58-05:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewedThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_03_RELEASE_RECONCILIATION_20261125",
+      "reconciledThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewedThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_04_RELEASE_RECONCILIATION_20261125",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-25T19:00:00Z"
+      "semanticReviewedAt": "2026-11-25T19:18:00Z"
     },
     {
       "key": "quality",
@@ -50,11 +49,11 @@
       "sha256": "900bfcd8248689706c40a71cdb086a804613b01d93e4d91b24a97b0c1a4fdbe3",
       "sourceChangedAt": "2026-11-03T12:49:15-05:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewedThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_03_RELEASE_RECONCILIATION_20261125",
+      "reconciledThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewedThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_04_RELEASE_RECONCILIATION_20261125",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-25T19:00:00Z"
+      "semanticReviewedAt": "2026-11-25T19:18:00Z"
     },
     {
       "key": "vision",
@@ -62,23 +61,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewedThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_03_RELEASE_RECONCILIATION_20261125",
+      "reconciledThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewedThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_04_RELEASE_RECONCILIATION_20261125",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-25T19:00:00Z"
+      "semanticReviewedAt": "2026-11-25T19:18:00Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "8c89fe3b2bb7023f31fade39dab7faa97051a10e2bf3af0ff1f66b01a3a5e210",
-      "sourceChangedAt": "2026-11-25T19:00:00.000Z",
+      "sha256": "698ea629b142132bd314209352701fe3e08b7b6ee894ccf2dc7a6f6ff343051a",
+      "sourceChangedAt": "2026-11-25T19:18:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewedThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_03_RELEASE_RECONCILIATION_20261125",
+      "reconciledThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewedThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_04_RELEASE_RECONCILIATION_20261125",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-11-25T19:00:00Z"
+      "semanticReviewedAt": "2026-11-25T19:18:00Z"
     },
     {
       "key": "plugin",
@@ -86,11 +85,11 @@
       "sha256": "447c28ec3ae5d822824df082d61badab7bc7864ef66c335fa849888d2434afb1",
       "sourceChangedAt": "2026-11-13T16:22:48-05:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewedThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_03_RELEASE_RECONCILIATION_20261125",
+      "reconciledThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewedThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_04_RELEASE_RECONCILIATION_20261125",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-25T19:00:00Z"
+      "semanticReviewedAt": "2026-11-25T19:18:00Z"
     },
     {
       "key": "report_design_system",
@@ -98,11 +97,11 @@
       "sha256": "0f0a304204fb53a6d7e6e0259c21015b9473c130f753a2e30335604e9fa74b0f",
       "sourceChangedAt": "2026-11-03T17:16:18-05:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewedThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_03_RELEASE_RECONCILIATION_20261125",
+      "reconciledThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewedThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_04_RELEASE_RECONCILIATION_20261125",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-25T19:00:00Z"
+      "semanticReviewedAt": "2026-11-25T19:18:00Z"
     },
     {
       "key": "standards_register",
@@ -110,35 +109,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewedThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_03_RELEASE_RECONCILIATION_20261125",
+      "reconciledThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewedThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_04_RELEASE_RECONCILIATION_20261125",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-25T19:00:00Z"
+      "semanticReviewedAt": "2026-11-25T19:18:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "51fa356d853d301c6ec6a00c343ad9e5712b26e6b0a7531ba8e05d47b722106c",
-      "sourceChangedAt": "2026-11-25T19:00:00.000Z",
+      "sha256": "385f9b7204ececb5e4e82dc3131487fd23b17dab11071d77c87795138ef66014",
+      "sourceChangedAt": "2026-11-25T19:18:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewedThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_03_RELEASE_RECONCILIATION_20261125",
+      "reconciledThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewedThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_04_RELEASE_RECONCILIATION_20261125",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-11-25T19:00:00Z"
+      "semanticReviewedAt": "2026-11-25T19:18:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "60262efc80fdc430533aee603283918352bb5a9fb00fc3a0191fbd4e86c67bd7",
-      "sourceChangedAt": "2026-11-25T19:00:00.000Z",
+      "sha256": "13748c80b4e23e3a5a9bc37a40c9a49cdc2ff765e334668ae4e9dc195f311ae1",
+      "sourceChangedAt": "2026-11-25T19:18:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewedThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_03_RELEASE_RECONCILIATION_20261125",
+      "reconciledThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewedThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_04_RELEASE_RECONCILIATION_20261125",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-11-25T19:00:00Z"
+      "semanticReviewedAt": "2026-11-25T19:18:00Z"
     },
     {
       "key": "audit",
@@ -146,11 +145,11 @@
       "sha256": "c58e64b3001d9f9ff189d76ecd9ee354f76c6f0431deaa2234c75227b5a4a7ec",
       "sourceChangedAt": "2026-11-04T06:55:09-05:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewedThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
-      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_03_RELEASE_RECONCILIATION_20261125",
+      "reconciledThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewedThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
+      "semanticReviewTask": "BIMLOG_SMART_MEETINGS_BLOCK_04_RELEASE_RECONCILIATION_20261125",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-11-25T19:00:00Z"
+      "semanticReviewedAt": "2026-11-25T19:18:00Z"
     }
   ]
 }

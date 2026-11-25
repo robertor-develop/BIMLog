@@ -1532,8 +1532,15 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/smart-meeting-agenda-schema.behavior.ts
 - artifacts/api-server/src/lib/smart-meeting-agenda.behavior.ts
 - artifacts/api-server/src/lib/smart-meeting-agenda.ts
+- artifacts/api-server/src/lib/smart-meeting-attendance.behavior.ts
+- artifacts/api-server/src/lib/smart-meeting-attendee-identity.behavior.ts
+- artifacts/api-server/src/lib/smart-meeting-attendee-review.behavior.ts
+- artifacts/api-server/src/lib/smart-meeting-attendee-review.ts
+- artifacts/api-server/src/lib/smart-meeting-attendee-ui.behavior.ts
 - artifacts/api-server/src/lib/smart-meeting-create-next-route.behavior.ts
 - artifacts/api-server/src/lib/smart-meeting-create-next-ui.behavior.ts
+- artifacts/api-server/src/lib/smart-meeting-ics.behavior.ts
+- artifacts/api-server/src/lib/smart-meeting-ics.ts
 - artifacts/api-server/src/lib/smart-meeting-lifecycle.behavior.ts
 - artifacts/api-server/src/lib/smart-meeting-lifecycle.ts
 - artifacts/api-server/src/lib/smart-meeting-preview-route.behavior.ts
@@ -1923,6 +1930,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/project/convention-builder/ConventionPartyAssignment.tsx
 - artifacts/bimlog/src/pages/project/meetings/MeetingActionCreate.tsx
 - artifacts/bimlog/src/pages/project/meetings/MeetingActionItemsTable.tsx
+- artifacts/bimlog/src/pages/project/meetings/MeetingAttendeePasteReview.tsx
 - artifacts/bimlog/src/pages/project/meetings/MeetingCurrentViewExports.tsx
 - artifacts/bimlog/src/pages/project/meetings/MeetingDocumentImport.tsx
 - artifacts/bimlog/src/pages/project/meetings/MeetingParticipantField.tsx

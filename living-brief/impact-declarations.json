@@ -83593,9 +83593,9 @@
       "reviewedChangeSha256": "982fe36d204f5b86a690e0c8673201fcb009add1db7738b776a61c238890a098"
     },
     {
-      "taskId": "BIMLOG_SMART_MEETINGS_BLOCK_03_RELEASE_RECONCILIATION_20261125",
-      "reviewedAt": "2026-11-25T19:00:00Z",
-      "reviewedThroughCommit": "dd88562fae1aac0f55c87e648649441fb68e0faf",
+      "taskId": "BIMLOG_SMART_MEETINGS_BLOCK_04_RELEASE_RECONCILIATION_20261125",
+      "reviewedAt": "2026-11-25T19:18:00Z",
+      "reviewedThroughCommit": "5f871b64c1f37c7686dd9fc5ebe7b61e36438ee1",
       "authorities": [
         {
           "key": "ecosystem_doctrine",
@@ -83655,14 +83655,13 @@
       ],
       "reason": "Reconcile successful Smart Meetings Builds 1–10 publication and accepted Builds 11–15 without claiming authenticated project persistence.",
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "1c0b683109614b92774a8cb834b8a336c2cd3c347baa5646af93ac477cef3b53"
+      "reviewedChangeSha256": "a4f509ea68daba6d4349c539bec02dd44b355e1e72ae005cca44dd6d9d402bb2"
     }
   ]
 }
