@@ -6,9 +6,9 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 816,
+    "apiRoutes": 819,
     "frontendApiReferences": 412,
-    "routeOwnedTables": 78
+    "routeOwnedTables": 79
   },
   "compatibilityRedirects": [
     {
@@ -6438,6 +6438,118 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
+        "projectsTable"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/projects/:projectId/meetings/:meetingId/lifecycle",
+      "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
+      "tables": [
+        "meetingMinutesTable",
+        "meetingAttendeesTable",
+        "actionItemsTable",
+        "activityLogTable",
+        "usersTable",
+        "rfisTable",
+        "meetingRfiLinksTable",
+        "submittalsTable",
+        "meetingSubmittalLinksTable",
+        "clashesTable",
+        "clashReportsTable",
+        "meetingClashLinksTable",
+        "meetingClashRefreshEventsTable",
+        "lensViewpointsTable",
+        "meetingLensViewpointLinksTable",
+        "linkedItemsTable",
+        "agentInsightsTable",
+        "projectMembersTable",
+        "projectMilestonesTable",
+        "scheduleBucketsTable",
+        "scheduleItemPlacementsTable",
+        "meetingScheduleBucketLinksTable",
+        "meetingScheduleTaskLinksTable",
+        "companiesTable",
+        "projectDirectoryTable",
+        "meetingDraftsTable",
+        "meetingAgendaItemsTable",
+        "meetingSeriesTable",
+        "meetingPublicationsTable",
+        "projectsTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/meetings/:meetingId/publications",
+      "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
+      "tables": [
+        "meetingMinutesTable",
+        "meetingAttendeesTable",
+        "actionItemsTable",
+        "activityLogTable",
+        "usersTable",
+        "rfisTable",
+        "meetingRfiLinksTable",
+        "submittalsTable",
+        "meetingSubmittalLinksTable",
+        "clashesTable",
+        "clashReportsTable",
+        "meetingClashLinksTable",
+        "meetingClashRefreshEventsTable",
+        "lensViewpointsTable",
+        "meetingLensViewpointLinksTable",
+        "linkedItemsTable",
+        "agentInsightsTable",
+        "projectMembersTable",
+        "projectMilestonesTable",
+        "scheduleBucketsTable",
+        "scheduleItemPlacementsTable",
+        "meetingScheduleBucketLinksTable",
+        "meetingScheduleTaskLinksTable",
+        "companiesTable",
+        "projectDirectoryTable",
+        "meetingDraftsTable",
+        "meetingAgendaItemsTable",
+        "meetingSeriesTable",
+        "meetingPublicationsTable",
+        "projectsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/meetings/:meetingId/publications",
+      "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
+      "tables": [
+        "meetingMinutesTable",
+        "meetingAttendeesTable",
+        "actionItemsTable",
+        "activityLogTable",
+        "usersTable",
+        "rfisTable",
+        "meetingRfiLinksTable",
+        "submittalsTable",
+        "meetingSubmittalLinksTable",
+        "clashesTable",
+        "clashReportsTable",
+        "meetingClashLinksTable",
+        "meetingClashRefreshEventsTable",
+        "lensViewpointsTable",
+        "meetingLensViewpointLinksTable",
+        "linkedItemsTable",
+        "agentInsightsTable",
+        "projectMembersTable",
+        "projectMilestonesTable",
+        "scheduleBucketsTable",
+        "scheduleItemPlacementsTable",
+        "meetingScheduleBucketLinksTable",
+        "meetingScheduleTaskLinksTable",
+        "companiesTable",
+        "projectDirectoryTable",
+        "meetingDraftsTable",
+        "meetingAgendaItemsTable",
+        "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6474,6 +6586,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6510,6 +6623,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6546,6 +6660,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6582,6 +6697,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6618,6 +6734,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6654,6 +6771,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6690,6 +6808,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6726,6 +6845,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6762,6 +6882,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6798,6 +6919,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6834,6 +6956,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6870,6 +6993,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6906,6 +7030,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6942,6 +7067,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -6978,6 +7104,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7014,6 +7141,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7050,6 +7178,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7086,6 +7215,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7122,6 +7252,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7158,6 +7289,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7194,6 +7326,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7230,6 +7363,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7266,6 +7400,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7302,6 +7437,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7338,6 +7474,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7374,6 +7511,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7410,6 +7548,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7446,6 +7585,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7482,6 +7622,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7518,6 +7659,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7554,6 +7696,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },
@@ -7590,6 +7733,7 @@
         "meetingDraftsTable",
         "meetingAgendaItemsTable",
         "meetingSeriesTable",
+        "meetingPublicationsTable",
         "projectsTable"
       ]
     },

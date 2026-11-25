@@ -6973,6 +6973,7 @@ Keep the corrected initial-load performance measurement in every later block. A 
 
 - [x] Implement and individually accept Smart Meetings Builds 1–10.
 - [x] Push the accepted ten-build source candidate to canonical `main` through `957cd777553065c584722ea93c9e5de577709767`.
-- [ ] Complete Replit production build and publication for the exact accepted candidate.
-- [ ] Complete three-round authenticated production acceptance for affected Meetings workflows, including refresh/reopen, clean reentry, authorization, persistence, console, and relevant network state.
-- [ ] Continue the authorized Smart Meetings program with Builds 11–25 only after this publication gate passes.
+- [x] Complete the controlled Replit production build and publication. Replit release `05ca6f40` promoted successfully; `/api/v1/healthz` reports `status=ok`, release `v1.05.N18-P37`, source `c26a487eb5c71b8552870053a2c512f6298bc7fd`, stable package identity and `identityBound=true`.
+- [ ] Complete authenticated project-record acceptance for affected Meetings workflows. Public production, exact health identity, protected-route redirect, refresh/reopen, clean public reentry and console state passed; the existing Chrome session had expired and exposed the normal login form, so no authenticated persistence claim is made.
+- [x] Continue the authorized Smart Meetings program after completing every independent release gate. Builds 11–15 are accepted through `dd88562fae1aac0f55c87e648649441fb68e0faf`: governed lifecycle, immutable publication schema, atomic publication API, bilingual lifecycle controls and visible fingerprinted history.
+- [ ] Push Builds 11–15 normally and verify local/remote equality. Continue with Builds 16–20; the next publication is due after Build 20. Builds 21–25 remain the final authorized block.

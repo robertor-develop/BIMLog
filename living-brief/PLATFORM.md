@@ -1534,7 +1534,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/smart-meeting-agenda.ts
 - artifacts/api-server/src/lib/smart-meeting-create-next-route.behavior.ts
 - artifacts/api-server/src/lib/smart-meeting-create-next-ui.behavior.ts
+- artifacts/api-server/src/lib/smart-meeting-lifecycle.behavior.ts
+- artifacts/api-server/src/lib/smart-meeting-lifecycle.ts
 - artifacts/api-server/src/lib/smart-meeting-preview-route.behavior.ts
+- artifacts/api-server/src/lib/smart-meeting-publication-route.behavior.ts
+- artifacts/api-server/src/lib/smart-meeting-publication-schema.behavior.ts
 - artifacts/api-server/src/lib/smart-meeting-recurrence.behavior.ts
 - artifacts/api-server/src/lib/smart-meeting-recurrence.ts
 - artifacts/api-server/src/lib/smart-meeting-series-policy.behavior.ts

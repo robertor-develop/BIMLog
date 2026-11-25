@@ -5167,3 +5167,10 @@ The authoritative XML export now carries each issue's current floor and responsi
 - Focused behavior coverage passed 21 assertions across 10 test files. Database workspace generation, API typecheck, and BIMLog frontend typecheck passed before publication.
 - Canonical `main` was pushed through `957cd777553065c584722ea93c9e5de577709767`. Publication and authenticated production acceptance remain independent gates until completed and recorded.
 - Builds 11–25 remain pending and must not be represented as implemented by this checkpoint.
+
+## Smart Meetings publication and Block 3 acceptance — 2026-11-25
+
+- Production publication succeeded as Replit release `05ca6f40`. The authoritative health endpoint returned `status=ok`, release `v1.05.N18-P37`, source commit `c26a487eb5c71b8552870053a2c512f6298bc7fd`, package `bimlog-c26a487eb5c71b85-8855e071eb5b0220`, stable refresh identity and `identityBound=true`.
+- Public workflow, protected-route authorization redirect, refresh/reopen, clean public reentry and browser console checks passed. The existing BIMLog Chrome session was expired; authenticated project persistence remains explicitly pending and was not bypassed.
+- Smart Meetings Builds 11–15 are individually accepted through `dd88562fae1aac0f55c87e648649441fb68e0faf`. The block adds a fail-closed agenda/minutes lifecycle, immutable versioned publication snapshots, atomic audited publication routes, bilingual visible lifecycle actions and discoverable fingerprinted publication history.
+- Complete Smart Meetings focused regression, database/API/frontend typechecks and the verified production frontend build pass. No customer record or production database row was changed by the build tests.
