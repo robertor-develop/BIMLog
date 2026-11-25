@@ -1,6 +1,7 @@
 import { MeetingImportFailure, normalizeMeetingImportData, meetingImportFileName, meetingImportTimestamp } from "../lib/meeting-import-contract";
 import { buildSmartMeetingAgenda } from "../lib/smart-meeting-agenda";
 import { normalizeSmartMeetingSeries } from "../lib/smart-meeting-series-policy";
+import { assertMeetingLifecycleTransition } from "../lib/smart-meeting-lifecycle";
 import { Router } from "express";
 import crypto from "crypto";
 import * as XLSX from "xlsx";
@@ -1432,6 +1433,53 @@ router.post(
       res.status(result.replayed ? 200 : 201).json(result);
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : "meeting_create_next_failed" });
+    }
+  },
+);
+
+router.patch(
+  "/projects/:projectId/meetings/:meetingId/lifecycle",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    if (!Number.isSafeInteger(meetingId) || meetingId <= 0) {
+      res.status(400).json({ error: "valid_meeting_identity_required" });
+      return;
+    }
+    try {
+      const result = await db.transaction(async (tx) => {
+        const [meeting] = await tx.select().from(meetingMinutesTable).where(and(
+          eq(meetingMinutesTable.id, meetingId),
+          eq(meetingMinutesTable.projectId, projectId),
+          isNull(meetingMinutesTable.deletedAt),
+        )).limit(1).for("update");
+        if (!meeting) return null;
+        const transition = assertMeetingLifecycleTransition(meeting.lifecycleStatus, req.body?.status);
+        if (transition.replayed) return { meeting, replayed: true };
+        const [updated] = await tx.update(meetingMinutesTable).set({
+          lifecycleStatus: transition.next,
+          updatedAt: new Date(),
+        }).where(and(
+          eq(meetingMinutesTable.id, meetingId),
+          eq(meetingMinutesTable.lifecycleStatus, transition.current),
+        )).returning();
+        if (!updated) throw new Error("meeting_lifecycle_stale");
+        await tx.insert(activityLogTable).values({
+          projectId, userId: req.user!.userId, userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName, actionType: "update", entityType: "meeting",
+          entityId: meetingId, fileNameBefore: null, fileNameAfter: null,
+          details: JSON.stringify({ event: "meeting.lifecycle_changed", from: transition.current, to: transition.next }),
+        });
+        return { meeting: updated, replayed: false };
+      });
+      if (!result) { res.status(404).json({ error: "meeting_not_found" }); return; }
+      res.json(result);
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "meeting_lifecycle_update_failed";
+      const status = code === "meeting_lifecycle_transition_denied" ? 409 : code === "meeting_lifecycle_invalid" ? 400 : code === "meeting_lifecycle_stale" ? 409 : 500;
+      res.status(status).json({ error: code });
     }
   },
 );
