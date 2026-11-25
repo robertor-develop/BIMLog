@@ -29,6 +29,7 @@ import {
   type MeetingActionItem,
 } from "./meetings/MeetingActionItemsTable";
 import { MeetingParticipantField } from "./meetings/MeetingParticipantField";
+import { MeetingAttendeePasteReview } from "./meetings/MeetingAttendeePasteReview";
 import {
   ClipboardList,
   CheckCircle2,
@@ -4971,6 +4972,14 @@ export function MeetingsTab({
               overflow: "hidden",
             }}
           >
+            <MeetingAttendeePasteReview
+              canWrite={canWrite}
+              existingEmails={attendees.map((attendee) => attendee.email)}
+              onConfirm={(rows) => setAttendees((current) => [
+                ...current,
+                ...rows.map((row) => ({ trade: "", company: row.company, fullName: row.fullName, role: "", email: row.email, phone: "" })),
+              ])}
+            />
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
