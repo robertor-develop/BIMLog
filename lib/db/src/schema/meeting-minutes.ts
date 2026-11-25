@@ -58,7 +58,7 @@ export const meetingSeriesTable = pgTable(
     description: text("description"),
     frequency: text("frequency").default("weekly").notNull(),
     intervalCount: integer("interval_count").default(1).notNull(),
-    weekDays: jsonb("week_days").$type<string[]>().notNull().default([]),
+    weekDays: jsonb("week_days").$type<number[]>().notNull().default([]),
     startTime: text("start_time").notNull(),
     durationMinutes: integer("duration_minutes").default(60).notNull(),
     timeZone: text("time_zone").default("America/New_York").notNull(),

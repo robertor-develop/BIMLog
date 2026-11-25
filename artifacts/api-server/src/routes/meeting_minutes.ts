@@ -1,5 +1,6 @@
 import { MeetingImportFailure, normalizeMeetingImportData, meetingImportFileName, meetingImportTimestamp } from "../lib/meeting-import-contract";
 import { buildSmartMeetingAgenda } from "../lib/smart-meeting-agenda";
+import { normalizeSmartMeetingSeries } from "../lib/smart-meeting-series-policy";
 import { Router } from "express";
 import crypto from "crypto";
 import * as XLSX from "xlsx";
@@ -32,6 +33,7 @@ import {
   projectDirectoryTable,
   meetingDraftsTable,
   meetingAgendaItemsTable,
+  meetingSeriesTable,
   projectsTable,
 } from "@workspace/db/schema";
 import {
@@ -2380,6 +2382,49 @@ router.get(
         .json({
           error: err instanceof Error ? err.message : "Internal server error",
         });
+    }
+  },
+);
+
+router.get(
+  "/projects/:projectId/meeting-series",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const series = await db.select().from(meetingSeriesTable).where(eq(meetingSeriesTable.projectId, projectId)).orderBy(asc(meetingSeriesTable.name));
+    res.json(series);
+  },
+);
+
+router.post(
+  "/projects/:projectId/meeting-series",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      const policy = normalizeSmartMeetingSeries(req.body);
+      const created = await db.transaction(async (tx) => {
+        const [row] = await tx.insert(meetingSeriesTable).values({
+          projectId,
+          ...policy,
+          createdById: req.user!.userId,
+        }).returning();
+        await tx.insert(activityLogTable).values({
+          projectId, userId: req.user!.userId, userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName, actionType: "create", entityType: "meeting_series",
+          entityId: row.id, fileNameBefore: null, fileNameAfter: null,
+          details: JSON.stringify({ event: "meeting_series.created", name: row.name, frequency: row.frequency }),
+        });
+        return row;
+      });
+      res.status(201).json(created);
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "meeting_series_create_failed";
+      if (code.startsWith("meeting_series_")) { res.status(400).json({ error: code }); return; }
+      if ((error as { code?: string })?.code === "23505") { res.status(409).json({ error: "meeting_series_name_exists" }); return; }
+      res.status(500).json({ error: "meeting_series_create_failed" });
     }
   },
 );
