@@ -800,6 +800,58 @@ queueDatabaseStartup(async () => {
 
 queueDatabaseStartup(async () => {
   try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS meeting_series (
+      id serial PRIMARY KEY,
+      project_id integer NOT NULL REFERENCES projects(id),
+      name text NOT NULL,
+      meeting_type text NOT NULL DEFAULT 'coordination',
+      description text,
+      frequency text NOT NULL DEFAULT 'weekly',
+      interval_count integer NOT NULL DEFAULT 1,
+      week_days jsonb NOT NULL DEFAULT '[]'::jsonb,
+      start_time text NOT NULL,
+      duration_minutes integer NOT NULL DEFAULT 60,
+      time_zone text NOT NULL DEFAULT 'America/New_York',
+      location text,
+      agenda_lead_days integer NOT NULL DEFAULT 2,
+      agenda_policy jsonb NOT NULL DEFAULT '{}'::jsonb,
+      active boolean NOT NULL DEFAULT true,
+      created_by_id integer NOT NULL REFERENCES users(id),
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_series_project_name_uidx
+      ON meeting_series (project_id, name)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS meeting_series_project_active_idx
+      ON meeting_series (project_id, active)`);
+    await pool.query(`ALTER TABLE meeting_minutes
+      ADD COLUMN IF NOT EXISTS series_id integer,
+      ADD COLUMN IF NOT EXISTS previous_meeting_id integer,
+      ADD COLUMN IF NOT EXISTS lifecycle_status text NOT NULL DEFAULT 'draft_agenda',
+      ADD COLUMN IF NOT EXISTS source_provider text,
+      ADD COLUMN IF NOT EXISTS source_event_id text,
+      ADD COLUMN IF NOT EXISTS source_event_revision text`);
+    await pool.query(`DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'meeting_minutes_series_id_fkey') THEN
+        ALTER TABLE meeting_minutes ADD CONSTRAINT meeting_minutes_series_id_fkey
+          FOREIGN KEY (series_id) REFERENCES meeting_series(id);
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'meeting_minutes_previous_meeting_id_fkey') THEN
+        ALTER TABLE meeting_minutes ADD CONSTRAINT meeting_minutes_previous_meeting_id_fkey
+          FOREIGN KEY (previous_meeting_id) REFERENCES meeting_minutes(id);
+      END IF;
+    END $$;`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_minutes_provider_event_uidx
+      ON meeting_minutes (project_id, source_provider, source_event_id)
+      WHERE source_provider IS NOT NULL AND source_event_id IS NOT NULL`);
+    console.log("[migration] smart meeting series foundation ensured");
+  } catch (e) {
+    console.error("[migration] smart meeting series foundation failed:", e);
+  }
+});
+
+queueDatabaseStartup(async () => {
+  try {
     await pool.query(`CREATE TABLE IF NOT EXISTS meeting_rfi_links (
       id serial PRIMARY KEY,
       project_id integer NOT NULL REFERENCES projects(id),

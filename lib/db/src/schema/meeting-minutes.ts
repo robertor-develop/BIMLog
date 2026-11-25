@@ -9,6 +9,7 @@
   jsonb,
   foreignKey,
   unique,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
 import { companiesTable, usersTable } from "./users";
@@ -37,7 +38,54 @@ export const meetingMinutesTable = pgTable("meeting_minutes", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   deletedAt: timestamp("deleted_at"),
   deleteReason: text("delete_reason"),
+  seriesId: integer("series_id"),
+  previousMeetingId: integer("previous_meeting_id"),
+  lifecycleStatus: text("lifecycle_status").default("draft_agenda").notNull(),
+  sourceProvider: text("source_provider"),
+  sourceEventId: text("source_event_id"),
+  sourceEventRevision: text("source_event_revision"),
 });
+
+export const meetingSeriesTable = pgTable(
+  "meeting_series",
+  {
+    id: serial("id").primaryKey(),
+    projectId: integer("project_id")
+      .references(() => projectsTable.id)
+      .notNull(),
+    name: text("name").notNull(),
+    meetingType: text("meeting_type").default("coordination").notNull(),
+    description: text("description"),
+    frequency: text("frequency").default("weekly").notNull(),
+    intervalCount: integer("interval_count").default(1).notNull(),
+    weekDays: jsonb("week_days").$type<string[]>().notNull().default([]),
+    startTime: text("start_time").notNull(),
+    durationMinutes: integer("duration_minutes").default(60).notNull(),
+    timeZone: text("time_zone").default("America/New_York").notNull(),
+    location: text("location"),
+    agendaLeadDays: integer("agenda_lead_days").default(2).notNull(),
+    agendaPolicy: jsonb("agenda_policy")
+      .$type<Record<string, boolean>>()
+      .notNull()
+      .default({}),
+    active: boolean("active").default(true).notNull(),
+    createdById: integer("created_by_id")
+      .references(() => usersTable.id)
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    projectNameUnique: uniqueIndex("meeting_series_project_name_uidx").on(
+      t.projectId,
+      t.name,
+    ),
+    projectActiveIdx: index("meeting_series_project_active_idx").on(
+      t.projectId,
+      t.active,
+    ),
+  }),
+);
 
 export const meetingAttendeesTable = pgTable(
   "meeting_attendees",
@@ -437,6 +485,7 @@ export const meetingScheduleTaskLinksTable = pgTable(
 );
 
 export type MeetingMinutes = typeof meetingMinutesTable.$inferSelect;
+export type MeetingSeries = typeof meetingSeriesTable.$inferSelect;
 export type MeetingAttendee = typeof meetingAttendeesTable.$inferSelect;
 export type MeetingRfiLink = typeof meetingRfiLinksTable.$inferSelect;
 export type MeetingSubmittalLink =
