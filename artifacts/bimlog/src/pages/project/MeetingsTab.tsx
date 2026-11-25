@@ -646,6 +646,7 @@ export function MeetingsTab({
   const createIdempotencyKeyRef = useRef(`meeting-${crypto.randomUUID()}`);
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [expandedSections, setExpandedSections] = useState<
     Record<string, boolean>
   >({
@@ -1371,6 +1372,49 @@ export function MeetingsTab({
     setView("new");
     setDraftLoaded(true);
     void loadMeetingDraft(meeting.id,detail.updatedAt);
+  };
+
+  const createNextMeeting = async (meeting: Meeting) => {
+    if (!canWrite || actionSaving) return;
+    setActionSaving(true);
+    setError("");
+    setSuccessMessage("");
+    try {
+      const nextDate = new Date(meeting.meetingDate);
+      nextDate.setDate(nextDate.getDate() + 7);
+      const response = await fetch(
+        `${API}/projects/${projectId}/meetings/${meeting.id}/create-next`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ meeting_date: nextDate.toISOString() }),
+        },
+      );
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "meeting_create_next_failed");
+      await loadMeetings();
+      setSuccessMessage(
+        t(
+          result.replayed
+            ? "The next meeting already existed and was reopened from saved state."
+            : "Next meeting created with attendees and unresolved agenda items.",
+          result.replayed
+            ? "La próxima reunión ya existía y se recuperó del estado guardado."
+            : "Próxima reunión creada con asistentes y asuntos pendientes.",
+        ),
+      );
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : t("Could not create the next meeting.", "No se pudo crear la próxima reunión."),
+      );
+    } finally {
+      setActionSaving(false);
+    }
   };
 
   const meetingPdfUrl = (meetingId: number) =>
@@ -3356,6 +3400,16 @@ export function MeetingsTab({
                   >
                     {canWrite && (
                       <button
+                        className="btn btn-sm btn-primary"
+                        disabled={actionSaving}
+                        onClick={() => void createNextMeeting(m)}
+                      >
+                        <Plus size={13} style={{ marginRight: 4 }} />
+                        {t("Create Next", "Crear Próxima")}
+                      </button>
+                    )}
+                    {canWrite && (
+                      <button
                         className="btn btn-sm btn-outline"
                         onClick={() => void openEditMeeting(m)}
                       >
@@ -4326,6 +4380,7 @@ export function MeetingsTab({
           />
         )}
 
+        {successMessage && <p role="status">{successMessage}</p>}
         {actionSaving && <p role="status">{t("Saving action and reloading saved state…", "Guardando acción y recargando estado guardado…")}</p>}
         {error && <div role="alert"><p>{error}</p><button disabled={loading || actionSaving} onClick={() => void loadMeetings()}>{t("Reload saved meetings and actions", "Recargar reuniones y acciones guardadas")}</button></div>}
         {!loading && view === "actions" && (
